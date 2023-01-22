@@ -1,0 +1,21 @@
+version: 1.0.0
+shell: bash
+groups:
+  - name: group1
+    env-file: .env
+    targets:
+      clean:
+        help: Use this target to clean up temporary files
+        pre-command: echo "cleaning"
+        command: echo "remove file X"
+        post-command: echo "done"
+      build:
+        help: Build the program
+        dependencies:
+          - clean
+        pre-command: echo "building"
+        command: |
+          echo "build file x"
+          echo "build file y"
+          echo "build file z"
+        post-command: echo "done"
