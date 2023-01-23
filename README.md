@@ -95,3 +95,5 @@ options:
 
 If you have any problem, open an issue at: https://github.com/osl-incubator/makim
 ```
+
+As you can see, the help menu automatically adds information defined by all the `help` key, inside the `.makim.yaml` file.
