@@ -29,23 +29,28 @@ groups:
     targets:
       clean:
         help: Use this target to clean up temporary files
-        run:
-          pre: echo "cleaning"
-          command: echo "remove file X"
-          post: echo "done"
+        args:
+          all:
+            type: bool
+            action: store-true
+            help: Remove all files that are tracked by git
+        run: |
+          echo "remove file X"
       build:
         help: Build the program
         args:
           clean:
             type: bool
             action: store-true
+            help: if not set, the clean dependency will not be triggered.
         dependencies:
           - target: clean
             if: ${{ args.clean == true }}
-        run:
+        run: |
           echo "build file x"
           echo "build file y"
           echo "build file z"
+
 ```
 
 Some examples of how to use it:
