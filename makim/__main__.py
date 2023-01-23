@@ -38,7 +38,7 @@ def _get_args():
     parser = argparse.ArgumentParser(
         prog='MakIm',
         description=(
-            'MakIm is a tool that helps you to organize'
+            'MakIm is a tool that helps you to organize '
             'and simplify your helper commands.'
         ),
         epilog=(

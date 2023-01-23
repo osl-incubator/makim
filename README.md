@@ -71,7 +71,7 @@ The help menu for the `.makim.yaml` file would looks like this:
 $ makim --help
 usage: MakIm [--help] [--version] [--config-file CONFIG_FILE] [target]
 
-MakIm is a tool that helps you to organizeand simplify your helper commands.
+MakIm is a tool that helps you to organize and simplify your helper commands.
 
 positional arguments:
   target
