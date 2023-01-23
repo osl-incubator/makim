@@ -63,3 +63,35 @@ Some examples of how to use it:
 
 * run the `build` target with the `clean` flag:
   `makim build --clean`
+
+
+The help menu for the `.makim.yaml` file would looks like this:
+
+```
+$ makim --help
+usage: MakIm [--help] [--version] [--config-file CONFIG_FILE] [target]
+
+MakIm is a tool that helps you to organizeand simplify your helper commands.
+
+positional arguments:
+  target
+    Specify the target command to be performed.
+    Options are:
+      default.clean => Use this target to clean up temporary files
+        ARGS:
+          --all: (bool) Remove all files that are tracked by git
+      default.build => Build the program
+        ARGS:
+          --clean: (bool) if not set, the clean dependency will not be triggered.
+    NOTE: 'default.' prefix is optional.
+
+options:
+  --help, -h
+    Show the help menu
+  --version
+    Show the version of the installed MakIm tool.
+  --config-file CONFIG_FILE
+    Specify a custom location for the config file.
+
+If you have any problem, open an issue at: https://github.com/osl-incubator/makim
+```
