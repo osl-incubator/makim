@@ -1,21 +1,29 @@
 version: 1.0.0
 shell: bash
 groups:
-  - name: group1
+  - name: default
     env-file: .env
     targets:
       clean:
         help: Use this target to clean up temporary files
-        pre-command: echo "cleaning"
-        command: echo "remove file X"
-        post-command: echo "done"
+        args:
+          all:
+            type: bool
+            action: store-true
+            help: Remove all files that are tracked by git
+        run: |
+          echo "remove file X"
       build:
         help: Build the program
+        args:
+          clean:
+            type: bool
+            action: store-true
+            help: if not set, the clean dependency will not be triggered.
         dependencies:
-          - clean
-        pre-command: echo "building"
-        command: |
+          - target: clean
+            if: ${{ args.clean == true }}
+        run: |
           echo "build file x"
           echo "build file y"
           echo "build file z"
-        post-command: echo "done"

@@ -1,7 +1,8 @@
 """Makim class for containers"""
+from copy import deepcopy
 import sys
 from pathlib import Path
-
+import warnings
 import yaml
 
 try:
@@ -27,22 +28,9 @@ class Makim:
     shell_app: object | None = None
     shell_args: list = []
     group_name: str = 'default'
-    target_name: str = ''
     group_data: dict = {}
+    target_name: str = ''
     target_data: dict = {}
-
-    def __init__(self, args):
-        self.args = args
-
-        self.config_file = self.args.config_file
-
-        self._verify_args()
-        self._load_config_data()
-        self._load_group_target_name()
-        self._verify_config()
-        self._load_shell_app()
-        self._load_shell_args()
-        self._load_target_data()
 
     def _call_shell_app(self, *args):
         return self.shell_app(
@@ -54,6 +42,9 @@ class Makim:
 
     def _check_config_file(self):
         return Path(self.config_file).exists()
+
+    def _verify_target_conditional(self, conditional):
+        breakpoint()
 
     def _verify_args(self):
         if not self._check_config_file():
@@ -68,11 +59,11 @@ class Makim:
             self.config_data = yaml.safe_load(f)
 
     def _load_group_target_name(self):
-        if ':' in self.args.target:
-            self.group_name, self.target_name = self.args.target.split()
+        if '.' in self.args['target']:
+            self.group_name, self.target_name = self.args['target'].split('.')
             return
         self.group_name = 'default'
-        self.target_name = self.args.target
+        self.target_name = self.args['target']
 
     def _load_target_data(self):
         self.target_data = self.group_data['targets'][self.target_name]
@@ -119,26 +110,49 @@ class Makim:
 
     # run commands
 
-    def _run_pre_command(self):
-        if not self.target_data['pre-command']:
+    def _run_dependencies(self, args: dict):
+        if (
+            'dependencies' not in self.target_data
+            or not self.target_data['dependencies']
+        ):
             return
-        self._call_shell_app(
-            self.target_data['pre-command'], []  # self.args.args.split(',')
-        )
+
+        makin_dep = deepcopy(self)
+        args_dep = deepcopy(args)
+
+        for dep_data in self.target_data['dependencies']:
+            args_dep['target'] = dep_data['target']
+            makin_dep.run(args_dep)
 
     def _run_command(self):
-        self._call_shell_app(
-            self.target_data['command'], []  # self.args.args.split(',')
-        )
+        cmd = self.target_data['run'].strip().replace('\n', ' && ')
+        self._call_shell_app(cmd, [])
 
-    def _run_post_command(self):
-        if not self.target_data['post-command']:
-            return
-        self._call_shell_app(
-            self.target_data['post-command'], []  # self.args.args.split(',')
-        )
+    # public methods
 
-    def run(self):
-        self._run_pre_command()
+    def load(self, config_file: str):
+        self.config_file = config_file
+        self._load_config_data()
+        self._verify_config()
+        self._load_shell_app()
+
+    def run(self, args: dict):
+        self.args = args
+
+        # setup
+        self._verify_args()
+        self._load_group_target_name()
+        self._load_shell_args()
+        self._load_target_data()
+
+        # commands
+        if 'if' in self.target_data and not self._verify_target_conditional(
+            self.target_data['if']
+        ):
+            return warnings.warn(
+                f'{args["target"]} not executed. '
+                'Condition (if) not satisfied.'
+            )
+
+        self._run_dependencies(args)
         self._run_command()
-        self._run_post_command()

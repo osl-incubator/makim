@@ -30,11 +30,13 @@ jobs:
 
     - name: Run tests
       run: |
-        makim help
-        makim version
-        makim build --group group1 --services ""
-        makim build --group group2 --services ""
-        makim build --group group1
+        makim --help
+        makim --version
+        makim clean
+        makim default:clean
+        makim build
+        makim default:build
+        makim build --clean
 
     - name: Run style checks
       if: success() || failure()
