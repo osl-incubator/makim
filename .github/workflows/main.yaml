@@ -32,7 +32,7 @@ jobs:
       env:
         CONFIG_FILE_ARG: "--config-file tests/.makim.yaml"
       run: |
-        export
+        echo "Extra argument: ${CONFIG_FILE_ARG}"
         makim ${CONFIG_FILE_ARG} --help
         makim ${CONFIG_FILE_ARG} --version
         makim ${CONFIG_FILE_ARG} clean
