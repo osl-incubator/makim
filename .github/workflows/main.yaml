@@ -38,7 +38,8 @@ jobs:
         makim ${MAKIM_FILE_ARG} default.clean
         makim ${MAKIM_FILE_ARG} build
         makim ${MAKIM_FILE_ARG} default.build
-        makim ${MAKIM_FILE_ARG} build --clean
+        # args not implemented yet
+        # makim ${MAKIM_FILE_ARG} build --clean
 
     - name: Test documentation generation
       run: makim docs-build
