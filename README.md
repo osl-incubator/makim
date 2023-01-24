@@ -72,7 +72,7 @@ The help menu for the `.makim.yaml` file would looks like this:
 
 ```
 $ makim --help
-usage: MakIm [--help] [--version] [--config-file CONFIG_FILE] [target]
+usage: MakIm [--help] [--version] [--config-file MAKIM_FILE] [target]
 
 MakIm is a tool that helps you to organize and simplify your helper commands.
 
@@ -93,7 +93,7 @@ options:
     Show the help menu
   --version
     Show the version of the installed MakIm tool.
-  --config-file CONFIG_FILE
+  --config-file MAKIM_FILE
     Specify a custom location for the config file.
 
 If you have any problem, open an issue at: https://github.com/osl-incubator/makim

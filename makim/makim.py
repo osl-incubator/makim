@@ -23,7 +23,7 @@ except Exception:
 
 class Makim:
     args: object | None = None
-    config_file: str = ''
+    makim_file: str = '.makim.yaml'
     config_data: dict = {}
     shell_app: object | None = None
     shell_args: list = []
@@ -48,14 +48,14 @@ class Makim:
             p.kill()
             print(f"[WW] Process {pid} killed.")
 
-    def _check_config_file(self):
-        return Path(self.config_file).exists()
+    def _check_makim_file(self):
+        return Path(self.makim_file).exists()
 
     def _verify_target_conditional(self, conditional):
         breakpoint()
 
     def _verify_args(self):
-        if not self._check_config_file():
+        if not self._check_makim_file():
             raise Exception('[config] Config file .makim.yaml not found.')
 
     def _verify_config(self):
@@ -63,7 +63,7 @@ class Makim:
             raise Exception('No target groups found.')
 
     def _load_config_data(self):
-        with open(self.config_file, 'r') as f:
+        with open(self.makim_file, 'r') as f:
             self.config_data = yaml.safe_load(f)
 
     def _load_group_target_name(self):
@@ -138,8 +138,8 @@ class Makim:
 
     # public methods
 
-    def load(self, config_file: str):
-        self.config_file = config_file
+    def load(self, makim_file: str):
+        self.makim_file = makim_file
         self._load_config_data()
         self._verify_config()
         self._load_shell_app()

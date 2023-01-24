@@ -30,16 +30,16 @@ jobs:
 
     - name: Run tests
       env:
-        CONFIG_FILE_ARG: "--config-file tests/.makim.yaml"
+        MAKIM_FILE_ARG: "--config-file tests/.makim.yaml"
       run: |
-        echo "Extra argument: ${CONFIG_FILE_ARG}"
-        makim ${CONFIG_FILE_ARG} --help
-        makim ${CONFIG_FILE_ARG} --version
-        makim ${CONFIG_FILE_ARG} clean
-        makim ${CONFIG_FILE_ARG} default:clean
-        makim ${CONFIG_FILE_ARG} build
-        makim ${CONFIG_FILE_ARG} default:build
-        makim ${CONFIG_FILE_ARG} build --clean
+        echo "Extra argument: ${MAKIM_FILE_ARG}"
+        makim ${MAKIM_FILE_ARG} --help
+        makim ${MAKIM_FILE_ARG} --version
+        makim ${MAKIM_FILE_ARG} clean
+        makim ${MAKIM_FILE_ARG} default:clean
+        makim ${MAKIM_FILE_ARG} build
+        makim ${MAKIM_FILE_ARG} default:build
+        makim ${MAKIM_FILE_ARG} build --clean
 
     - name: Test documentation generation
       run: makim docs-build

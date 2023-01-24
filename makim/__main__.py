@@ -63,15 +63,15 @@ def _get_args():
     )
 
     parser.add_argument(
-        '--config-file',
+        '--makim-file',
         type=str,
         default=str(Path(os.getcwd()) / '.makim.yaml'),
-        help='Specify a custom location for the config file.',
+        help='Specify a custom location for the makim file.',
     )
 
     args = parser.parse_args([])
 
-    makim.load(args.config_file)
+    makim.load(args.makim_file)
 
     target_help = []
 
@@ -119,6 +119,7 @@ def app():
     if args.version:
         return show_version()
 
+    makim.load(args.makim_file)
     return makim.run(dict(args._get_kwargs()))
 
 
