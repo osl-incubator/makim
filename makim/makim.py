@@ -1,8 +1,11 @@
 """Makim class for containers"""
-from copy import deepcopy
+import os
 import sys
-from pathlib import Path
 import warnings
+from copy import deepcopy
+from pathlib import Path
+
+import sh
 import yaml
 
 try:
@@ -23,7 +26,7 @@ except Exception:
 
 class Makim:
     args: object | None = None
-    config_file: str = ''
+    makim_file: str = '.makim.yaml'
     config_data: dict = {}
     shell_app: object | None = None
     shell_args: list = []
@@ -33,21 +36,35 @@ class Makim:
     target_data: dict = {}
 
     def _call_shell_app(self, *args):
-        return self.shell_app(
+
+        p = self.shell_app(
             *self.shell_args,
             *args,
             _out=sys.stdout,
             _err=sys.stderr,
+            _bg=True,
+            _no_err=True,
+            _env=os.environ,
+            bg_exc=False,
         )
 
-    def _check_config_file(self):
-        return Path(self.config_file).exists()
+        try:
+            p.wait()
+        except sh.ErrorReturnCode:
+            ...
+        except KeyboardInterrupt:
+            pid = p.pid
+            p.kill()
+            print(f'[WW] Process {pid} killed.')
+
+    def _check_makim_file(self):
+        return Path(self.makim_file).exists()
 
     def _verify_target_conditional(self, conditional):
-        breakpoint()
+        ...
 
     def _verify_args(self):
-        if not self._check_config_file():
+        if not self._check_makim_file():
             raise Exception('[config] Config file .makim.yaml not found.')
 
     def _verify_config(self):
@@ -55,7 +72,7 @@ class Makim:
             raise Exception('No target groups found.')
 
     def _load_config_data(self):
-        with open(self.config_file, 'r') as f:
+        with open(self.makim_file, 'r') as f:
             self.config_data = yaml.safe_load(f)
 
     def _load_group_target_name(self):
@@ -74,7 +91,7 @@ class Makim:
         elif self.config_data['shell'] == 'sh':
             self.shell_app = shell_sh
         elif self.config_data['shell'] == 'zsh':
-            self.shell_app = zsh
+            self.shell_app = shell_zsh
         else:
             raise Exception(
                 f'"{self.config_data["shell"]}" not supported yet.'
@@ -103,9 +120,6 @@ class Makim:
 
     def _load_shell_args(self):
         self._filter_group_data()
-
-        # if hasattr(self.config_data, 'env-file'):
-        #     self.shell_args.extend(['--env-file', self.group_data['env-file']])
         self.shell_args.extend(['-c'])
 
     # run commands
@@ -130,8 +144,8 @@ class Makim:
 
     # public methods
 
-    def load(self, config_file: str):
-        self.config_file = config_file
+    def load(self, makim_file: str):
+        self.makim_file = makim_file
         self._load_config_data()
         self._verify_config()
         self._load_shell_app()

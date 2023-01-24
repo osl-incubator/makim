@@ -50,42 +50,51 @@ If you are proposing a feature:
 
 ## Get Started!
 
+For development, we encourage you to use `conda`. If you don't know
+what is that, check these links:
+
+* In Spanish: https://opensciencelabs.org/blog/como-instalar-y-comenzar-utilizar-conda/
+* In English: https://cloudsmith.com/blog/what-is-conda/
+
+We recommend you to use mamba-forge, a combination of
+miniconda + conda-forge + mamba. You can download it from here:
+https://github.com/conda-forge/miniforge#mambaforge
+
 Ready to contribute? Here’s how to set up `makim` for local development.
 
 1.  Fork the `makim` repo on GitHub.
-
-2.  Clone your fork locally::
-
-    $ git clone git@github.com:your_name_here/makim.git
-
-3.  Install your local copy into a virtualenv. Assuming you have
-    virtualenvwrapper installed, this is how you set up your fork for
-    local development::
-
-    $ mkvirtualenv makim
-    $ cd makim/
-    $ python setup.py develop
-
-4.  Create a branch for local development::
-
-    $ git checkout -b name-of-your-bugfix-or-feature
-
-    Now you can make your changes locally.
-
-5.  When you’re done making changes, check that your changes pass flake8
+2.  Clone your fork locally:
+```bash
+$ git clone git@github.com:your_name_here/makim.git
+```
+3. Create a conda environment and activate it:
+```bash
+$ mamba env create --file conda/dev.yaml
+```
+and
+```bash
+$ conda activate makim
+```
+4. Install your local project copy into your conda environment:
+```bash
+$ poetry install
+```
+5. Create a branch for local development::
+```bash
+$ git checkout -b name-of-your-bugfix-or-feature
+```
+6.  When you’re done making changes, check that your changes pass flake8
     and the tests, including testing other Python versions with tox::
-
-    $ make lint
-    $ make test
-
-    To get flake8 and tox, just pip install them into your virtualenv.
-
-6.  Commit your changes and push your branch to GitHub::
-
-    $ git add . $ git commit -m “Your detailed description of your
-    changes.” $ git push origin name-of-your-bugfix-or-feature
-
-7.  Submit a pull request through the GitHub website.
+```bash
+$ makim lint
+$ makim test
+```
+7.  Commit your changes and push your branch to GitHub::
+```bash
+$ git add . $ git commit -m "Your detailed description of your changes."
+$ git push origin name-of-your-bugfix-or-feature
+```
+8.  Submit a pull request through the GitHub website.
 
 ## Pull Request Guidelines
 

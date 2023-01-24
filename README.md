@@ -45,13 +45,16 @@ groups:
             help: if not set, the clean dependency will not be triggered.
         dependencies:
           - target: clean
-            if: ${{ args.clean == true }}
+            if: \${\{ args.clean == true \}\}
         run: |
           echo "build file x"
           echo "build file y"
           echo "build file z"
 
 ```
+
+PS: in `\${\{ args.clean == true \}\}`, this `\` is just for escaping it for
+the documentation here, you should use it with no escape `\`.
 
 Some examples of how to use it:
 
@@ -69,7 +72,7 @@ The help menu for the `.makim.yaml` file would looks like this:
 
 ```
 $ makim --help
-usage: MakIm [--help] [--version] [--config-file CONFIG_FILE] [target]
+usage: MakIm [--help] [--version] [--config-file MAKIM_FILE] [target]
 
 MakIm is a tool that helps you to organize and simplify your helper commands.
 
@@ -90,10 +93,11 @@ options:
     Show the help menu
   --version
     Show the version of the installed MakIm tool.
-  --config-file CONFIG_FILE
+  --config-file MAKIM_FILE
     Specify a custom location for the config file.
 
 If you have any problem, open an issue at: https://github.com/osl-incubator/makim
 ```
 
-As you can see, the help menu automatically adds information defined by all the `help` key, inside the `.makim.yaml` file.
+As you can see, the help menu automatically adds information defined by all
+the `help` key, inside the `.makim.yaml` file.

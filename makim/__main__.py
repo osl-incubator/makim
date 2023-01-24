@@ -1,8 +1,8 @@
 import argparse
 import os
 from pathlib import Path
+import sys
 
-import yaml
 
 from makim import Makim, __version__
 
@@ -35,6 +35,8 @@ makim = Makim()
 
 
 def _get_args():
+    makim_file_default = str(Path(os.getcwd()) / '.makim.yaml')
+
     parser = argparse.ArgumentParser(
         prog='MakIm',
         description=(
@@ -63,15 +65,19 @@ def _get_args():
     )
 
     parser.add_argument(
-        '--config-file',
+        '--makim-file',
         type=str,
-        default=str(Path(os.getcwd()) / '.makim.yaml'),
-        help='Specify a custom location for the config file.',
+        default=makim_file_default,
+        help='Specify a custom location for the makim file.',
     )
 
-    args = parser.parse_args([])
+    try:
+        idx = sys.argv.index("--makim-files")
+        makim_file = sys.argv[idx + 1]
+    except ValueError:
+        makim_file = makim_file_default
 
-    makim.load(args.config_file)
+    makim.load(makim_file)
 
     target_help = []
 
@@ -83,11 +89,12 @@ def _get_args():
             target_help.append(f'  {target_name_qualified} => {help_text}')
 
             if 'args' in target_data:
-                target_help.append(f'    ARGS:')
+                target_help.append('    ARGS:')
 
                 for arg_name, arg_data in target_data['args'].items():
                     target_help.append(
-                        f'      --{arg_name}: ({arg_data["type"]}) {arg_data["help"]}'
+                        f'      --{arg_name}: ({arg_data["type"]}) '
+                        f'{arg_data["help"]}'
                     )
 
     target_help.append("NOTE: 'default.' prefix is optional.")
@@ -119,6 +126,7 @@ def app():
     if args.version:
         return show_version()
 
+    makim.load(args.makim_file)
     return makim.run(dict(args._get_kwargs()))
 
 
