@@ -30,7 +30,7 @@ jobs:
 
     - name: Run tests
       env:
-        MAKIM_FILE_ARG: "--config-file tests/.makim.yaml"
+        MAKIM_FILE_ARG: "--makim-file tests/.makim.yaml"
       run: |
         echo "Extra argument: ${MAKIM_FILE_ARG}"
         makim ${MAKIM_FILE_ARG} --help
