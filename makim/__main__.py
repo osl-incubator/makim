@@ -1,6 +1,8 @@
 import argparse
 import os
 from pathlib import Path
+import sys
+
 
 from makim import Makim, __version__
 
@@ -33,6 +35,8 @@ makim = Makim()
 
 
 def _get_args():
+    makim_file_default = str(Path(os.getcwd()) / '.makim.yaml')
+
     parser = argparse.ArgumentParser(
         prog='MakIm',
         description=(
@@ -63,12 +67,17 @@ def _get_args():
     parser.add_argument(
         '--makim-file',
         type=str,
-        default=str(Path(os.getcwd()) / '.makim.yaml'),
+        default=makim_file_default,
         help='Specify a custom location for the makim file.',
     )
 
-    args = parser.parse_args()
-    makim.load(args.makim_file)
+    try:
+        idx = sys.argv.index("--makim-files")
+        makim_file = sys.argv[idx + 1]
+    except ValueError:
+        makim_file = makim_file_default
+
+    makim.load(makim_file)
 
     target_help = []
 
