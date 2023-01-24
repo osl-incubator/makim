@@ -75,7 +75,7 @@ and
 ```bash
 $ conda activate makim
 ```
-4. Install your local copy into your conda environment:
+4. Install your local project copy into your conda environment:
 ```bash
 $ poetry install
 ```
@@ -85,18 +85,16 @@ $ git checkout -b name-of-your-bugfix-or-feature
 ```
 6.  When you’re done making changes, check that your changes pass flake8
     and the tests, including testing other Python versions with tox::
-
-    $ make lint
-    $ make test
-
-    To get flake8 and tox, just pip install them into your virtualenv.
-
-3.  Commit your changes and push your branch to GitHub::
-
-    $ git add . $ git commit -m “Your detailed description of your
-    changes.” $ git push origin name-of-your-bugfix-or-feature
-
-4.  Submit a pull request through the GitHub website.
+```bash
+$ makim lint
+$ makim test
+```
+7.  Commit your changes and push your branch to GitHub::
+```bash
+$ git add . $ git commit -m "Your detailed description of your changes."
+$ git push origin name-of-your-bugfix-or-feature
+```
+8.  Submit a pull request through the GitHub website.
 
 ## Pull Request Guidelines
 

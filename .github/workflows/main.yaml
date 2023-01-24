@@ -32,7 +32,6 @@ jobs:
       env:
         MAKIM_FILE_ARG: "--makim-file tests/.makim.yaml"
       run: |
-        echo "Extra argument: ${MAKIM_FILE_ARG}"
         makim ${MAKIM_FILE_ARG} --help
         makim ${MAKIM_FILE_ARG} --version
         makim ${MAKIM_FILE_ARG} clean

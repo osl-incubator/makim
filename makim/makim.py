@@ -1,8 +1,11 @@
 """Makim class for containers"""
-from copy import deepcopy
+import os
 import sys
-from pathlib import Path
 import warnings
+from copy import deepcopy
+from pathlib import Path
+
+import sh
 import yaml
 
 try:
@@ -39,20 +42,24 @@ class Makim:
             _out=sys.stdout,
             _err=sys.stderr,
             _bg=True,
+            _no_err=True,
+            _env=os.environ,
         )
 
         try:
             p.wait()
+        except sh.ErrorReturnCode:
+            ...
         except KeyboardInterrupt:
             pid = p.pid
             p.kill()
-            print(f"[WW] Process {pid} killed.")
+            print(f'[WW] Process {pid} killed.')
 
     def _check_makim_file(self):
         return Path(self.makim_file).exists()
 
     def _verify_target_conditional(self, conditional):
-        breakpoint()
+        ...
 
     def _verify_args(self):
         if not self._check_makim_file():
@@ -82,7 +89,7 @@ class Makim:
         elif self.config_data['shell'] == 'sh':
             self.shell_app = shell_sh
         elif self.config_data['shell'] == 'zsh':
-            self.shell_app = zsh
+            self.shell_app = shell_zsh
         else:
             raise Exception(
                 f'"{self.config_data["shell"]}" not supported yet.'
@@ -111,9 +118,6 @@ class Makim:
 
     def _load_shell_args(self):
         self._filter_group_data()
-
-        # if hasattr(self.config_data, 'env-file'):
-        #     self.shell_args.extend(['--env-file', self.group_data['env-file']])
         self.shell_args.extend(['-c'])
 
     # run commands

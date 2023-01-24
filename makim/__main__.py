@@ -2,8 +2,6 @@ import argparse
 import os
 from pathlib import Path
 
-import yaml
-
 from makim import Makim, __version__
 
 
@@ -83,11 +81,12 @@ def _get_args():
             target_help.append(f'  {target_name_qualified} => {help_text}')
 
             if 'args' in target_data:
-                target_help.append(f'    ARGS:')
+                target_help.append('    ARGS:')
 
                 for arg_name, arg_data in target_data['args'].items():
                     target_help.append(
-                        f'      --{arg_name}: ({arg_data["type"]}) {arg_data["help"]}'
+                        f'      --{arg_name}: ({arg_data["type"]}) '
+                        f'{arg_data["help"]}'
                     )
 
     target_help.append("NOTE: 'default.' prefix is optional.")

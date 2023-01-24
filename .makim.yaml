@@ -3,13 +3,22 @@ shell: bash
 groups:
   - name: default
     env-file: .env
+
     targets:
       docs-build:
         help: Build documentation
         run: |
           mkdocs build --config-file docs/mkdocs.yaml
           echo "arxlang.org" > ./build/CNAME
+
       docs-preview:
         help: Preview documentation page locally
-        run: |
-          mkdocs serve --watch docs --config-file docs/mkdocs.yaml
+        run: mkdocs serve --watch docs --config-file docs/mkdocs.yaml
+
+      lint:
+        help: Run linter tools
+        run: pre-commit run --all-files --verbose
+
+      tests:
+        help: Run tests
+        run: pytest
