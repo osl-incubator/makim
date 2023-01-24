@@ -36,6 +36,7 @@ class Makim:
     target_data: dict = {}
 
     def _call_shell_app(self, *args):
+
         p = self.shell_app(
             *self.shell_args,
             *args,
@@ -44,6 +45,7 @@ class Makim:
             _bg=True,
             _no_err=True,
             _env=os.environ,
+            bg_exc=False,
         )
 
         try:

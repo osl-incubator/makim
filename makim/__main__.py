@@ -67,8 +67,7 @@ def _get_args():
         help='Specify a custom location for the makim file.',
     )
 
-    args = parser.parse_args([])
-
+    args = parser.parse_args()
     makim.load(args.makim_file)
 
     target_help = []
