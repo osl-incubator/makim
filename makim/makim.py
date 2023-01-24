@@ -33,12 +33,20 @@ class Makim:
     target_data: dict = {}
 
     def _call_shell_app(self, *args):
-        return self.shell_app(
+        p = self.shell_app(
             *self.shell_args,
             *args,
             _out=sys.stdout,
             _err=sys.stderr,
+            _bg=True,
         )
+
+        try:
+            p.wait()
+        except KeyboardInterrupt:
+            pid = p.pid
+            p.kill()
+            print(f"[WW] Process {pid} killed.")
 
     def _check_config_file(self):
         return Path(self.config_file).exists()

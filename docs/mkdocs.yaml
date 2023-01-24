@@ -1,5 +1,5 @@
 site_name: makim
-site_url: https://github.com/osl-incubator/makim
+site_url: https://osl-incubator.github.io/makim
 repo_url: https://github.com/osl-incubator/makim.git
 docs_dir: ./
 site_dir: ../build
@@ -18,8 +18,8 @@ theme:
     - search.suggest
   icon:
     repo: fontawesome/brands/github
-  logo: /images/logo.png
-  favicon: /images/favicon.png
+  logo: ./images/logo.png
+  favicon: ./images/favicon.png
   palette:
     scheme: slate
     primary: white

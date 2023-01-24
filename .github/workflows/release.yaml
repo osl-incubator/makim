@@ -65,3 +65,14 @@ jobs:
           -p "@semantic-release/git" \
           -p "@google/semantic-release-replace-plugin" \
           semantic-release --ci
+
+    - name: Generate documentation with changes from semantic-release
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      run: makim docs-build
+
+    - name: GitHub Pages action
+      if: ${{ github.event_name == 'workflow_dispatch' }}
+      uses: peaceiris/actions-gh-pages@v3.5.9
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./build/

@@ -45,13 +45,16 @@ groups:
             help: if not set, the clean dependency will not be triggered.
         dependencies:
           - target: clean
-            if: ${{ args.clean == true }}
+            if: \${\{ args.clean == true \}\}
         run: |
           echo "build file x"
           echo "build file y"
           echo "build file z"
 
 ```
+
+PS: in `\${\{ args.clean == true \}\}`, this `\` is just for escaping it for
+the documentation here, you should use it with no escape `\`.
 
 Some examples of how to use it:
 

@@ -4,26 +4,12 @@ groups:
   - name: default
     env-file: .env
     targets:
-      clean:
-        help: Use this target to clean up temporary files
-        args:
-          all:
-            type: bool
-            action: store-true
-            help: Remove all files that are tracked by git
+      docs-build:
+        help: Build documentation
         run: |
-          echo "remove file X"
-      build:
-        help: Build the program
-        args:
-          clean:
-            type: bool
-            action: store-true
-            help: if not set, the clean dependency will not be triggered.
-        dependencies:
-          - target: clean
-            if: ${{ args.clean == true }}
+          mkdocs build --config-file docs/mkdocs.yaml
+          echo "arxlang.org" > ./build/CNAME
+      docs-preview:
+        help: Preview documentation page locally
         run: |
-          echo "build file x"
-          echo "build file y"
-          echo "build file z"
+          mkdocs serve --watch docs --config-file docs/mkdocs.yaml
