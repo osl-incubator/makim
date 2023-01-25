@@ -43,9 +43,9 @@ class Makim:
             _out=sys.stdout,
             _err=sys.stderr,
             _bg=True,
+            _bg_exc=False,
             _no_err=True,
             _env=os.environ,
-            bg_exc=False,
         )
 
         try:
