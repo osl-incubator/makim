@@ -1,8 +1,7 @@
 import argparse
 import os
-from pathlib import Path
 import sys
-
+from pathlib import Path
 
 from makim import Makim, __version__
 
@@ -72,7 +71,7 @@ def _get_args():
     )
 
     try:
-        idx = sys.argv.index("--makim-files")
+        idx = sys.argv.index('--makim-files')
         makim_file = sys.argv[idx + 1]
     except ValueError:
         makim_file = makim_file_default
