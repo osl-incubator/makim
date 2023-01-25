@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://osl-incubator.github.io/makim/</loc>
+         <lastmod>2023-01-25</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osl-incubator.github.io/makim/changelog/</loc>
+         <lastmod>2023-01-25</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osl-incubator.github.io/makim/contributing/</loc>
+         <lastmod>2023-01-25</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osl-incubator.github.io/makim/installation/</loc>
+         <lastmod>2023-01-25</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+</urlset>
