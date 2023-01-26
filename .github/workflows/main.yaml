@@ -24,7 +24,7 @@ jobs:
 
     - name: Prepare conda environment
       run: |
-        sed -i /python\ 3\.7\.1/python\ ${{ matrix.python_version }}/ conda/dev.yaml
+        sed -i s/python\ 3\.7\.1/python\ ${{ matrix.python_version }}/ conda/dev.yaml
         cat conda/dev.yaml
 
     - uses: conda-incubator/setup-miniconda@v2
