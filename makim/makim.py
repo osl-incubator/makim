@@ -4,6 +4,7 @@ import sys
 import warnings
 from copy import deepcopy
 from pathlib import Path
+from typing import Optional
 
 import sh
 import yaml
@@ -25,10 +26,10 @@ except Exception:
 
 
 class Makim:
-    args: object | None = None
+    args: Optional[object] = None
     makim_file: str = '.makim.yaml'
     config_data: dict = {}
-    shell_app: object | None = None
+    shell_app: Optional[object] = None
     shell_args: list = []
     group_name: str = 'default'
     group_data: dict = {}
