@@ -4,25 +4,49 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version:
+          - '3.7.1'
+          - '3.8'
+          - '3.9'
+          - '3.10'
+        os:
+          - 'ubuntu'
+          - 'macos'
+          # poetry is failing on windows: https://github.com/python-poetry/poetry/issues/1031
+          # - 'windows'
+
+    runs-on: ${{ matrix.os }}-latest
     timeout-minutes: 10
 
     defaults:
       run:
         shell: bash -l {0}
 
-    strategy:
-      matrix:
-        python_version: ["3.7.1", "3.8", "3.9", "3.10"]
-
     concurrency:
-      group: ci-${{ matrix.python_version }}-${{ github.ref }}
+      group: ci-${{ matrix.os }}-${{ matrix.python_version }}-${{ github.ref }}
       cancel-in-progress: true
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+
+    - name: Install MacOS extra tools and add extra config
+      if: ${{ matrix.os == 'macos' }}
+      run: |
+        brew install gnu-sed
+        echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bashrc
+        echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bash_profile
+
+    - name: Prepare conda environment (windows)
+      if: ${{ matrix.os == 'windows' }}
+      run: |
+        $env:Path += ";C:\Program Files\Git\usr\bin"
+        sed -i s/python\ 3\.7\.1/python\ ${{ matrix.python_version }}/ conda/dev.yaml
+        cat conda/dev.yaml
 
     - name: Prepare conda environment
+      if: ${{ matrix.os != 'windows' }}
       run: |
         sed -i s/python\ 3\.7\.1/python\ ${{ matrix.python_version }}/ conda/dev.yaml
         cat conda/dev.yaml
