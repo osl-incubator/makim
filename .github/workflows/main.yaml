@@ -18,7 +18,7 @@ jobs:
           # - 'windows'
 
     runs-on: ${{ matrix.os }}-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     defaults:
       run:
@@ -77,7 +77,7 @@ jobs:
         # makim ${MAKIM_FILE_ARG} build --clean
 
     - name: Test documentation generation
-      run: makim docs-build
+      run: makim docs.build
 
     - name: Run style checks
       if: success() || failure()

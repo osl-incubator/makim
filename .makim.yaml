@@ -3,17 +3,22 @@ shell: bash
 groups:
   - name: default
     env-file: .env
-
     targets:
-      docs-build:
-        help: Build documentation
+      clean:
+        help: Clean unnecessary temporary files
         run: |
-          mkdocs build --config-file docs/mkdocs.yaml
-          echo "arxlang.org" > ./build/CNAME
-
-      docs-preview:
-        help: Preview documentation page locally
-        run: mkdocs serve --watch docs --config-file docs/mkdocs.yaml
+          rm -fr build/
+          rm -fr dist/
+          rm -fr .eggs/
+          find . -name '*.egg-info' -exec rm -fr {} +
+          find . -name '*.egg' -exec rm -f {} +
+          find . -name '*.pyc' -exec rm -f {} +
+          find . -name
+          find . -name '__pycache__' -exec rm -fr '*.pyo' -exec rm -f {} +
+          find . -name '*~' -exec rm -f {} +{} +
+          rm -f .coverage
+          rm -fr htmlcov/
+          rm -fr .pytest_cache
 
       lint:
         help: Run linter tools
@@ -22,3 +27,39 @@ groups:
       tests:
         help: Run tests
         run: pytest
+
+  - name: docs
+    env-file: .env
+    targets:
+      build:
+        help: Build documentation
+        run: |
+          mkdocs build --config-file docs/mkdocs.yaml
+
+      preview:
+        help: Preview documentation page locally
+        run: mkdocs serve --watch docs --config-file docs/mkdocs.yaml
+
+  - name: release
+    env-file: .env
+    vars:
+      app: |
+        npx --yes \
+        -p semantic-release \
+        -p "@semantic-release/commit-analyzer" \
+        -p "@semantic-release/release-notes-generator" \
+        -p "@semantic-release/changelog" \
+        -p "@semantic-release/exec" \
+        -p "@semantic-release/github" \
+        -p "@semantic-release/git" \
+        -p "@google/semantic-release-replace-plugin" \
+        semantic-release
+
+    targets:
+      ci:
+        help: Run semantic release on CI
+        run: {{ app }} --ci
+
+      dry:
+        help: Run semantic release on CI
+        run: {{ app }} --dry-run
