@@ -83,7 +83,7 @@ $ poetry install
 ```bash
 $ git checkout -b name-of-your-bugfix-or-feature
 ```
-6.  When you’re done making changes, check that your changes pass flake8
+6.  When you’re done makimg changes, check that your changes pass flake8
     and the tests, including testing other Python versions with tox::
 ```bash
 $ makim lint

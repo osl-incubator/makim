@@ -1,6 +1,6 @@
 # MakIm
 
-`MakIn` or just `makin` is based on `make` and focus on improve
+`MakIm` or just `makim` is based on `make` and focus on improve
 the way to define targets and dependencies. Instead of using the
 `Makefile` format, it uses `yaml` format.
 
