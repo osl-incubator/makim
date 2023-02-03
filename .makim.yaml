@@ -61,5 +61,5 @@ groups:
         run: {{ app }} --ci
 
       dry:
-        help: Run semantic release on CI
+        help: Run semantic release in dry-run mode
         run: {{ app }} --dry-run

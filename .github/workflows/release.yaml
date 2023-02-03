@@ -13,7 +13,7 @@ env:
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     defaults:
       run:
@@ -41,7 +41,9 @@ jobs:
 
       - name: Run semantic release
         if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: makim release.ci
+        run: |
+          poetry config pypi-token.pypi ${PYPI_TOKEN}
+          makim release.ci
 
       - name: Generate documentation with changes from semantic-release
         if: ${{ github.event_name == 'workflow_dispatch' }}
