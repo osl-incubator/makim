@@ -81,7 +81,7 @@ def _get_args():
     )
 
     try:
-        idx = sys.argv.index('--makim-files')
+        idx = sys.argv.index('--makim-file')
         makim_file = sys.argv[idx + 1]
     except ValueError:
         makim_file = makim_file_default
@@ -124,11 +124,12 @@ def _get_args():
 def show_version():
     print(__version__)
 
+
 def extract_makim_args():
     makim_args = {}
     index_to_remove = []
     for ind, arg in enumerate(list(sys.argv)):
-        if arg in ['--help', '--version', '--verbose']:
+        if arg in ['--help', '--version', '--verbose', '--makim-file']:
             continue
 
         if not arg.startswith('--'):
@@ -144,7 +145,11 @@ def extract_makim_args():
 
         arg_name = sys.argv[ind]
 
-        if len(sys.argv) == next_ind or len(sys.argv) > next_ind and sys.argv[next_ind].startswith('--'):
+        if (
+            len(sys.argv) == next_ind
+            or len(sys.argv) > next_ind
+            and sys.argv[next_ind].startswith('--')
+        ):
             is_arg_bool = True
             arg_value = True
         else:
