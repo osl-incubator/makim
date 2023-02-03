@@ -81,8 +81,10 @@ class Makim:
     def _load_shell_app(self):
         self.shell_app = shell_app
 
-    def _filter_group_data(self):
+    def _filter_group_data(self, group_name='default'):
         groups = self.config_data['groups']
+
+        self.group_name = group_name
 
         if self.group_name == 'default' and len(groups) == 1:
             self.group_data = groups[0]
@@ -112,14 +114,16 @@ class Makim:
         ):
             return
 
-        makin_dep = deepcopy(self)
+        makim_dep = deepcopy(self)
         args_dep = deepcopy(args)
+
+        makim_dep._filter_group_data()
 
         for dep_data in self.target_data['dependencies']:
             args_dep['target'] = dep_data['target']
-            makin_dep.run(args_dep)
+            makim_dep.run(args_dep)
 
-    def _run_command(self, verbose: bool = False):
+    def _run_command(self, args: dict):
         cmd = self.target_data['run'].strip()
 
         if not 'vars' in self.group_data:
@@ -134,10 +138,24 @@ class Makim:
 
         variables = {k: v.strip() for k, v in self.group_data['vars'].items()}
 
+        args_input = {}
+        for k, v in self.target_data.get('args', {}).items():
+            args_input[k] = (
+                None if 'default' not in v else None
+            )   # v["default"]
+
+            input_flag = f'--{k}'
+            if input_flag in args:
+                args_input[k] = (
+                    args[input_flag].strip()
+                    if isinstance(args[input_flag], str)
+                    else args[input_flag]
+                )
+
         # revert template tags escape
         cmd = cmd.replace('\{\{', '{{').replace('\}\}', '}}')
-        cmd = Template(cmd).render(**variables)
-        if verbose:
+        cmd = Template(cmd).render(args=args_input, **variables)
+        if args.get('verbose'):
             print('-' * 80)
             print('>>>', cmd.replace('\n', '\n>>> '))
             print('-' * 80)
@@ -170,4 +188,4 @@ class Makim:
             )
 
         self._run_dependencies(args)
-        self._run_command(self.args['verbose'])
+        self._run_command(args)

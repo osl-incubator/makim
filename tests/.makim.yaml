@@ -12,12 +12,12 @@ groups:
             action: store-true
             help: Remove all files that are tracked by git
         run: |
-          if 1 == 1:
-            echo "remove file X"
+          if {{ args.all }} == True:
+            echo "[II] Remove all files"
           else:
             echo "remove file X"
 
-          echo "[II] removed!"
+          echo "[II] Done!"
 
       build:
         help: Build the program
