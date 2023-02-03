@@ -81,10 +81,11 @@ class Makim:
     def _load_shell_app(self):
         self.shell_app = shell_app
 
-    def _filter_group_data(self, group_name='default'):
+    def _filter_group_data(self, group_name=None):
         groups = self.config_data['groups']
 
-        self.group_name = group_name
+        if group_name is not None:
+            self.group_name = group_name
 
         if self.group_name == 'default' and len(groups) == 1:
             self.group_data = groups[0]
