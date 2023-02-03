@@ -1,10 +1,13 @@
 """Makim class for containers"""
+import io
 import os
 import sys
 import warnings
 from copy import deepcopy
 from pathlib import Path
 from typing import Optional
+
+from jinja2 import Template
 
 import sh
 import yaml
@@ -74,6 +77,9 @@ class Makim:
 
     def _load_config_data(self):
         with open(self.makim_file, 'r') as f:
+            # escape template tags
+            content = f.read().replace('{{', '\{\{').replace('}}', '\}\}')
+            f = io.StringIO(content)
             self.config_data = yaml.safe_load(f)
 
     def _load_group_target_name(self):
@@ -141,6 +147,26 @@ class Makim:
 
     def _run_command(self):
         cmd = self.target_data['run'].strip().replace('\n', ' && ')
+
+        if not 'vars' in self.group_data:
+            self.group_data['vars'] = {}
+
+        if not isinstance(self.group_data['vars'], dict):
+            print(
+                "[EE] `vars` attribute inside the group "
+                f"{self.group_name} is not a dictionary."
+            )
+            exit(1)
+
+        variables = {
+            k: v.strip() for k, v in
+            self.group_data['vars'].items()
+        }
+
+        # revert template tags escape
+        cmd = cmd.replace('\{\{', '{{').replace('\}\}', '}}')
+        cmd = Template(cmd).render(**variables)
+        print(cmd)
         self._call_shell_app(cmd, [])
 
     # public methods
