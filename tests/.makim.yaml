@@ -12,7 +12,13 @@ groups:
             action: store-true
             help: Remove all files that are tracked by git
         run: |
-          echo "remove file X"
+          if {{ args.all }} == True:
+            echo "[II] Remove all files"
+          else:
+            echo "remove file X"
+
+          echo "[II] Done!"
+
       build:
         help: Build the program
         args:
@@ -22,7 +28,7 @@ groups:
             help: if not set, the clean dependency will not be triggered.
         dependencies:
           - target: clean
-            if: ${{ args.clean == true }}
+            if: {{ args.clean == true }}
         run: |
           echo "build file x"
           echo "build file y"
