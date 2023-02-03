@@ -34,6 +34,10 @@ makim = Makim()
 
 
 def _get_args():
+    """
+    note: when added new flags, update the list of flags to be
+          skipped at extract_makim_args function.
+    """
     makim_file_default = str(Path(os.getcwd()) / '.makim.yaml')
 
     parser = argparse.ArgumentParser(
@@ -61,6 +65,12 @@ def _get_args():
         '--version',
         action='store_true',
         help='Show the version of the installed MakIm tool.',
+    )
+
+    parser.add_argument(
+        '--verbose',
+        action='store_true',
+        help='Show the commands to be executed.',
     )
 
     parser.add_argument(
@@ -114,8 +124,44 @@ def _get_args():
 def show_version():
     print(__version__)
 
+def extract_makim_args():
+    makim_args = {}
+    index_to_remove = []
+    for ind, arg in enumerate(list(sys.argv)):
+        if arg in ['--help', '--version', '--verbose']:
+            continue
+
+        if not arg.startswith('--'):
+            continue
+
+        index_to_remove.append(ind)
+
+        is_arg_bool = False
+        arg_name = None
+        arg_value = None
+
+        next_ind = ind + 1
+
+        arg_name = sys.argv[ind]
+
+        if len(sys.argv) == next_ind or len(sys.argv) > next_ind and sys.argv[next_ind].startswith('--'):
+            is_arg_bool = True
+            arg_value = True
+        else:
+            arg_value = sys.argv[next_ind]
+            index_to_remove.append(next_ind)
+
+        makim_args[arg_name] = arg_value
+
+    # remove exclusive makim flags from original sys.argv
+    for ind in sorted(index_to_remove, reverse=True):
+        sys.argv.pop(ind)
+
+    return makim_args
+
 
 def app():
+    makim_args = extract_makim_args()
     args_parser = _get_args()
     args = args_parser.parse_args()
 
@@ -126,7 +172,8 @@ def app():
         return show_version()
 
     makim.load(args.makim_file)
-    return makim.run(dict(args._get_kwargs()))
+    makim_args.update(dict(args._get_kwargs()))
+    return makim.run(makim_args)
 
 
 if __name__ == '__main__':

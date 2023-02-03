@@ -12,20 +12,7 @@ from jinja2 import Template
 import sh
 import yaml
 
-try:
-    from sh import sh as shell_sh
-except Exception:
-    shell_sh = None
-
-try:
-    from sh import bash as shell_bash
-except Exception:
-    shell_bash = None
-
-try:
-    from sh import zsh as shell_zsh
-except Exception:
-    shell_zsh = None
+from sh import xonsh as shell_app
 
 
 class Makim:
@@ -40,10 +27,9 @@ class Makim:
     target_data: dict = {}
 
     def _call_shell_app(self, *args):
-
         p = self.shell_app(
             *self.shell_args,
-            *args,
+            args,
             _out=sys.stdout,
             _err=sys.stderr,
             _bg=True,
@@ -93,19 +79,7 @@ class Makim:
         self.target_data = self.group_data['targets'][self.target_name]
 
     def _load_shell_app(self):
-        if self.config_data['shell'] == 'bash':
-            self.shell_app = shell_bash
-        elif self.config_data['shell'] == 'sh':
-            self.shell_app = shell_sh
-        elif self.config_data['shell'] == 'zsh':
-            self.shell_app = shell_zsh
-        else:
-            raise Exception(
-                f'"{self.config_data["shell"]}" not supported yet.'
-            )
-
-        if self.shell_app is None:
-            raise Exception(f'"{self.config_data["shell"]}" not found.')
+        self.shell_app = shell_app
 
     def _filter_group_data(self):
         groups = self.config_data['groups']
@@ -127,7 +101,7 @@ class Makim:
 
     def _load_shell_args(self):
         self._filter_group_data()
-        self.shell_args.extend(['-c'])
+        self.shell_args = ['-c']
 
     # run commands
 
@@ -145,29 +119,29 @@ class Makim:
             args_dep['target'] = dep_data['target']
             makin_dep.run(args_dep)
 
-    def _run_command(self):
-        cmd = self.target_data['run'].strip().replace('\n', ' && ')
+    def _run_command(self, verbose: bool = False):
+        cmd = self.target_data['run'].strip()
 
         if not 'vars' in self.group_data:
             self.group_data['vars'] = {}
 
         if not isinstance(self.group_data['vars'], dict):
             print(
-                "[EE] `vars` attribute inside the group "
-                f"{self.group_name} is not a dictionary."
+                '[EE] `vars` attribute inside the group '
+                f'{self.group_name} is not a dictionary.'
             )
             exit(1)
 
-        variables = {
-            k: v.strip() for k, v in
-            self.group_data['vars'].items()
-        }
+        variables = {k: v.strip() for k, v in self.group_data['vars'].items()}
 
         # revert template tags escape
         cmd = cmd.replace('\{\{', '{{').replace('\}\}', '}}')
         cmd = Template(cmd).render(**variables)
-        print(cmd)
-        self._call_shell_app(cmd, [])
+        if verbose:
+            print('-' * 80)
+            print('>>>', cmd.replace('\n', '\n>>> '))
+            print('-' * 80)
+        self._call_shell_app(cmd)
 
     # public methods
 
@@ -196,4 +170,4 @@ class Makim:
             )
 
         self._run_dependencies(args)
-        self._run_command()
+        self._run_command(self.args['verbose'])
