@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.1.0](https://github.com/osl-incubator/makim/compare/1.0.2...1.1.0) (2023-02-03)
+
+
+### Features
+
+* Add support for variables for the target group ([#9](https://github.com/osl-incubator/makim/issues/9)) ([e3aa389](https://github.com/osl-incubator/makim/commit/e3aa389a07b7f5677328420f1389e84ed71bc7b3))
+
 ## [1.0.2](https://github.com/osl-incubator/makim/compare/1.0.1...1.0.2) (2023-01-26)
 
 
