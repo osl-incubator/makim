@@ -18,7 +18,7 @@ jobs:
           # - 'windows'
 
     runs-on: ${{ matrix.os }}-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     defaults:
       run:
