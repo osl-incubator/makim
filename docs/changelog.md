@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.2.0](https://github.com/osl-incubator/makim/compare/1.1.1...1.2.0) (2023-02-03)
+
+
+### Features
+
+* Add initial support for arguments ([#11](https://github.com/osl-incubator/makim/issues/11)) ([4d105d0](https://github.com/osl-incubator/makim/commit/4d105d0b6b1488af298877f8c0e9390256c5b559))
+
 ## [1.1.1](https://github.com/osl-incubator/makim/compare/1.1.0...1.1.1) (2023-02-03)
 
 
