@@ -16,11 +16,13 @@ from sh import xonsh as shell_app
 
 
 class Makim:
-    args: Optional[object] = None
     makim_file: str = '.makim.yaml'
     config_data: dict = {}
     shell_app: Optional[object] = None
     shell_args: list = []
+
+    # temporary variables
+    args: Optional[object] = None
     group_name: str = 'default'
     group_data: dict = {}
     target_name: str = ''
@@ -68,20 +70,28 @@ class Makim:
             f = io.StringIO(content)
             self.config_data = yaml.safe_load(f)
 
-    def _load_group_target_name(self):
-        if '.' in self.args['target']:
-            self.group_name, self.target_name = self.args['target'].split('.')
-            return
-        self.group_name = 'default'
-        self.target_name = self.args['target']
-
-    def _load_target_data(self):
-        self.target_data = self.group_data['targets'][self.target_name]
-
     def _load_shell_app(self):
         self.shell_app = shell_app
 
-    def _filter_group_data(self, group_name=None):
+    def _change_target(self, target_name: str):
+        group_name = 'default'
+        if '.' in target_name:
+            group_name, target_name = target_name.split('.')
+
+        self.target_name = target_name
+        self._change_group_data(group_name)
+
+        for target_name, target_data in self.group_data['targets'].items():
+            if target_name == self.target_name:
+                self.target_data = target_data
+                return
+
+        raise Exception(
+            f'The given target "{self.target_name}" was not found in the '
+            f'configuration file for the group {self.group_name}.'
+        )
+
+    def _change_group_data(self, group_name=None):
         groups = self.config_data['groups']
 
         if group_name is not None:
@@ -103,7 +113,7 @@ class Makim:
         )
 
     def _load_shell_args(self):
-        self._filter_group_data()
+        self._change_group_data()
         self.shell_args = ['-c']
 
     # run commands
@@ -116,13 +126,43 @@ class Makim:
             return
 
         makim_dep = deepcopy(self)
-        args_dep = deepcopy(args)
+        args_dep = {
+            'makim_file': args['makim_file'],
+            'help': args['help'],
+            'verbose': args['verbose'],
+            'version': args['version'],
+            'args': {},
+        }
 
-        makim_dep._filter_group_data()
+        makim_dep._change_group_data()
+
+        # clean double dash prefix in args
+        original_args_clean = {}
+        for arg_name, arg_value in args.items():
+            original_args_clean[
+                arg_name.replace('--', '', 1).replace('-', '_')
+            ] = (
+                arg_value.replace('--', '', 1)
+                if isinstance(arg_value, str)
+                else arg_value
+            )
 
         for dep_data in self.target_data['dependencies']:
+            args_dep['args'] = {}
+
+            # check conditional
+
+            # update the arguments
+            for arg_name, arg_value in dep_data['args'].items():
+                unescaped_value = arg_value.replace('\{\{', '{{').replace(
+                    '\}\}', '}}'
+                )
+                args_dep[f'--{arg_name}'] = Template(unescaped_value).render(
+                    args=original_args_clean
+                )
+
             args_dep['target'] = dep_data['target']
-            makim_dep.run(args_dep)
+            makim_dep.run(deepcopy(args_dep))
 
     def _run_command(self, args: dict):
         cmd = self.target_data['run'].strip()
@@ -175,9 +215,8 @@ class Makim:
 
         # setup
         self._verify_args()
-        self._load_group_target_name()
+        self._change_target(args['target'])
         self._load_shell_args()
-        self._load_target_data()
 
         # commands
         if 'if' in self.target_data and not self._verify_target_conditional(

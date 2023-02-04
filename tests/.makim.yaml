@@ -26,9 +26,17 @@ groups:
             type: bool
             action: store-true
             help: if not set, the clean dependency will not be triggered.
+          # args name will replace dash to underscore when converted
+          # into variables, for example: args.clean_all
+          clean-all:
+            type: bool
+            action: store-true
+            help: if not set, the clean dependency will not be triggered.
         dependencies:
           - target: clean
-            if: {{ args.clean == true }}
+            if: {{ args.clean == true or args.clean_all }}
+            args:
+              all: {{ args.clean_all }}
         run: |
           echo "build file x"
           echo "build file y"
