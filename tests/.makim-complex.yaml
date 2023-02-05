@@ -19,43 +19,38 @@ groups:
           - target: build.clean-gcda
         run: echo "[II] Remove unnecessary files"
 
-      clean-optional:
-        help: Clean temporary files if `--clean` flag is given
-        args:
-          'yes':
-            type: bool
-            action: store_true
-            help: If it is given, target `build.clean` will be called.
-        run: |
-          if {{ args.yes }} == True:
-            makim build.clean
-
       install:
         help: Install package locally
         run: echo "[II] Install package"
 
       release:
         help: Build package for release
+        env:
+          ASAN_OPTIONS: '{{ args.asan_options }}'
         args:
+          asan-options:
+            help: |
+              Define a custom value for the environment variable
+              `ASAN_OPTIONS`
+            type: string
+            default: ''
           build-type:
             help: |
               Define the build type, options are:
               plain, debug, debugoptimized, release, minsize, and custom
             type: string
             default: release
-          extras:
-            help: Extra arguments for the build step
-            type: string
-            default: '"no extras"'
           clean:
             help: Clean temporary files before the building step
             type: bool
             action: store_true
+          extras:
+            help: Extra arguments for the build step
+            type: string
+            default: ''
         dependencies:
-          - target: build.clean-optional
+          - target: build.clean
             if: {{ args.clean }}
-            args:
-              yes: {{ args.clean }}
         run: |
           echo "[II] Build the package for release options:"
           echo "\tbuild-type: {{ args.build_type }}"
@@ -63,12 +58,18 @@ groups:
 
       dev:
         help: Build for development (+tests +debug)
-        env:
-          ASAN_OPTIONS: "fast_unwind_on_malloc=0"
-        run: |
-          makim build.release \
-            --build-type="debug" \
-            --extra "-Ddev=enabled -Db_coverage=true -Doptimization=0"
+        args:
+          clean:
+            help: Clean temporary files before the building step
+            type: bool
+            action: store_true
+        dependencies:
+          - target: build.release
+            args:
+              build-type: "debug"
+              extra: "-Ddev=enabled -Db_coverage=true -Doptimization=0"
+              clean: {{ args.clean }}
+              asan-options: "fast_unwind_on_malloc=0"
 
   - name: env
     targets:
@@ -88,11 +89,11 @@ groups:
     targets:
       ci:
         help: Run semantic-release on CI
-        run: {{ app }} "--ci"
+        run: {{ app }} --ci
 
       dry:
         help: Run semantic-release on CI for tests in dry-run mode.
-        run: {{ app }} "--dry-run"
+        run: {{ app }} --dry-run
 
   - name: docs
     targets:
@@ -158,3 +159,15 @@ groups:
       fibonacci:
         help: Debug package via an example file (fibonacci)
         run: echo "[II] Debug package via an example file"
+
+  - name: print
+    targets:
+      local-env-vars:
+        help: Print environment variables
+        run: echo "[II] $CONDA_PREFIX"
+
+      makim-env-vars:
+        help: Print environment variables from the makim file
+        env:
+          MYNEWENV: MYNEWVALUE WORKED!!!
+        run: echo "[II] $MYNEWENV"

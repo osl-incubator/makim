@@ -5,6 +5,7 @@ import sys
 import warnings
 from copy import deepcopy
 from pathlib import Path
+from pprint import pprint
 from typing import Optional
 
 from jinja2 import Template
@@ -13,6 +14,14 @@ import sh
 import yaml
 
 from sh import xonsh as shell_app
+
+
+def escape_template_tag(v: str) -> str:
+    return v.replace('{{', '\{\{').replace('}}', '\}\}')
+
+
+def unescape_template_tag(v: str) -> str:
+    return v.replace('\{\{', '{{').replace('\}\}', '}}')
 
 
 class Makim:
@@ -57,16 +66,18 @@ class Makim:
 
     def _verify_args(self):
         if not self._check_makim_file():
-            raise Exception('[config] Config file .makim.yaml not found.')
+            print('[EE] CONFIG: Config file .makim.yaml not found.')
+            exit(1)
 
     def _verify_config(self):
         if not len(self.config_data['groups']):
-            raise Exception('No target groups found.')
+            print('[EE] No target groups found.')
+            exit(1)
 
     def _load_config_data(self):
         with open(self.makim_file, 'r') as f:
             # escape template tags
-            content = f.read().replace('{{', '\{\{').replace('}}', '\}\}')
+            content = escape_template_tag(f.read())
             f = io.StringIO(content)
             self.config_data = yaml.safe_load(f)
 
@@ -108,10 +119,11 @@ class Makim:
                 self.group_data = g
                 return
 
-        raise Exception(
-            f'The given group target "{self.group_name}" was not found in the '
+        print(
+            f'[EE] The given group target "{self.group_name}" was not found in the '
             'configuration file.'
         )
+        exit(1)
 
     def _load_shell_args(self):
         self._change_group_data()
@@ -127,11 +139,12 @@ class Makim:
             return
 
         makim_dep = deepcopy(self)
-        args_dep = {
+        args_dep_original = {
             'makim_file': args['makim_file'],
             'help': args['help'],
-            'verbose': args['verbose'],
-            'version': args['version'],
+            'verbose': args.get('verbose', False),
+            'dry-run': args.get('dry-run', False),
+            'version': args.get('version', False),
             'args': {},
         }
 
@@ -149,24 +162,36 @@ class Makim:
             )
 
         for dep_data in self.target_data['dependencies']:
-            args_dep['args'] = {}
-
-            # check conditional
+            args_dep = {}
 
             # update the arguments
             for arg_name, arg_value in dep_data.get('args', {}).items():
-                unescaped_value = arg_value.replace('\{\{', '{{').replace(
-                    '\}\}', '}}'
+                unescaped_value = (
+                    unescape_template_tag(arg_value)
+                    if isinstance(arg_value, str)
+                    else str(arg_value)
                 )
+
                 args_dep[f'--{arg_name}'] = Template(unescaped_value).render(
                     args=original_args_clean
                 )
 
             args_dep['target'] = dep_data['target']
+            args_dep.update(args_dep_original)
+
+            # checking for the conditional statement
+            if_stmt = dep_data.get('if')
+            if if_stmt:
+                result = Template(if_stmt).render(args=args_dep)
+                if not result and args.get('verbose'):
+                    return print(
+                        f'[II] Skipping dependency: {dep_data.get("target")}'
+                    )
+
             makim_dep.run(deepcopy(args_dep))
 
     def _run_command(self, args: dict):
-        cmd = self.target_data['run'].strip()
+        cmd = self.target_data.get('run', '').strip()
 
         if not 'vars' in self.group_data:
             self.group_data['vars'] = {}
@@ -180,7 +205,7 @@ class Makim:
 
         variables = {k: v.strip() for k, v in self.group_data['vars'].items()}
 
-        args_input = {}
+        args_input = {'makim_file': args['makim_file']}
         for k, v in self.target_data.get('args', {}).items():
             k_clean = k.replace('-', '_')
             args_input[k_clean] = v.get(
@@ -199,14 +224,35 @@ class Makim:
                     else args[input_flag]
                 )
 
-        # revert template tags escape
-        cmd = cmd.replace('\{\{', '{{').replace('\}\}', '}}')
+        current_env = deepcopy(os.environ)
+        env = {}
+        for k, v in self.target_data.get('env', {}).items():
+            env[k] = Template(unescape_template_tag(v)).render(
+                args=args_input, **variables
+            )
+            os.environ[k] = env[k]
+
+        cmd = unescape_template_tag(cmd)
         cmd = Template(cmd).render(args=args_input, **variables)
         if args.get('verbose'):
+            print('=' * 80)
+            print('TARGET:', f'{self.group_name}.{self.target_name}')
+            print('ARGS:')
+            pprint(args_input)
+            print('VARS:')
+            pprint(variables)
+            print('ENV:')
+            pprint(env)
             print('-' * 80)
             print('>>>', cmd.replace('\n', '\n>>> '))
-            print('-' * 80)
-        self._call_shell_app(cmd)
+            print('=' * 80)
+
+        if not args.get('dry_run') and cmd:
+            self._call_shell_app(cmd)
+
+        # move back the environment variable to the previous values
+        os.environ.clear()
+        os.environ.update(current_env)
 
     # public methods
 

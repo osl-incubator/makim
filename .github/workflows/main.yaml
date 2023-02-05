@@ -83,8 +83,6 @@ jobs:
         makim ${MAKIM_FILE_ARG} default.lint --verbose
         makim ${MAKIM_FILE_ARG} build.clean-gcda --verbose
         makim ${MAKIM_FILE_ARG} build.clean --verbose
-        makim ${MAKIM_FILE_ARG} build.clean-optional --verbose
-        makim ${MAKIM_FILE_ARG} build.clean-optional --yes --verbose
         makim ${MAKIM_FILE_ARG} build.install --verbose
         makim ${MAKIM_FILE_ARG} build.release --verbose
         makim ${MAKIM_FILE_ARG} build.release --build-type debug --verbose
