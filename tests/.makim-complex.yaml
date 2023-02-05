@@ -144,15 +144,15 @@ groups:
       examples:
         help: Test all code generation for the example package files
         dependencies:
-          - target: docs.gen-object
-          - target: docs.gen-ast
-          - target: docs.gen-llvm-ir
+          - target: tests.gen-object
+          - target: tests.gen-ast
+          - target: tests.gen-llvm-ir
 
       all:
         help: Run sanitizer tests and code generation for examples
         dependencies:
-          - target: docs.sanitizer
-          - target: docs.examples
+          - target: tests.sanitizer
+          - target: tests.examples
 
   - name: debug
     targets:
