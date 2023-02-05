@@ -104,8 +104,8 @@ groups:
       build:
         help: Build the general docs pages
         dependencies:
-          - target: clean
-          - target: api
+          - target: docs.clean
+          - target: docs.api
         run: echo "[II] Build general docs"
 
       clean:
@@ -115,8 +115,8 @@ groups:
       preview:
         help: Preview documentation result locally
         dependencies:
-          - target: clean
-          - target: api
+          - target: docs.clean
+          - target: docs.api
         run: echo "[II] Preview documentation result locally"
 
   - name: tests
@@ -144,15 +144,15 @@ groups:
       examples:
         help: Test all code generation for the example package files
         dependencies:
-          - target: gen-object
-          - target: gen-ast
-          - target: gen-llvm-ir
+          - target: docs.gen-object
+          - target: docs.gen-ast
+          - target: docs.gen-llvm-ir
 
       all:
         help: Run sanitizer tests and code generation for examples
         dependencies:
-          - target: sanitizer
-          - target: examples
+          - target: docs.sanitizer
+          - target: docs.examples
 
   - name: debug
     targets:
