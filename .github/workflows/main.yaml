@@ -76,7 +76,7 @@ jobs:
 
     - name: Run tests using complex makim file
       env:
-        MAKIM_FILE_ARG: "--makim-file tests/.makim.yaml"
+        MAKIM_FILE_ARG: "--makim-file tests/.makim-complex.yaml"
       run: |
         makim ${MAKIM_FILE_ARG} --help
         makim ${MAKIM_FILE_ARG} --version
