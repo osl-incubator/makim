@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.3.0](https://github.com/osl-incubator/makim/compare/1.2.0...1.3.0) (2023-02-05)
+
+
+### Features
+
+* Add dependency argument ([#13](https://github.com/osl-incubator/makim/issues/13)) ([7f28c68](https://github.com/osl-incubator/makim/commit/7f28c6873a78aa608106fdf9559d303ab5469b74))
+
 # [1.2.0](https://github.com/osl-incubator/makim/compare/1.1.1...1.2.0) (2023-02-03)
 
 
