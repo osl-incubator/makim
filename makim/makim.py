@@ -5,6 +5,7 @@ import sys
 import warnings
 from copy import deepcopy
 from pathlib import Path
+from pprint import pprint
 from typing import Optional
 
 from jinja2 import Template
@@ -15,12 +16,22 @@ import yaml
 from sh import xonsh as shell_app
 
 
+def escape_template_tag(v: str) -> str:
+    return v.replace('{{', '\{\{').replace('}}', '\}\}')
+
+
+def unescape_template_tag(v: str) -> str:
+    return v.replace('\{\{', '{{').replace('\}\}', '}}')
+
+
 class Makim:
-    args: Optional[object] = None
     makim_file: str = '.makim.yaml'
     config_data: dict = {}
     shell_app: Optional[object] = None
     shell_args: list = []
+
+    # temporary variables
+    args: Optional[object] = None
     group_name: str = 'default'
     group_data: dict = {}
     target_name: str = ''
@@ -55,33 +66,44 @@ class Makim:
 
     def _verify_args(self):
         if not self._check_makim_file():
-            raise Exception('[config] Config file .makim.yaml not found.')
+            print('[EE] CONFIG: Config file .makim.yaml not found.')
+            exit(1)
 
     def _verify_config(self):
         if not len(self.config_data['groups']):
-            raise Exception('No target groups found.')
+            print('[EE] No target groups found.')
+            exit(1)
 
     def _load_config_data(self):
         with open(self.makim_file, 'r') as f:
             # escape template tags
-            content = f.read().replace('{{', '\{\{').replace('}}', '\}\}')
+            content = escape_template_tag(f.read())
             f = io.StringIO(content)
             self.config_data = yaml.safe_load(f)
-
-    def _load_group_target_name(self):
-        if '.' in self.args['target']:
-            self.group_name, self.target_name = self.args['target'].split('.')
-            return
-        self.group_name = 'default'
-        self.target_name = self.args['target']
-
-    def _load_target_data(self):
-        self.target_data = self.group_data['targets'][self.target_name]
 
     def _load_shell_app(self):
         self.shell_app = shell_app
 
-    def _filter_group_data(self, group_name=None):
+    def _change_target(self, target_name: str):
+        group_name = 'default'
+        if '.' in target_name:
+            group_name, target_name = target_name.split('.')
+
+        self.target_name = target_name
+        self._change_group_data(group_name)
+
+        for target_name, target_data in self.group_data['targets'].items():
+            if target_name == self.target_name:
+                self.target_data = target_data
+                return
+
+        print(
+            f'[EE] The given target "{self.target_name}" was not found in the '
+            f'configuration file for the group {self.group_name}.'
+        )
+        exit(1)
+
+    def _change_group_data(self, group_name=None):
         groups = self.config_data['groups']
 
         if group_name is not None:
@@ -97,13 +119,14 @@ class Makim:
                 self.group_data = g
                 return
 
-        raise Exception(
-            f'The given group target "{self.group_name}" was not found in the '
+        print(
+            f'[EE] The given group target "{self.group_name}" was not found in the '
             'configuration file.'
         )
+        exit(1)
 
     def _load_shell_args(self):
-        self._filter_group_data()
+        self._change_group_data()
         self.shell_args = ['-c']
 
     # run commands
@@ -116,16 +139,59 @@ class Makim:
             return
 
         makim_dep = deepcopy(self)
-        args_dep = deepcopy(args)
+        args_dep_original = {
+            'makim_file': args['makim_file'],
+            'help': args['help'],
+            'verbose': args.get('verbose', False),
+            'dry-run': args.get('dry-run', False),
+            'version': args.get('version', False),
+            'args': {},
+        }
 
-        makim_dep._filter_group_data()
+        makim_dep._change_group_data()
+
+        # clean double dash prefix in args
+        original_args_clean = {}
+        for arg_name, arg_value in args.items():
+            original_args_clean[
+                arg_name.replace('--', '', 1).replace('-', '_')
+            ] = (
+                arg_value.replace('--', '', 1)
+                if isinstance(arg_value, str)
+                else arg_value
+            )
 
         for dep_data in self.target_data['dependencies']:
+            args_dep = {}
+
+            # update the arguments
+            for arg_name, arg_value in dep_data.get('args', {}).items():
+                unescaped_value = (
+                    unescape_template_tag(arg_value)
+                    if isinstance(arg_value, str)
+                    else str(arg_value)
+                )
+
+                args_dep[f'--{arg_name}'] = Template(unescaped_value).render(
+                    args=original_args_clean
+                )
+
             args_dep['target'] = dep_data['target']
-            makim_dep.run(args_dep)
+            args_dep.update(args_dep_original)
+
+            # checking for the conditional statement
+            if_stmt = dep_data.get('if')
+            if if_stmt:
+                result = Template(if_stmt).render(args=args_dep)
+                if not result and args.get('verbose'):
+                    return print(
+                        f'[II] Skipping dependency: {dep_data.get("target")}'
+                    )
+
+            makim_dep.run(deepcopy(args_dep))
 
     def _run_command(self, args: dict):
-        cmd = self.target_data['run'].strip()
+        cmd = self.target_data.get('run', '').strip()
 
         if not 'vars' in self.group_data:
             self.group_data['vars'] = {}
@@ -139,28 +205,54 @@ class Makim:
 
         variables = {k: v.strip() for k, v in self.group_data['vars'].items()}
 
-        args_input = {}
+        args_input = {'makim_file': args['makim_file']}
         for k, v in self.target_data.get('args', {}).items():
-            args_input[k] = (
-                None if 'default' not in v else None
-            )   # v["default"]
+            k_clean = k.replace('-', '_')
+            args_input[k_clean] = v.get(
+                'default', False if v.get('actions') == 'store_true' else None
+            )
 
             input_flag = f'--{k}'
             if input_flag in args:
-                args_input[k] = (
+                if v.get('actions') == 'store_true':
+                    args_input[k_clean] = True
+                    continue
+
+                args_input[k_clean] = (
                     args[input_flag].strip()
                     if isinstance(args[input_flag], str)
                     else args[input_flag]
                 )
 
-        # revert template tags escape
-        cmd = cmd.replace('\{\{', '{{').replace('\}\}', '}}')
+        current_env = deepcopy(os.environ)
+        env = {}
+        for k, v in self.target_data.get('env', {}).items():
+            env[k] = Template(unescape_template_tag(v)).render(
+                args=args_input, **variables
+            )
+            os.environ[k] = env[k]
+
+        cmd = unescape_template_tag(cmd)
         cmd = Template(cmd).render(args=args_input, **variables)
         if args.get('verbose'):
+            print('=' * 80)
+            print('TARGET:', f'{self.group_name}.{self.target_name}')
+            print('ARGS:')
+            pprint(args_input)
+            print('VARS:')
+            pprint(variables)
+            print('ENV:')
+            pprint(env)
             print('-' * 80)
             print('>>>', cmd.replace('\n', '\n>>> '))
-            print('-' * 80)
-        self._call_shell_app(cmd)
+            print('=' * 80)
+
+        if not args.get('dry_run') and cmd:
+            self._call_shell_app(cmd)
+
+        # move back the environment variable to the previous values
+        os.environ.clear()
+        os.environ.update(current_env)
 
     # public methods
 
@@ -175,9 +267,8 @@ class Makim:
 
         # setup
         self._verify_args()
-        self._load_group_target_name()
+        self._change_target(args['target'])
         self._load_shell_args()
-        self._load_target_data()
 
         # commands
         if 'if' in self.target_data and not self._verify_target_conditional(

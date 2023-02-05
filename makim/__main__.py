@@ -74,6 +74,12 @@ def _get_args():
     )
 
     parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help='Show the commands but don\'t execute them.',
+    )
+
+    parser.add_argument(
         '--makim-file',
         type=str,
         default=makim_file_default,
@@ -129,7 +135,7 @@ def extract_makim_args():
     makim_args = {}
     index_to_remove = []
     for ind, arg in enumerate(list(sys.argv)):
-        if arg in ['--help', '--version', '--verbose', '--makim-file']:
+        if arg in ['--help', '--version', '--verbose', '--makim-file', '--dry-run']:
             continue
 
         if not arg.startswith('--'):

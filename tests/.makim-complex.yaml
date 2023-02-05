@@ -1,0 +1,173 @@
+version: 1.0.0
+shell: bash
+groups:
+  - name: default
+    targets:
+      lint:
+        help: Run linter tools
+        run: echo "[II] Run linter"
+
+  - name: build
+    targets:
+      clean-gcda:
+        help: Remove temporary gcda files
+        run: echo "[II] Remove gcda files"
+
+      clean:
+        help: Remove all unnecessary temporary files
+        dependencies:
+          - target: build.clean-gcda
+        run: echo "[II] Remove unnecessary files"
+
+      install:
+        help: Install package locally
+        run: echo "[II] Install package"
+
+      release:
+        help: Build package for release
+        env:
+          ASAN_OPTIONS: '{{ args.asan_options }}'
+        args:
+          asan-options:
+            help: |
+              Define a custom value for the environment variable
+              `ASAN_OPTIONS`
+            type: string
+            default: ''
+          build-type:
+            help: |
+              Define the build type, options are:
+              plain, debug, debugoptimized, release, minsize, and custom
+            type: string
+            default: release
+          clean:
+            help: Clean temporary files before the building step
+            type: bool
+            action: store_true
+          extras:
+            help: Extra arguments for the build step
+            type: string
+            default: ''
+        dependencies:
+          - target: build.clean
+            if: {{ args.clean }}
+        run: |
+          echo "[II] Build the package for release options:"
+          echo "\tbuild-type: {{ args.build_type }}"
+          echo "\textras: {{ args.extras }}"
+
+      dev:
+        help: Build for development (+tests +debug)
+        args:
+          clean:
+            help: Clean temporary files before the building step
+            type: bool
+            action: store_true
+        dependencies:
+          - target: build.release
+            args:
+              build-type: "debug"
+              extra: "-Ddev=enabled -Db_coverage=true -Doptimization=0"
+              clean: {{ args.clean }}
+              asan-options: "fast_unwind_on_malloc=0"
+
+  - name: env
+    targets:
+      create-file:
+        help: Create a dot env file
+        run: echo "[II] Create a dot env file"
+
+  - name: conda
+    targets:
+      build:
+        help: Create the conda package
+        run: echo "[II] Create the conda package"
+
+  - name: release
+    vars:
+      app: echo
+    targets:
+      ci:
+        help: Run semantic-release on CI
+        run: {{ app }} --ci
+
+      dry:
+        help: Run semantic-release on CI for tests in dry-run mode.
+        run: {{ app }} --dry-run
+
+  - name: docs
+    targets:
+      api:
+        help: Build API docs
+        run: echo "[II] Build API docs"
+
+      build:
+        help: Build the general docs pages
+        dependencies:
+          - target: docs.clean
+          - target: docs.api
+        run: echo "[II] Build general docs"
+
+      clean:
+        help: Clean temporary documentation files
+        run: echo "[II] Clean temporary doc files"
+
+      preview:
+        help: Preview documentation result locally
+        dependencies:
+          - target: docs.clean
+          - target: docs.api
+        run: echo "[II] Preview documentation result locally"
+
+  - name: tests
+    targets:
+      sanitizer:
+        help: Run sanitizer tests
+        run: echo "[II] Run sanitizer test"
+
+      code-coverage:
+        help: Check code coverage by tests
+        run: echo "[II] Check code coverage by tests"
+
+      gen-object:
+        help: Run test for object generation
+        run: echo "[II] Run test for object generation"
+
+      gen-ast:
+        help: Run test for AST generation
+        run: echo "[II] Run test for AST generation"
+
+      gen-llvm-ir:
+        help: Run test for LLVM IR
+        run: echo "[II] Run test for LLVM IR"
+
+      examples:
+        help: Test all code generation for the example package files
+        dependencies:
+          - target: tests.gen-object
+          - target: tests.gen-ast
+          - target: tests.gen-llvm-ir
+
+      all:
+        help: Run sanitizer tests and code generation for examples
+        dependencies:
+          - target: tests.sanitizer
+          - target: tests.examples
+
+  - name: debug
+    targets:
+      fibonacci:
+        help: Debug package via an example file (fibonacci)
+        run: echo "[II] Debug package via an example file"
+
+  - name: print
+    targets:
+      local-env-vars:
+        help: Print environment variables
+        run: echo "[II] $CONDA_PREFIX"
+
+      makim-env-vars:
+        help: Print environment variables from the makim file
+        env:
+          MYNEWENV: MYNEWVALUE WORKED!!!
+        run: echo "[II] $MYNEWENV"
