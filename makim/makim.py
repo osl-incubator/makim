@@ -86,10 +86,11 @@ class Makim:
                 self.target_data = target_data
                 return
 
-        raise Exception(
-            f'The given target "{self.target_name}" was not found in the '
+        print(
+            f'[EE] The given target "{self.target_name}" was not found in the '
             f'configuration file for the group {self.group_name}.'
         )
+        exit(1)
 
     def _change_group_data(self, group_name=None):
         groups = self.config_data['groups']
@@ -153,7 +154,7 @@ class Makim:
             # check conditional
 
             # update the arguments
-            for arg_name, arg_value in dep_data['args'].items():
+            for arg_name, arg_value in dep_data.get('args', {}).items():
                 unescaped_value = arg_value.replace('\{\{', '{{').replace(
                     '\}\}', '}}'
                 )
@@ -181,13 +182,18 @@ class Makim:
 
         args_input = {}
         for k, v in self.target_data.get('args', {}).items():
-            args_input[k] = (
-                None if 'default' not in v else None
-            )   # v["default"]
+            k_clean = k.replace('-', '_')
+            args_input[k_clean] = v.get(
+                'default', False if v.get('actions') == 'store_true' else None
+            )
 
             input_flag = f'--{k}'
             if input_flag in args:
-                args_input[k] = (
+                if v.get('actions') == 'store_true':
+                    args_input[k_clean] = True
+                    continue
+
+                args_input[k_clean] = (
                     args[input_flag].strip()
                     if isinstance(args[input_flag], str)
                     else args[input_flag]

@@ -62,9 +62,9 @@ jobs:
     - name: Install dependencies
       run: poetry install
 
-    - name: Run tests
+    - name: Run tests using simple makim file
       env:
-        MAKIM_FILE_ARG: "--makim-file tests/.makim.yaml"
+        MAKIM_FILE_ARG: "--makim-file tests/.makim-simple.yaml"
       run: |
         makim ${MAKIM_FILE_ARG} --help
         makim ${MAKIM_FILE_ARG} --version
@@ -72,8 +72,41 @@ jobs:
         makim ${MAKIM_FILE_ARG} default.clean
         makim ${MAKIM_FILE_ARG} build
         makim ${MAKIM_FILE_ARG} default.build
-        # args not implemented yet
-        # makim ${MAKIM_FILE_ARG} build --clean
+        makim ${MAKIM_FILE_ARG} build --clean
+
+    - name: Run tests using complex makim file
+      env:
+        MAKIM_FILE_ARG: "--makim-file tests/.makim.yaml"
+      run: |
+        makim ${MAKIM_FILE_ARG} --help
+        makim ${MAKIM_FILE_ARG} --version
+        makim ${MAKIM_FILE_ARG} default.lint --verbose
+        makim ${MAKIM_FILE_ARG} build.clean-gcda --verbose
+        makim ${MAKIM_FILE_ARG} build.clean --verbose
+        makim ${MAKIM_FILE_ARG} build.clean-optional --verbose
+        makim ${MAKIM_FILE_ARG} build.clean-optional --yes --verbose
+        makim ${MAKIM_FILE_ARG} build.install --verbose
+        makim ${MAKIM_FILE_ARG} build.release --verbose
+        makim ${MAKIM_FILE_ARG} build.release --build-type debug --verbose
+        makim ${MAKIM_FILE_ARG} build.release --extras '-D' --verbose
+        makim ${MAKIM_FILE_ARG} build.release --clean --verbose
+        makim ${MAKIM_FILE_ARG} build.dev --verbose
+        makim ${MAKIM_FILE_ARG} env.create-file --verbose
+        makim ${MAKIM_FILE_ARG} conda.build --verbose
+        makim ${MAKIM_FILE_ARG} release.ci --verbose
+        makim ${MAKIM_FILE_ARG} release.dry --verbose
+        makim ${MAKIM_FILE_ARG} docs.api --verbose
+        makim ${MAKIM_FILE_ARG} docs.build --verbose
+        makim ${MAKIM_FILE_ARG} docs.clean --verbose
+        makim ${MAKIM_FILE_ARG} docs.preview --verbose
+        makim ${MAKIM_FILE_ARG} tests.sanitizer --verbose
+        makim ${MAKIM_FILE_ARG} tests.code-coverage --verbose
+        makim ${MAKIM_FILE_ARG} tests.gen-object --verbose
+        makim ${MAKIM_FILE_ARG} tests.gen-ast --verbose
+        makim ${MAKIM_FILE_ARG} tests.gen-llvm-ir --verbose
+        makim ${MAKIM_FILE_ARG} tests.examples --verbose
+        makim ${MAKIM_FILE_ARG} tests.all --verbose
+        makim ${MAKIM_FILE_ARG} debug.fibonacci --verbose
 
     - name: Test documentation generation
       run: makim docs.build

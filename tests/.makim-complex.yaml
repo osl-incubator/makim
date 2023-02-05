@@ -1,0 +1,160 @@
+version: 1.0.0
+shell: bash
+groups:
+  - name: default
+    targets:
+      lint:
+        help: Run linter tools
+        run: echo "[II] Run linter"
+
+  - name: build
+    targets:
+      clean-gcda:
+        help: Remove temporary gcda files
+        run: echo "[II] Remove gcda files"
+
+      clean:
+        help: Remove all unnecessary temporary files
+        dependencies:
+          - target: build.clean-gcda
+        run: echo "[II] Remove unnecessary files"
+
+      clean-optional:
+        help: Clean temporary files if `--clean` flag is given
+        args:
+          'yes':
+            type: bool
+            action: store_true
+            help: If it is given, target `build.clean` will be called.
+        run: |
+          if {{ args.yes }} == True:
+            makim build.clean
+
+      install:
+        help: Install package locally
+        run: echo "[II] Install package"
+
+      release:
+        help: Build package for release
+        args:
+          build-type:
+            help: |
+              Define the build type, options are:
+              plain, debug, debugoptimized, release, minsize, and custom
+            type: string
+            default: release
+          extras:
+            help: Extra arguments for the build step
+            type: string
+            default: '"no extras"'
+          clean:
+            help: Clean temporary files before the building step
+            type: bool
+            action: store_true
+        dependencies:
+          - target: build.clean-optional
+            if: {{ args.clean }}
+            args:
+              yes: {{ args.clean }}
+        run: |
+          echo "[II] Build the package for release options:"
+          echo "\tbuild-type: {{ args.build_type }}"
+          echo "\textras: {{ args.extras }}"
+
+      dev:
+        help: Build for development (+tests +debug)
+        env:
+          ASAN_OPTIONS: "fast_unwind_on_malloc=0"
+        run: |
+          makim build.release \
+            --build-type="debug" \
+            --extra "-Ddev=enabled -Db_coverage=true -Doptimization=0"
+
+  - name: env
+    targets:
+      create-file:
+        help: Create a dot env file
+        run: echo "[II] Create a dot env file"
+
+  - name: conda
+    targets:
+      build:
+        help: Create the conda package
+        run: echo "[II] Create the conda package"
+
+  - name: release
+    vars:
+      app: echo
+    targets:
+      ci:
+        help: Run semantic-release on CI
+        run: {{ app }} "--ci"
+
+      dry:
+        help: Run semantic-release on CI for tests in dry-run mode.
+        run: {{ app }} "--dry-run"
+
+  - name: docs
+    targets:
+      api:
+        help: Build API docs
+        run: echo "[II] Build API docs"
+
+      build:
+        help: Build the general docs pages
+        dependencies:
+          - target: clean
+          - target: api
+        run: echo "[II] Build general docs"
+
+      clean:
+        help: Clean temporary documentation files
+        run: echo "[II] Clean temporary doc files"
+
+      preview:
+        help: Preview documentation result locally
+        dependencies:
+          - target: clean
+          - target: api
+        run: echo "[II] Preview documentation result locally"
+
+  - name: tests
+    targets:
+      sanitizer:
+        help: Run sanitizer tests
+        run: echo "[II] Run sanitizer test"
+
+      code-coverage:
+        help: Check code coverage by tests
+        run: echo "[II] Check code coverage by tests"
+
+      gen-object:
+        help: Run test for object generation
+        run: echo "[II] Run test for object generation"
+
+      gen-ast:
+        help: Run test for AST generation
+        run: echo "[II] Run test for AST generation"
+
+      gen-llvm-ir:
+        help: Run test for LLVM IR
+        run: echo "[II] Run test for LLVM IR"
+
+      examples:
+        help: Test all code generation for the example package files
+        dependencies:
+          - target: gen-object
+          - target: gen-ast
+          - target: gen-llvm-ir
+
+      all:
+        help: Run sanitizer tests and code generation for examples
+        dependencies:
+          - target: sanitizer
+          - target: examples
+
+  - name: debug
+    targets:
+      fibonacci:
+        help: Debug package via an example file (fibonacci)
+        run: echo "[II] Debug package via an example file"
