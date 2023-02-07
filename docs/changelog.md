@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.4.0](https://github.com/osl-incubator/makim/compare/1.3.0...1.4.0) (2023-02-07)
+
+
+### Features
+
+* Add support to dot env file in the top level in the makim file ([#15](https://github.com/osl-incubator/makim/issues/15)) ([ee07cdb](https://github.com/osl-incubator/makim/commit/ee07cdbef497cd0183be97524e1d12cc06e7b589))
+
 # [1.3.0](https://github.com/osl-incubator/makim/compare/1.2.0...1.3.0) (2023-02-05)
 
 
