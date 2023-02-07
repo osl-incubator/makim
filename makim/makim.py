@@ -9,11 +9,11 @@ from pprint import pprint
 from typing import Optional
 
 from jinja2 import Template
-
+import dotenv
 import sh
 import yaml
 
-from sh import xonsh as shell_app
+from sh import xonsh
 
 
 def escape_template_tag(v: str) -> str:
@@ -27,10 +27,11 @@ def unescape_template_tag(v: str) -> str:
 class Makim:
     makim_file: str = '.makim.yaml'
     config_data: dict = {}
-    shell_app: Optional[object] = None
+    shell_app: sh.Command = xonsh
     shell_args: list = []
 
     # temporary variables
+    env: dict = {}
     args: Optional[object] = None
     group_name: str = 'default'
     group_data: dict = {}
@@ -82,7 +83,7 @@ class Makim:
             self.config_data = yaml.safe_load(f)
 
     def _load_shell_app(self):
-        self.shell_app = shell_app
+        self.shell_app = xonsh
 
     def _change_target(self, target_name: str):
         group_name = 'default'
@@ -225,12 +226,13 @@ class Makim:
                 )
 
         current_env = deepcopy(os.environ)
-        env = {}
+        env = deepcopy(self.env)
         for k, v in self.target_data.get('env', {}).items():
             env[k] = Template(unescape_template_tag(v)).render(
                 args=args_input, **variables
             )
-            os.environ[k] = env[k]
+        for k, v in env.items():
+            os.environ[k] = v
 
         cmd = unescape_template_tag(cmd)
         cmd = Template(cmd).render(args=args_input, **variables)
@@ -254,6 +256,23 @@ class Makim:
         os.environ.clear()
         os.environ.update(current_env)
 
+    def _load_dotenv(self):
+        env_file = self.config_data.get('env-file')
+        if not env_file:
+            return
+
+        if not env_file.startswith('/'):
+            # use makim file as reference for the working directory
+            # for the .env file
+            env_file = str(Path(self.makim_file).parent / env_file)
+
+        if not Path(env_file).exists():
+            print('[EE] The given env-file was not found.')
+            exit(1)
+
+        self.env = dotenv.dotenv_values(env_file)
+
+
     # public methods
 
     def load(self, makim_file: str):
@@ -261,6 +280,7 @@ class Makim:
         self._load_config_data()
         self._verify_config()
         self._load_shell_app()
+        self._load_dotenv()
 
     def run(self, args: dict):
         self.args = args
