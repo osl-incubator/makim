@@ -22,7 +22,6 @@ This is an example of a configuration file:
 
 ```yaml
 version: 1.0.0
-shell: bash
 groups:
   - name: default
     env-file: .env

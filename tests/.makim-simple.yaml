@@ -1,8 +1,7 @@
 version: 1.0.0
-shell: bash
+env-file: .env
 groups:
   - name: default
-    env-file: .env
     targets:
       clean:
         help: Use this target to clean up temporary files

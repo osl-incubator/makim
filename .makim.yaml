@@ -1,5 +1,4 @@
 version: 1.0.0
-shell: bash
 groups:
   - name: default
     env-file: .env
@@ -58,8 +57,8 @@ groups:
     targets:
       ci:
         help: Run semantic release on CI
-        run: {{ app }} --ci
+        run: {{ app }} '--ci'
 
       dry:
         help: Run semantic release in dry-run mode
-        run: {{ app }} --dry-run
+        run: {{ app }} '--dry-run'

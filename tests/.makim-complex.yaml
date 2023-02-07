@@ -1,5 +1,5 @@
 version: 1.0.0
-shell: bash
+env-file: .env
 groups:
   - name: default
     targets:
@@ -171,3 +171,7 @@ groups:
         env:
           MYNEWENV: MYNEWVALUE WORKED!!!
         run: echo "[II] $MYNEWENV"
+
+      dotenv-var:
+        help: Print environment variables from .env file
+        run:  echo "[II] $ENV"
