@@ -8,7 +8,7 @@ groups:
         args:
           all:
             type: bool
-            action: store-true
+            action: store_true
             help: Remove all files that are tracked by git
         run: |
           if {{ args.all }} == True:
@@ -22,18 +22,18 @@ groups:
         help: Build the program
         args:
           clean:
-            type: bool
-            action: store-true
             help: if not set, the clean dependency will not be triggered.
+            type: bool
+            action: store_true
           # args name will replace dash to underscore when converted
           # into variables, for example: args.clean_all
           clean-all:
-            type: bool
-            action: store-true
             help: if not set, the clean dependency will not be triggered.
+            type: bool
+            action: store_true
         dependencies:
           - target: clean
-            if: {{ args.clean == true or args.clean_all }}
+            if: {{ args.clean or args.clean_all }}
             args:
               all: {{ args.clean_all }}
         run: |

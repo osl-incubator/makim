@@ -76,7 +76,7 @@ def _get_args():
     parser.add_argument(
         '--dry-run',
         action='store_true',
-        help='Show the commands but don\'t execute them.',
+        help="Show the commands but don't execute them.",
     )
 
     parser.add_argument(
@@ -135,7 +135,13 @@ def extract_makim_args():
     makim_args = {}
     index_to_remove = []
     for ind, arg in enumerate(list(sys.argv)):
-        if arg in ['--help', '--version', '--verbose', '--makim-file', '--dry-run']:
+        if arg in [
+            '--help',
+            '--version',
+            '--verbose',
+            '--makim-file',
+            '--dry-run',
+        ]:
             continue
 
         if not arg.startswith('--'):
@@ -143,7 +149,6 @@ def extract_makim_args():
 
         index_to_remove.append(ind)
 
-        is_arg_bool = False
         arg_name = None
         arg_value = None
 
@@ -156,7 +161,6 @@ def extract_makim_args():
             or len(sys.argv) > next_ind
             and sys.argv[next_ind].startswith('--')
         ):
-            is_arg_bool = True
             arg_value = True
         else:
             arg_value = sys.argv[next_ind]

@@ -1,6 +1,7 @@
 """Tests for `makim` package."""
 import pytest
-import makim
+
+import makim  # noqa: F401
 
 
 @pytest.fixture

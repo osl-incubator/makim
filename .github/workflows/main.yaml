@@ -3,7 +3,7 @@ name: build
 on: [push, pull_request]
 
 jobs:
-  build:
+  tests:
     strategy:
       matrix:
         python_version:
@@ -24,7 +24,7 @@ jobs:
         shell: bash -l {0}
 
     concurrency:
-      group: ci-${{ matrix.os }}-${{ matrix.python_version }}-${{ github.ref }}
+      group: ci-tests-${{ matrix.os }}-${{ matrix.python_version }}-${{ github.ref }}
       cancel-in-progress: true
 
     steps:
@@ -62,49 +62,41 @@ jobs:
     - name: Install dependencies
       run: poetry install
 
-    - name: Run tests using simple makim file
-      env:
-        MAKIM_FILE_ARG: "--makim-file tests/.makim-simple.yaml"
-      run: |
-        makim ${MAKIM_FILE_ARG} --help
-        makim ${MAKIM_FILE_ARG} --version
-        makim ${MAKIM_FILE_ARG} clean
-        makim ${MAKIM_FILE_ARG} default.clean
-        makim ${MAKIM_FILE_ARG} build
-        makim ${MAKIM_FILE_ARG} default.build
-        makim ${MAKIM_FILE_ARG} build --clean
+    - name: Run smoke tests using simple makim file
+      run: makim tests.makim-file-simple --verbose
 
-    - name: Run tests using complex makim file
-      env:
-        MAKIM_FILE_ARG: "--makim-file tests/.makim-complex.yaml"
-      run: |
-        makim ${MAKIM_FILE_ARG} --help
-        makim ${MAKIM_FILE_ARG} --version
-        makim ${MAKIM_FILE_ARG} default.lint --verbose
-        makim ${MAKIM_FILE_ARG} build.clean-gcda --verbose
-        makim ${MAKIM_FILE_ARG} build.clean --verbose
-        makim ${MAKIM_FILE_ARG} build.install --verbose
-        makim ${MAKIM_FILE_ARG} build.release --verbose
-        makim ${MAKIM_FILE_ARG} build.release --build-type debug --verbose
-        makim ${MAKIM_FILE_ARG} build.release --extras '-D' --verbose
-        makim ${MAKIM_FILE_ARG} build.release --clean --verbose
-        makim ${MAKIM_FILE_ARG} build.dev --verbose
-        makim ${MAKIM_FILE_ARG} env.create-file --verbose
-        makim ${MAKIM_FILE_ARG} conda.build --verbose
-        makim ${MAKIM_FILE_ARG} release.ci --verbose
-        makim ${MAKIM_FILE_ARG} release.dry --verbose
-        makim ${MAKIM_FILE_ARG} docs.api --verbose
-        makim ${MAKIM_FILE_ARG} docs.build --verbose
-        makim ${MAKIM_FILE_ARG} docs.clean --verbose
-        makim ${MAKIM_FILE_ARG} docs.preview --verbose
-        makim ${MAKIM_FILE_ARG} tests.sanitizer --verbose
-        makim ${MAKIM_FILE_ARG} tests.code-coverage --verbose
-        makim ${MAKIM_FILE_ARG} tests.gen-object --verbose
-        makim ${MAKIM_FILE_ARG} tests.gen-ast --verbose
-        makim ${MAKIM_FILE_ARG} tests.gen-llvm-ir --verbose
-        makim ${MAKIM_FILE_ARG} tests.examples --verbose
-        makim ${MAKIM_FILE_ARG} tests.all --verbose
-        makim ${MAKIM_FILE_ARG} debug.fibonacci --verbose
+    - name: Run smoke tests using complex makim file
+      run: makim tests.makim-file-complex --verbose
+
+    - name: Run unit tests
+      run: makim tests.unittest
+
+  linter-and-docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    concurrency:
+      group: ci-linter-docs-${{ matrix.os }}-${{ matrix.python_version }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        miniconda-version: "latest"
+        environment-file: conda/dev.yaml
+        channels: conda-forge,nodefaults
+        activate-environment: makim
+        use-mamba: true
+        miniforge-variant: Mambaforge
+
+    - name: Install dependencies
+      run: poetry install
 
     - name: Test documentation generation
       run: makim docs.build
@@ -113,3 +105,4 @@ jobs:
       if: success() || failure()
       run: |
         pre-commit install
+        makim tests.lint

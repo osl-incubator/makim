@@ -8,20 +8,20 @@ from pathlib import Path
 from pprint import pprint
 from typing import Optional
 
-from jinja2 import Template
 import dotenv
 import sh
 import yaml
-
+from colorama import Fore
+from jinja2 import Template
 from sh import xonsh
 
 
 def escape_template_tag(v: str) -> str:
-    return v.replace('{{', '\{\{').replace('}}', '\}\}')
+    return v.replace('{{', '\{\{').replace('}}', '\}\}')  # noqa: W605
 
 
 def unescape_template_tag(v: str) -> str:
-    return v.replace('\{\{', '{{').replace('\}\}', '}}')
+    return v.replace('\{\{', '{{').replace('\}\}', '}}')  # noqa: W605
 
 
 class Makim:
@@ -42,6 +42,7 @@ class Makim:
         p = self.shell_app(
             *self.shell_args,
             args,
+            _in=sys.stdin,
             _out=sys.stdout,
             _err=sys.stderr,
             _bg=True,
@@ -52,12 +53,14 @@ class Makim:
 
         try:
             p.wait()
-        except sh.ErrorReturnCode:
-            ...
+        except sh.ErrorReturnCode as e:
+            self._print_error(str(e))
+            exit(1)
         except KeyboardInterrupt:
             pid = p.pid
             p.kill()
-            print(f'[WW] Process {pid} killed.')
+            self._print_error(f'[EE] Process {pid} killed.')
+            exit(1)
 
     def _check_makim_file(self):
         return Path(self.makim_file).exists()
@@ -67,12 +70,14 @@ class Makim:
 
     def _verify_args(self):
         if not self._check_makim_file():
-            print('[EE] CONFIG: Config file .makim.yaml not found.')
+            self._print_error(
+                '[EE] CONFIG: Config file .makim.yaml not found.'
+            )
             exit(1)
 
     def _verify_config(self):
         if not len(self.config_data['groups']):
-            print('[EE] No target groups found.')
+            self._print_error('[EE] No target groups found.')
             exit(1)
 
     def _load_config_data(self):
@@ -98,7 +103,7 @@ class Makim:
                 self.target_data = target_data
                 return
 
-        print(
+        self._print_error(
             f'[EE] The given target "{self.target_name}" was not found in the '
             f'configuration file for the group {self.group_name}.'
         )
@@ -120,9 +125,9 @@ class Makim:
                 self.group_data = g
                 return
 
-        print(
-            f'[EE] The given group target "{self.group_name}" was not found in the '
-            'configuration file.'
+        self._print_error(
+            f'[EE] The given group target "{self.group_name}" '
+            'was not found in the configuration file.'
         )
         exit(1)
 
@@ -194,11 +199,11 @@ class Makim:
     def _run_command(self, args: dict):
         cmd = self.target_data.get('run', '').strip()
 
-        if not 'vars' in self.group_data:
+        if 'vars' not in self.group_data:
             self.group_data['vars'] = {}
 
         if not isinstance(self.group_data['vars'], dict):
-            print(
+            self._print_error(
                 '[EE] `vars` attribute inside the group '
                 f'{self.group_name} is not a dictionary.'
             )
@@ -209,13 +214,15 @@ class Makim:
         args_input = {'makim_file': args['makim_file']}
         for k, v in self.target_data.get('args', {}).items():
             k_clean = k.replace('-', '_')
+            action = v.get('action', '').replace('-', '_')
+
             args_input[k_clean] = v.get(
-                'default', False if v.get('actions') == 'store_true' else None
+                'default', False if action == 'store_true' else None
             )
 
             input_flag = f'--{k}'
             if input_flag in args:
-                if v.get('actions') == 'store_true':
+                if action == 'store_true':
                     args_input[k_clean] = True
                     continue
 
@@ -224,6 +231,12 @@ class Makim:
                     if isinstance(args[input_flag], str)
                     else args[input_flag]
                 )
+            elif v.get('required'):
+                self._print_error(
+                    f'[EE] The argument `{k}` is set as required. '
+                    'Please, provide that argument to proceed.'
+                )
+                exit(1)
 
         current_env = deepcopy(os.environ)
         env = deepcopy(self.env)
@@ -267,11 +280,20 @@ class Makim:
             env_file = str(Path(self.makim_file).parent / env_file)
 
         if not Path(env_file).exists():
-            print('[EE] The given env-file was not found.')
+            self._print_error('[EE] The given env-file was not found.')
             exit(1)
 
         self.env = dotenv.dotenv_values(env_file)
 
+    # print messages
+    def _print_error(self, message: str):
+        print(Fore.RED, message, Fore.RESET)
+
+    def _print_info(self, message: str):
+        print(Fore.BLUE, message, Fore.RESET)
+
+    def _print_warning(self, message: str):
+        print(Fore.YELLOW, message, Fore.RESET)
 
     # public methods
 

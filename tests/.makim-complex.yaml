@@ -175,3 +175,12 @@ groups:
       dotenv-var:
         help: Print environment variables from .env file
         run:  echo "[II] $ENV"
+
+      required-arg:
+        help: Print a required argument `name`
+        args:
+          name:
+            help: A name to be printed
+            type: string
+            required: true
+        run:  echo "[II] {{ args.name }}"
