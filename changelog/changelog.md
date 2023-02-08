@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.5.0](https://github.com/osl-incubator/makim/compare/1.4.0...1.5.0) (2023-02-08)
+
+
+### Features
+
+* Add required argument option ([#16](https://github.com/osl-incubator/makim/issues/16)) ([dc79486](https://github.com/osl-incubator/makim/commit/dc794861f1230608306337e9e07283d0c8c56dd0))
+
 # [1.4.0](https://github.com/osl-incubator/makim/compare/1.3.0...1.4.0) (2023-02-07)
 
 
