@@ -31,7 +31,7 @@ groups:
         args:
           all:
             type: bool
-            action: store-true
+            action: store_true
             help: Remove all files that are tracked by git
         run: |
           echo "remove file X"
@@ -40,7 +40,7 @@ groups:
         args:
           clean:
             type: bool
-            action: store-true
+            action: store_true
             help: if not set, the clean dependency will not be triggered.
         dependencies:
           - target: clean
