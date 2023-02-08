@@ -42,6 +42,7 @@ class Makim:
         p = self.shell_app(
             *self.shell_args,
             args,
+            _in=sys.stdin,
             _out=sys.stdout,
             _err=sys.stderr,
             _bg=True,
@@ -52,8 +53,9 @@ class Makim:
 
         try:
             p.wait()
-        except sh.ErrorReturnCode:
-            ...
+        except sh.ErrorReturnCode as e:
+            print(e)
+            exit(1)
         except KeyboardInterrupt:
             pid = p.pid
             p.kill()
@@ -224,6 +226,12 @@ class Makim:
                     if isinstance(args[input_flag], str)
                     else args[input_flag]
                 )
+            elif v.get('required'):
+                print(
+                    f'[EE] The argument `{k}` is set as required. '
+                    'Please, provide that argument to proceed.'
+                )
+                exit(1)
 
         current_env = deepcopy(os.environ)
         env = deepcopy(self.env)
@@ -271,7 +279,6 @@ class Makim:
             exit(1)
 
         self.env = dotenv.dotenv_values(env_file)
-
 
     # public methods
 

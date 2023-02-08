@@ -3,7 +3,7 @@ name: build
 on: [push, pull_request]
 
 jobs:
-  build:
+  tests:
     strategy:
       matrix:
         python_version:
@@ -24,7 +24,7 @@ jobs:
         shell: bash -l {0}
 
     concurrency:
-      group: ci-${{ matrix.os }}-${{ matrix.python_version }}-${{ github.ref }}
+      group: ci-tests-${{ matrix.os }}-${{ matrix.python_version }}-${{ github.ref }}
       cancel-in-progress: true
 
     steps:
@@ -105,6 +105,36 @@ jobs:
         makim ${MAKIM_FILE_ARG} tests.examples --verbose
         makim ${MAKIM_FILE_ARG} tests.all --verbose
         makim ${MAKIM_FILE_ARG} debug.fibonacci --verbose
+        makim ${MAKIM_FILE_ARG} print.local-env-vars --verbose
+        makim ${MAKIM_FILE_ARG} print.makim-env-vars --verbose
+        makim ${MAKIM_FILE_ARG} print.dotenv-var --verbose
+
+  linter-and-docs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    concurrency:
+      group: ci-linter-docs-${{ matrix.os }}-${{ matrix.python_version }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        miniconda-version: "latest"
+        environment-file: conda/dev.yaml
+        channels: conda-forge,nodefaults
+        activate-environment: makim
+        use-mamba: true
+        miniforge-variant: Mambaforge
+
+    - name: Install dependencies
+      run: poetry install
 
     - name: Test documentation generation
       run: makim docs.build
