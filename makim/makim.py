@@ -19,11 +19,11 @@ from makim.error import MakimError
 
 
 def escape_template_tag(v: str) -> str:
-    return str(v).replace('{{', r'\{\{').replace('}}', r'\}\}')
+    return v.replace('{{', r'\{\{').replace('}}', r'\}\}')
 
 
 def unescape_template_tag(v: str) -> str:
-    return str(v).replace(r'\{\{', '{{').replace(r'\}\}', '}}')
+    return v.replace(r'\{\{', '{{').replace(r'\}\}', '}}')
 
 
 class PrintPlugin:
@@ -49,6 +49,10 @@ class Makim(PrintPlugin):
     group_data: dict = {}
     target_name: str = ''
     target_data: dict = {}
+
+    def __init__(self):
+        os.environ['RAISE_SUBPROC_ERROR'] = '1'
+        os.environ['XONSH_SHOW_TRACEBACK'] = '0'
 
     def _call_shell_app(self, cmd):
         fd, filepath = tempfile.mkstemp(suffix='.makim', text=True)
@@ -202,7 +206,7 @@ class Makim(PrintPlugin):
             # update the arguments
             for arg_name, arg_value in dep_data.get('args', {}).items():
                 unescaped_value = (
-                    unescape_template_tag(arg_value)
+                    unescape_template_tag(str(arg_value))
                     if isinstance(arg_value, str)
                     else str(arg_value)
                 )
@@ -217,7 +221,7 @@ class Makim(PrintPlugin):
             # checking for the conditional statement
             if_stmt = dep_data.get('if')
             if if_stmt:
-                result = Template(unescape_template_tag(if_stmt)).render(
+                result = Template(unescape_template_tag(str(if_stmt))).render(
                     args=original_args_clean
                 )
                 if not yaml.safe_load(result):
@@ -297,13 +301,13 @@ class Makim(PrintPlugin):
         ]:
             env.update(env_file)
             for k, v in env_user.items():
-                env[k] = Template(unescape_template_tag(v)).render(
+                env[k] = Template(unescape_template_tag(str(v))).render(
                     args=args_input, env=env, vars=variables
                 )
         for k, v in env.items():
             os.environ[k] = v
 
-        cmd = unescape_template_tag(cmd)
+        cmd = unescape_template_tag(str(cmd))
         cmd = Template(cmd).render(args=args_input, env=env, vars=variables)
         if args.get('verbose'):
             self._print_info('=' * 80)

@@ -40,3 +40,25 @@ groups:
           echo "build file x"
           echo "build file y"
           echo "build file z"
+
+  - name: print
+    targets:
+      force-error:
+        help: This target should print until item 3
+        run: |
+          echo 1
+          wrongecho
+          echo 2
+          wrongecho
+          echo 3
+
+      skip-error:
+        help: This target should print until item 3
+        env:
+          RAISE_SUBPROC_ERROR: 0
+        run: |
+          echo 1
+          wrongecho
+          echo 2
+          wrongecho
+          echo 3
