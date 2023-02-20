@@ -38,6 +38,10 @@ class Makim:
     target_name: str = ''
     target_data: dict = {}
 
+    def __init__(self):
+        os.environ['RAISE_SUBPROC_ERROR'] = '1'
+        os.environ['XONSH_SHOW_TRACEBACK'] = '0'
+
     def _call_shell_app(self, *args):
         p = self.shell_app(
             *self.shell_args,
@@ -241,7 +245,7 @@ class Makim:
         current_env = deepcopy(os.environ)
         env = deepcopy(self.env)
         for k, v in self.target_data.get('env', {}).items():
-            env[k] = Template(unescape_template_tag(v)).render(
+            env[k] = Template(unescape_template_tag(str(v))).render(
                 args=args_input, **variables
             )
         for k, v in env.items():
