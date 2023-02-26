@@ -1,0 +1,16 @@
+version: 1.0.0
+env-file: .env
+shell: bash
+groups:
+  - name: main-scope
+    targets:
+      test:
+        help: Test bash defined in the main scope
+        args:
+          all:
+            type: bool
+            action: store_true
+            help: Remove all files that are tracked by git
+        run: |
+          export MAKIM_TEST=$(pwd)
+          echo ${MAKIM_TEST}
