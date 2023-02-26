@@ -13,7 +13,6 @@ import sh
 import yaml
 from colorama import Fore
 from jinja2 import Template
-from sh import xonsh
 
 
 def escape_template_tag(v: str) -> str:
@@ -27,7 +26,7 @@ def unescape_template_tag(v: str) -> str:
 class Makim:
     makim_file: str = '.makim.yaml'
     config_data: dict = {}
-    shell_app: sh.Command = xonsh
+    shell_app: sh.Command = sh.xonsh
     shell_args: list = []
 
     # temporary variables
@@ -87,8 +86,10 @@ class Makim:
             f = io.StringIO(content)
             self.config_data = yaml.safe_load(f)
 
-    def _load_shell_app(self):
-        self.shell_app = xonsh
+    def _load_shell_app(self, shell_app: str = ''):
+        if not shell_app:
+            shell_app = self.config_data.get('shell', 'xonsh')
+        self.shell_app = getattr(sh, shell_app)
 
     def _change_target(self, target_name: str):
         group_name = 'default'
@@ -101,6 +102,9 @@ class Makim:
         for target_name, target_data in self.group_data['targets'].items():
             if target_name == self.target_name:
                 self.target_data = target_data
+                shell_app = target_data.get('shell')
+                if shell_app:
+                    self._load_shell_app(shell_app)
                 return
 
         self._print_error(
@@ -115,14 +119,21 @@ class Makim:
         if group_name is not None:
             self.group_name = group_name
 
+        shell_app_default = self.config_data.get('shell', 'xonsh')
+
         if self.group_name == 'default' and len(groups) == 1:
             self.group_data = groups[0]
             self.group_name = groups[0]['name']
+
+            shell_app = self.group_data.get('shell', shell_app_default)
+            self._load_shell_app(shell_app)
             return
 
         for g in groups:
             if g['name'] == self.group_name:
                 self.group_data = g
+                shell_app = g.get('shell', shell_app_default)
+                self._load_shell_app(shell_app)
                 return
 
         self._print_error(
@@ -132,7 +143,6 @@ class Makim:
         exit(1)
 
     def _load_shell_args(self):
-        self._change_group_data()
         self.shell_args = ['-c']
 
     # run commands

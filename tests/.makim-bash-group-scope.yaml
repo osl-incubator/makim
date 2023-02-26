@@ -1,0 +1,26 @@
+version: 1.0.0
+env-file: .env
+groups:
+  - name: group-scope
+    shell: bash
+    targets:
+      test:
+        help: Test bash defined in the group scope
+        args:
+          all:
+            type: bool
+            action: store_true
+            help: Remove all files that are tracked by git
+        dependencies:
+          - target: group-deps.dep
+        run: |
+          export MAKIM_TEST=$(pwd)
+          echo ${MAKIM_TEST}
+
+  - name: group-deps
+    targets:
+      dep:
+        help: dependency using xonsh
+        run: |
+          import os
+          print(os.getcwd())

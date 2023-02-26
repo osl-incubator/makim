@@ -1,0 +1,19 @@
+version: 1.0.0
+env-file: .env
+groups:
+  - name: target-scope
+    targets:
+      dep:
+        help: dependency using xonsh
+        run: |
+          import os
+          print(os.getcwd())
+
+      test:
+        shell: bash
+        help: Test bash defined in the target scope
+        dependencies:
+          - target: target-scope.dep
+        run: |
+          export MAKIM_TEST=$(pwd)
+          echo ${MAKIM_TEST}
