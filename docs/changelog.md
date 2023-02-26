@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.6.0](https://github.com/osl-incubator/makim/compare/1.5.0...1.6.0) (2023-02-26)
+
+
+### Features
+
+* Add support for user defined shell app ([#22](https://github.com/osl-incubator/makim/issues/22)) ([dd4a7db](https://github.com/osl-incubator/makim/commit/dd4a7dbab93e7a2ea44bbfb3f1e2ad9b65da9b29))
+
 # [1.5.0](https://github.com/osl-incubator/makim/compare/1.4.0...1.5.0) (2023-02-08)
 
 
