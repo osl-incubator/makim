@@ -14,6 +14,17 @@ extra parameters for each target.
 * Free software: BSD 3 Clause
 * Documentation: https://osl-incubator.github.io/makim
 
+## Features
+
+* Help text as first-class in the `.makim.yaml` specification. It can be used by targets and arguments.
+* Targets have an option for arguments.
+* Targets have an option for dependencies.
+* Dependencies can call a target with specific arguments.
+* Dependencies can have a conditional control flow (`if`).
+* Allow the creation of groups, so the targets can be organized by topics.
+* Targets and groups have an option for user defined variables and/or environment variables.
+* Access arguments, variables or environment variables via template (using Jinja2).
+* Option for using dot environment files using `env-file` key.
 
 ## How to use it
 
