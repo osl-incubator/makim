@@ -23,7 +23,18 @@ def unescape_template_tag(v: str) -> str:
     return v.replace('\{\{', '{{').replace('\}\}', '}}')  # noqa: W605
 
 
-class Makim:
+class PrintMessage:
+    def _print_error(self, message: str):
+        print(Fore.RED, message, Fore.RESET)
+
+    def _print_info(self, message: str):
+        print(Fore.BLUE, message, Fore.RESET)
+
+    def _print_warning(self, message: str):
+        print(Fore.YELLOW, message, Fore.RESET)
+
+
+class Makim(PrintMessage):
     makim_file: str = '.makim.yaml'
     config_data: dict = {}
     shell_app: sh.Command = sh.xonsh
@@ -148,10 +159,7 @@ class Makim:
     # run commands
 
     def _run_dependencies(self, args: dict):
-        if (
-            'dependencies' not in self.target_data
-            or not self.target_data['dependencies']
-        ):
+        if not self.target_data.get('dependencies'):
             return
 
         makim_dep = deepcopy(self)
@@ -188,8 +196,8 @@ class Makim:
                     else str(arg_value)
                 )
 
-                args_dep[f'--{arg_name}'] = Template(unescaped_value).render(
-                    args=original_args_clean
+                args_dep[f'--{arg_name}'] = yaml.safe_load(
+                    Template(unescaped_value).render(args=original_args_clean)
                 )
 
             args_dep['target'] = dep_data['target']
@@ -198,8 +206,10 @@ class Makim:
             # checking for the conditional statement
             if_stmt = dep_data.get('if')
             if if_stmt:
-                result = Template(if_stmt).render(args=args_dep)
-                if not result and args.get('verbose'):
+                result = Template(unescape_template_tag(if_stmt)).render(
+                    args=original_args_clean
+                )
+                if not yaml.safe_load(result) and args.get('verbose'):
                     return print(
                         f'[II] Skipping dependency: {dep_data.get("target")}'
                     )
@@ -225,15 +235,17 @@ class Makim:
         for k, v in self.target_data.get('args', {}).items():
             k_clean = k.replace('-', '_')
             action = v.get('action', '').replace('-', '_')
+            is_store_true = action == 'store_true'
+            default = v.get('default', False if is_store_true else None)
 
-            args_input[k_clean] = v.get(
-                'default', False if action == 'store_true' else None
-            )
+            args_input[k_clean] = default
 
             input_flag = f'--{k}'
             if input_flag in args:
                 if action == 'store_true':
-                    args_input[k_clean] = True
+                    args_input[k_clean] = (
+                        True if args[input_flag] is None else args[input_flag]
+                    )
                     continue
 
                 args_input[k_clean] = (
@@ -295,15 +307,16 @@ class Makim:
 
         self.env = dotenv.dotenv_values(env_file)
 
-    # print messages
-    def _print_error(self, message: str):
-        print(Fore.RED, message, Fore.RESET)
-
-    def _print_info(self, message: str):
-        print(Fore.BLUE, message, Fore.RESET)
-
-    def _print_warning(self, message: str):
-        print(Fore.YELLOW, message, Fore.RESET)
+    def _load_target_args(self):
+        for name, value in self.target_data.get('args', {}).items():
+            qualified_name = f'--{name}'
+            if self.args.get(qualified_name):
+                continue
+            default = value.get('default')
+            is_bool = value.get('type', '') == 'bool'
+            self.args[qualified_name] = (
+                default if default is not None else False if is_bool else None
+            )
 
     # public methods
 
@@ -321,9 +334,10 @@ class Makim:
         self._verify_args()
         self._change_target(args['target'])
         self._load_shell_args()
+        self._load_target_args()
 
         # commands
-        if 'if' in self.target_data and not self._verify_target_conditional(
+        if self.target_data.get('if') and not self._verify_target_conditional(
             self.target_data['if']
         ):
             return warnings.warn(
