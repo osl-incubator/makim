@@ -16,14 +16,14 @@ from jinja2 import Template
 
 
 def escape_template_tag(v: str) -> str:
-    return v.replace('{{', '\{\{').replace('}}', '\}\}')  # noqa: W605
+    return v.replace('{{', r'\{\{').replace('}}', r'\}\}')
 
 
 def unescape_template_tag(v: str) -> str:
-    return v.replace('\{\{', '{{').replace('\}\}', '}}')  # noqa: W605
+    return v.replace(r'\{\{', '{{').replace(r'\}\}', '}}')
 
 
-class PrintMessage:
+class PrintPlugin:
     def _print_error(self, message: str):
         print(Fore.RED, message, Fore.RESET)
 
@@ -34,7 +34,7 @@ class PrintMessage:
         print(Fore.YELLOW, message, Fore.RESET)
 
 
-class Makim(PrintMessage):
+class Makim(PrintPlugin):
     makim_file: str = '.makim.yaml'
     config_data: dict = {}
     shell_app: sh.Command = sh.xonsh
@@ -65,12 +65,12 @@ class Makim(PrintMessage):
             p.wait()
         except sh.ErrorReturnCode as e:
             self._print_error(str(e))
-            exit(1)
+            os._exit(1)
         except KeyboardInterrupt:
             pid = p.pid
             p.kill()
             self._print_error(f'[EE] Process {pid} killed.')
-            exit(1)
+            os._exit(1)
 
     def _check_makim_file(self):
         return Path(self.makim_file).exists()
@@ -83,12 +83,12 @@ class Makim(PrintMessage):
             self._print_error(
                 '[EE] CONFIG: Config file .makim.yaml not found.'
             )
-            exit(1)
+            os._exit(1)
 
     def _verify_config(self):
         if not len(self.config_data['groups']):
             self._print_error('[EE] No target groups found.')
-            exit(1)
+            os._exit(1)
 
     def _load_config_data(self):
         with open(self.makim_file, 'r') as f:
@@ -122,7 +122,7 @@ class Makim(PrintMessage):
             f'[EE] The given target "{self.target_name}" was not found in the '
             f'configuration file for the group {self.group_name}.'
         )
-        exit(1)
+        os._exit(1)
 
     def _change_group_data(self, group_name=None):
         groups = self.config_data['groups']
@@ -151,7 +151,7 @@ class Makim(PrintMessage):
             f'[EE] The given group target "{self.group_name}" '
             'was not found in the configuration file.'
         )
-        exit(1)
+        os._exit(1)
 
     def _load_shell_args(self):
         self.shell_args = ['-c']
@@ -165,7 +165,7 @@ class Makim(PrintMessage):
         makim_dep = deepcopy(self)
         args_dep_original = {
             'makim_file': args['makim_file'],
-            'help': args['help'],
+            'help': args.get('help', False),
             'verbose': args.get('verbose', False),
             'dry-run': args.get('dry-run', False),
             'version': args.get('version', False),
@@ -227,7 +227,7 @@ class Makim(PrintMessage):
                 '[EE] `vars` attribute inside the group '
                 f'{self.group_name} is not a dictionary.'
             )
-            exit(1)
+            os._exit(1)
 
         variables = {k: v.strip() for k, v in self.group_data['vars'].items()}
 
@@ -258,7 +258,7 @@ class Makim(PrintMessage):
                     f'[EE] The argument `{k}` is set as required. '
                     'Please, provide that argument to proceed.'
                 )
-                exit(1)
+                os._exit(1)
 
         current_env = deepcopy(os.environ)
         env = deepcopy(self.env)
@@ -303,7 +303,7 @@ class Makim(PrintMessage):
 
         if not Path(env_file).exists():
             self._print_error('[EE] The given env-file was not found.')
-            exit(1)
+            os._exit(1)
 
         self.env = dotenv.dotenv_values(env_file)
 

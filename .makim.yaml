@@ -62,7 +62,7 @@ groups:
 
       unittest:
         help: Run tests
-        run: pytest
+        run: pytest -s -vv tests
 
       makim-file-simple:
         help: Test makim using a simple makimfile
