@@ -1,16 +1,29 @@
 """Tests for `makim` package."""
+from pathlib import Path
+
 import pytest
 
-import makim  # noqa: F401
+import makim
 
 
-@pytest.fixture
-def response():
-    """Sample pytest fixture.
+@pytest.mark.parametrize(
+    'args',
+    [
+        {'target': 'tests.test-1'},
+        {'target': 'tests.test-1', '--all': False},
+        {'target': 'tests.test-2', '--all': True},
+        {'target': 'tests.test-3-a'},
+        {'target': 'tests.test-3-b'},
+        {'target': 'tests.test-4'},
+        {'target': 'tests.test-4', '--trigger-dep': True},
+    ],
+)
+def test_success(args):
+    makim_file = Path(__file__).parent / '.makim-unittest.yaml'
 
-    See more at: http://doc.pytest.org/en/latest/fixture.html
-    """
+    m = makim.Makim()
+    m.load(makim_file)
 
+    args.update({'makim_file': makim_file})
 
-def test_content(response):
-    """Sample pytest test function with the pytest fixture as an argument."""
+    m.run(args)
