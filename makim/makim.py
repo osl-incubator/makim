@@ -59,6 +59,7 @@ class Makim(PrintPlugin):
             _bg_exc=False,
             _no_err=True,
             _env=os.environ,
+            _new_session=True,
         )
 
         try:
@@ -68,7 +69,7 @@ class Makim(PrintPlugin):
             os._exit(1)
         except KeyboardInterrupt:
             pid = p.pid
-            p.kill()
+            p.kill_group()
             self._print_error(f'[EE] Process {pid} killed.')
             os._exit(1)
 
