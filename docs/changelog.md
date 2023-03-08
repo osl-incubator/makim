@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.6.2](https://github.com/osl-incubator/makim/compare/1.6.1...1.6.2) (2023-03-08)
+
+
+### Bug Fixes
+
+* Fix the mechanism for killing child processes when CTRL+C is pressed ([#25](https://github.com/osl-incubator/makim/issues/25)) ([00a9aff](https://github.com/osl-incubator/makim/commit/00a9affd98eb3259700cba3ac9173e5b9dcc5840))
+
 ## [1.6.1](https://github.com/osl-incubator/makim/compare/1.6.0...1.6.1) (2023-03-08)
 
 
