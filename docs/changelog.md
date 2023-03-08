@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.6.1](https://github.com/osl-incubator/makim/compare/1.6.0...1.6.1) (2023-03-08)
+
+
+### Bug Fixes
+
+* Fix IF statement and arguments used by dependencies ([#24](https://github.com/osl-incubator/makim/issues/24)) ([e03886e](https://github.com/osl-incubator/makim/commit/e03886ef0340e1233926946397b6dda0432541f6))
+
 # [1.6.0](https://github.com/osl-incubator/makim/compare/1.5.0...1.6.0) (2023-02-26)
 
 
