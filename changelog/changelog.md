@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.6.3](https://github.com/osl-incubator/makim/compare/1.6.2...1.6.3) (2023-03-11)
+
+
+### Bug Fixes
+
+* Fix conditional parameter when --verbose is not given ([#27](https://github.com/osl-incubator/makim/issues/27)) ([e715268](https://github.com/osl-incubator/makim/commit/e715268e918746e4e4b2d783979ef39bf375a3a7))
+
 ## [1.6.2](https://github.com/osl-incubator/makim/compare/1.6.1...1.6.2) (2023-03-08)
 
 
