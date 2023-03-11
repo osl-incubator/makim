@@ -10,8 +10,7 @@ groups:
             type: bool
             action: store_true
             help: arg `all`
-        run: |
-          assert not {{ args.all }}
+        run: assert not {{ args.all }}
 
       test-2:
         help: test-2 args `all` should be true
@@ -20,18 +19,17 @@ groups:
             type: bool
             action: store_true
             help: arg `all`
-        run: |
-          assert {{ args.all }}
+        run: assert {{ args.all }}
 
       test-3-a:
         help: test-3-a is a dep for test-3-b
-        run: "true"
+        run: assert True
 
       test-3-b:
         help: test-3-b
         dependencies:
           - target: test-3-a
-        run: "true"
+        run: assert True
 
       test-4-dep:
         help: test-4-dep is a dep for test-4
@@ -40,16 +38,64 @@ groups:
             help: arg1
             type: bool
             action: store_true
-        run: |
-          assert {{ args.arg1 }}
+        run: assert {{ args.arg1 }}
 
       test-4:
         help: test-4
         args:
           trigger-dep:
+            help: Help trigger-dep
             type: bool
             action: store_true
         dependencies:
-          - target: test-3-a
+          - target: test-4-dep
             if: {{ args.trigger_dep }}
+            args:
+              arg1: {{ args.trigger_dep }}
         run: "true"
+
+      test-5-dep:
+        help: test-5-dep is a dep for test-5
+        run: assert False
+
+      test-5:
+        help: test-5
+        args:
+          trigger-dep:
+            help: Help trigger-dep
+            type: bool
+            action: store_true
+        dependencies:
+          - target: test-5-dep
+            if: {{ args.trigger_dep }}
+        run: assert True
+
+      test-6-dep-1:
+        help: test-6-1
+        run: rm -f /tmp/makim-test.txt
+
+      test-6-dep-2:
+        help: test-6-dep-2 is a dep for test-6
+        run: assert False
+
+      test-6-dep-3:
+        help: test-6-dep-3 is a dep for test-6
+        run: echo "OK" > /tmp/makim-test.txt
+
+      test-6:
+        help: test-6
+        args:
+          trigger-dep:
+            help: Help trigger-dep
+            type: bool
+            action: store_true
+        dependencies:
+          - target: test-6-dep-1
+            if: {{ True }}
+          - target: test-6-dep-2
+            if: {{ False }}
+          - target: test-6-dep-3
+            if: {{ True }}
+        run: |
+          cat /tmp/makim-test.txt | grep "OK"
+          rm -f /tmp/makim-test.txt
