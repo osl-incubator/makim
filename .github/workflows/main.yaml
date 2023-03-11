@@ -64,17 +64,20 @@ jobs:
 
     - name: Run smoke tests using simple makim file
       run: |
-        makim tests.makim-file-simple --verbose
+        #  --verbose-mode is an user-defined argument
+        makim tests.makim-file-simple --verbose --verbose-mode
         makim tests.makim-file-simple
 
     - name: Run smoke tests using complex makim file
       run: |
-        makim tests.makim-file-complex --verbose
+        #  --verbose-mode is an user-defined argument
+        makim tests.makim-file-complex --verbose --verbose-mode
         makim tests.makim-file-complex
 
     - name: Run smoke tests using unittest makim file
       run: |
-        makim tests.makim-file-simple --verbose
+        #  --verbose-mode is an user-defined argument
+        makim tests.makim-file-simple --verbose --verbose-mode
         makim tests.makim-file-simple
 
     - name: Run smoke test using bash
