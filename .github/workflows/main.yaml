@@ -63,10 +63,14 @@ jobs:
       run: poetry install
 
     - name: Run smoke tests using simple makim file
-      run: makim tests.makim-file-simple --verbose
+      run: |
+        makim tests.makim-file-simple --verbose
+        makim tests.makim-file-simple
 
     - name: Run smoke tests using complex makim file
-      run: makim tests.makim-file-complex --verbose
+      run: |
+        makim tests.makim-file-complex --verbose
+        makim tests.makim-file-complex
 
     - name: Run smoke test using bash
       run: |
