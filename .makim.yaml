@@ -66,21 +66,35 @@ groups:
 
       makim-file-simple:
         help: Test makim using a simple makimfile
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
         env:
           MAKIM_FILE: ./tests/.makim-simple.yaml
+          VERBOSE_FLAG: '{{ "--verbose" if args.verbose_mode else "" }}'
+        shell: bash
         run: |
           makim --makim-file $MAKIM_FILE --help
           makim --makim-file $MAKIM_FILE --version
-          makim --makim-file $MAKIM_FILE clean --verbose
-          makim --makim-file $MAKIM_FILE default.clean --verbose
-          makim --makim-file $MAKIM_FILE build --verbose
-          makim --makim-file $MAKIM_FILE default.build --verbose
-          makim --makim-file $MAKIM_FILE build --clean --verbose
+          makim --makim-file $MAKIM_FILE clean $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE default.clean $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE build $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE default.build $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE build --clean $VERBOSE_FLAG
 
       makim-file-complex:
         help: Test makim using a complex makimfile
         env:
           MAKIM_FILE: ./tests/.makim-complex.yaml
+          VERBOSE_FLAG: '{{ "--verbose" if args.verbose_mode else "" }}'
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        shell: bash
         run: |
           makim --makim-file $MAKIM_FILE --help
           makim --makim-file $MAKIM_FILE --version
@@ -112,3 +126,25 @@ groups:
           makim --makim-file $MAKIM_FILE print.local-env-vars --verbose
           makim --makim-file $MAKIM_FILE print.makim-env-vars --verbose
           makim --makim-file $MAKIM_FILE print.dotenv-var --verbose
+
+      makim-file-unittest:
+        help: Test makim using a unittest makimfile
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: ./tests/.makim-unittest.yaml
+          VERBOSE_FLAG: '{{ "--verbose" if args.verbose_mode else "" }}'
+        shell: bash
+        run: |
+          makim --makim-file $MAKIM_FILE --help
+          makim --makim-file $MAKIM_FILE --version
+          makim --makim-file $MAKIM_FILE tests.test-1 $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE tests.test-2 --all $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE tests.test-3-a $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE tests.test-3-b $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE tests.test-4 $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE tests.test-4 --trigger-dep $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE tests.test-5 $VERBOSE_FLAG

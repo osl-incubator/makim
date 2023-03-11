@@ -72,6 +72,11 @@ jobs:
         makim tests.makim-file-complex --verbose
         makim tests.makim-file-complex
 
+    - name: Run smoke tests using unittest makim file
+      run: |
+        makim tests.makim-file-simple --verbose
+        makim tests.makim-file-simple
+
     - name: Run smoke test using bash
       run: |
         makim --makim-file tests/.makim-bash-main-scope.yaml main-scope.test
