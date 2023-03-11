@@ -16,6 +16,8 @@ import makim
         ('tests.test-3-b', {}),
         ('tests.test-4', {}),
         ('tests.test-4', {'--trigger-dep': True}),
+        ('tests.test-5', {}),
+        ('tests.test-6', {}),
     ],
 )
 def test_success(target, args):

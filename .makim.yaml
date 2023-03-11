@@ -148,3 +148,4 @@ groups:
           makim --makim-file $MAKIM_FILE tests.test-4 $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE tests.test-4 --trigger-dep $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE tests.test-5 $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE tests.test-6 $VERBOSE_FLAG

@@ -216,8 +216,7 @@ class Makim(PrintPlugin):
                             '[II] Skipping dependency: '
                             f'{dep_data.get("target")}'
                         )
-                        return
-                    return
+                    continue
 
             makim_dep.run(deepcopy(args_dep))
 
