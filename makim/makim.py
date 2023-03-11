@@ -210,10 +210,14 @@ class Makim(PrintPlugin):
                 result = Template(unescape_template_tag(if_stmt)).render(
                     args=original_args_clean
                 )
-                if not yaml.safe_load(result) and args.get('verbose'):
-                    return print(
-                        f'[II] Skipping dependency: {dep_data.get("target")}'
-                    )
+                if not yaml.safe_load(result):
+                    if args.get('verbose'):
+                        self._print_info(
+                            '[II] Skipping dependency: '
+                            f'{dep_data.get("target")}'
+                        )
+                        return
+                    return
 
             makim_dep.run(deepcopy(args_dep))
 
