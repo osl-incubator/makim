@@ -175,7 +175,7 @@ def app():
     makim_args = extract_makim_args()
     args_parser = _get_args()
     args = args_parser.parse_args()
-    
+
     if not args.target and not args.help:
         return args_parser.print_help()
 
