@@ -176,7 +176,7 @@ def app():
     args_parser = _get_args()
     args = args_parser.parse_args()
 
-    if not args.target and not args.help:
+    if not args.target or args.help:
         return args_parser.print_help()
 
     if args.help:
