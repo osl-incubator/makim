@@ -53,7 +53,6 @@ def _get_args():
         add_help=False,
         formatter_class=CustomHelpFormatter,
     )
-
     parser.add_argument(
         '--help',
         '-h',
@@ -93,14 +92,12 @@ def _get_args():
         makim_file = makim_file_default
 
     makim.load(makim_file)
-
     target_help = []
-
-    for group in makim.config_data['groups']:
-        for target_name, target_data in group['targets'].items():
-            target_name_qualified = f"{group['name']}.{target_name}"
+    groups = makim.config_data['groups']
+    for group in list(groups.keys()):
+        for target_name, target_data in groups[group]['targets'].items():
+            target_name_qualified = f'{group}.{target_name}'
             help_text = target_data['help'] if 'help' in target_data else ''
-
             target_help.append(f'  {target_name_qualified} => {help_text}')
 
             if 'args' in target_data:
@@ -111,7 +108,6 @@ def _get_args():
                         f'      --{arg_name}: ({arg_data["type"]}) '
                         f'{arg_data["help"]}'
                     )
-
     target_help.append("NOTE: 'default.' prefix is optional.")
 
     parser.add_argument(
@@ -179,6 +175,9 @@ def app():
     makim_args = extract_makim_args()
     args_parser = _get_args()
     args = args_parser.parse_args()
+    
+    if not args.target and not args.help:
+        return args_parser.print_help()
 
     if args.help:
         return args_parser.print_help()
@@ -188,7 +187,6 @@ def app():
 
     makim.load(args.makim_file)
     makim_args.update(dict(args._get_kwargs()))
-
     return makim.run(makim_args)
 
 
