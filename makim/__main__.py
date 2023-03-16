@@ -93,8 +93,8 @@ def _get_args():
 
     makim.load(makim_file)
     target_help = []
-    groups = makim.config_data['groups']
-    for group in list(groups.keys()):
+    groups = makim.config_data.get('groups', [])
+    for group in groups:
         for target_name, target_data in groups[group]['targets'].items():
             target_name_qualified = f'{group}.{target_name}'
             help_text = target_data['help'] if 'help' in target_data else ''
