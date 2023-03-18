@@ -1,7 +1,7 @@
 version: 1.0.0
 env-file: .env
 groups:
-  - name: tests
+  tests:
     targets:
       test-1:
         help: test-1 args `all` should be false

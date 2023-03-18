@@ -1,7 +1,7 @@
 version: 1.0.0
 env-file: .env
 groups:
-  - name: target-scope
+  target-scope:
     targets:
       dep:
         help: dependency using xonsh

@@ -1,7 +1,7 @@
 version: 1.0.0
 env-file: .env
 groups:
-  - name: default
+  default:
     targets:
       clean:
         help: Use this target to clean up temporary files

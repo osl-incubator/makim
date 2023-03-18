@@ -1,6 +1,6 @@
 version: 1.0.0
 groups:
-  - name: default
+  default:
     targets:
       clean:
         help: Clean unnecessary temporary files
@@ -18,7 +18,7 @@ groups:
           rm -fr htmlcov/
           rm -fr .pytest_cache
 
-  - name: docs
+  docs:
     env-file: .env
     targets:
       build:
@@ -30,7 +30,7 @@ groups:
         help: Preview documentation page locally
         run: mkdocs serve --watch docs --config-file docs/mkdocs.yaml
 
-  - name: release
+  release:
     env-file: .env
     vars:
       app: |
@@ -54,7 +54,7 @@ groups:
         help: Run semantic release in dry-run mode
         run: {{ app }} '--dry-run'
 
-  - name: tests
+  tests:
     targets:
       lint:
         help: Run linter tools

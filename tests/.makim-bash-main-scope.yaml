@@ -2,7 +2,7 @@ version: 1.0.0
 env-file: .env
 shell: bash
 groups:
-  - name: main-scope
+  main-scope:
     targets:
       test:
         help: Test bash defined in the main scope

@@ -130,21 +130,19 @@ class Makim(PrintPlugin):
 
         if group_name is not None:
             self.group_name = group_name
-
         shell_app_default = self.config_data.get('shell', 'xonsh')
-
         if self.group_name == 'default' and len(groups) == 1:
-            self.group_data = groups[0]
-            self.group_name = groups[0]['name']
+            group = list(groups)[0]
+            self.group_data = groups[group]
 
             shell_app = self.group_data.get('shell', shell_app_default)
             self._load_shell_app(shell_app)
             return
 
-        for g in groups:
-            if g['name'] == self.group_name:
-                self.group_data = g
-                shell_app = g.get('shell', shell_app_default)
+        for group in groups:
+            if group == self.group_name:
+                self.group_data = groups[group]
+                shell_app = groups[group].get('shell', shell_app_default)
                 self._load_shell_app(shell_app)
                 return
 
@@ -162,7 +160,6 @@ class Makim(PrintPlugin):
     def _run_dependencies(self, args: dict):
         if not self.target_data.get('dependencies'):
             return
-
         makim_dep = deepcopy(self)
         args_dep_original = {
             'makim_file': args['makim_file'],
@@ -222,7 +219,6 @@ class Makim(PrintPlugin):
 
     def _run_command(self, args: dict):
         cmd = self.target_data.get('run', '').strip()
-
         if 'vars' not in self.group_data:
             self.group_data['vars'] = {}
 

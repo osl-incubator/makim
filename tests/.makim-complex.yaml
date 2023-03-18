@@ -1,13 +1,13 @@
 version: 1.0.0
 env-file: .env
 groups:
-  - name: default
+  default:
     targets:
       lint:
         help: Run linter tools
         run: echo "[II] Run linter"
 
-  - name: build
+  build:
     targets:
       clean-gcda:
         help: Remove temporary gcda files
@@ -71,19 +71,19 @@ groups:
               clean: {{ args.clean }}
               asan-options: "fast_unwind_on_malloc=0"
 
-  - name: env
+  env:
     targets:
       create-file:
         help: Create a dot env file
         run: echo "[II] Create a dot env file"
 
-  - name: conda
+  conda:
     targets:
       build:
         help: Create the conda package
         run: echo "[II] Create the conda package"
 
-  - name: release
+  release:
     vars:
       app: echo
     targets:
@@ -95,7 +95,7 @@ groups:
         help: Run semantic-release on CI for tests in dry-run mode.
         run: {{ app }} --dry-run
 
-  - name: docs
+  docs:
     targets:
       api:
         help: Build API docs
@@ -119,7 +119,7 @@ groups:
           - target: docs.api
         run: echo "[II] Preview documentation result locally"
 
-  - name: tests
+  tests:
     targets:
       sanitizer:
         help: Run sanitizer tests
@@ -154,13 +154,13 @@ groups:
           - target: tests.sanitizer
           - target: tests.examples
 
-  - name: debug
+  debug:
     targets:
       fibonacci:
         help: Debug package via an example file (fibonacci)
         run: echo "[II] Debug package via an example file"
 
-  - name: print
+  print:
     targets:
       local-env-vars:
         help: Print environment variables
