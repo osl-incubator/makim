@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.6.4](https://github.com/osl-incubator/makim/compare/1.6.3...1.6.4) (2023-03-21)
+
+
+### Bug Fixes
+
+* **groups:** change groups to accept dict instead of list && improve help cmd ([#28](https://github.com/osl-incubator/makim/issues/28)) ([a6b1672](https://github.com/osl-incubator/makim/commit/a6b1672413656072442caa0cc9ec5c0e5eb4786f))
+
 ## [1.6.3](https://github.com/osl-incubator/makim/compare/1.6.2...1.6.3) (2023-03-11)
 
 
