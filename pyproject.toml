@@ -4,6 +4,9 @@ version = "1.6.4"  # semantic-release
 description = "Simplify the usage of containers"
 authors = ["Ivan Ogasawara <ivan.ogasawara@gmail.com>"]
 license = "BSD 3 Clause"
+repository = "https://github.com/osl-incubator/makim"
+homepage = "https://github.com/osl-incubator/makim"
+readme = "README.md"
 include = [
   "*.cfg",
   "*.ini",
