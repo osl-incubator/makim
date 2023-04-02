@@ -89,6 +89,12 @@ jobs:
     - name: Run unit tests
       run: makim tests.unittest
 
+    - name: Semantic Release PR Title Check
+      uses: osl-incubator/semantic-release-pr-title-check@v1.4.1
+      if: success() || failure()
+      with:
+        convention-name: conventionalcommits
+
   linter-and-docs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -124,3 +130,9 @@ jobs:
       run: |
         pre-commit install
         makim tests.lint
+
+    - name: Semantic Release PR Title Check
+      uses: osl-incubator/semantic-release-pr-title-check@v1.4.1
+      if: success() || failure()
+      with:
+        convention-name: conventionalcommits
