@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "makim"
-version = "1.6.4"  # semantic-release
+version = "1.6.5"  # semantic-release
 description = "Simplify the usage of containers"
 authors = ["Ivan Ogasawara <ivan.ogasawara@gmail.com>"]
 license = "BSD 3 Clause"
