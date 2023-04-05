@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.6.5](https://github.com/osl-incubator/makim/compare/1.6.4...1.6.5) (2023-04-05)
+
+
+### Bug Fixes
+
+* Fix nested commands ([#34](https://github.com/osl-incubator/makim/issues/34)) ([790d2ba](https://github.com/osl-incubator/makim/commit/790d2bad746b2462bb8a6795b48eb913502a775e))
+
 ## [1.6.4](https://github.com/osl-incubator/makim/compare/1.6.3...1.6.4) (2023-03-21)
 
 
