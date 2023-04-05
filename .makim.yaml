@@ -126,6 +126,22 @@ groups:
           makim --makim-file $MAKIM_FILE print.local-env-vars --verbose
           makim --makim-file $MAKIM_FILE print.makim-env-vars --verbose
           makim --makim-file $MAKIM_FILE print.dotenv-var --verbose
+          makim --makim-file $MAKIM_FILE print.nested --verbose
+
+      containers:
+        help: Test makim with containers-sugar
+        env:
+          MAKIM_FILE: .makim-complex.yaml
+          VERBOSE_FLAG: '{{ "--verbose" if args.verbose_mode else "" }}'
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        shell: bash
+        run: |
+          cd ./tests/
+          makim --makim-file $MAKIM_FILE containers.run --verbose
 
       makim-file-unittest:
         help: Test makim using a unittest makimfile

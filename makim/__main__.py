@@ -108,7 +108,6 @@ def _get_args():
                         f'      --{arg_name}: ({arg_data["type"]}) '
                         f'{arg_data["help"]}'
                     )
-    target_help.append("NOTE: 'default.' prefix is optional.")
 
     parser.add_argument(
         'target',
