@@ -2,6 +2,7 @@
 import io
 import os
 import sys
+import tempfile
 import warnings
 from copy import deepcopy
 from pathlib import Path
@@ -48,10 +49,15 @@ class Makim(PrintPlugin):
     target_name: str = ''
     target_data: dict = {}
 
-    def _call_shell_app(self, *args):
+    def _call_shell_app(self, cmd):
+        fd, filepath = tempfile.mkstemp(suffix='.makim', text=True)
+
+        with open(filepath, 'w') as f:
+            f.write(cmd)
+
         p = self.shell_app(
             *self.shell_args,
-            args,
+            filepath,
             _in=sys.stdin,
             _out=sys.stdout,
             _err=sys.stderr,
@@ -65,13 +71,16 @@ class Makim(PrintPlugin):
         try:
             p.wait()
         except sh.ErrorReturnCode as e:
+            os.close(fd)
             self._print_error(str(e))
             os._exit(1)
         except KeyboardInterrupt:
+            os.close(fd)
             pid = p.pid
             p.kill_group()
             self._print_error(f'[EE] Process {pid} killed.')
             os._exit(1)
+        os.close(fd)
 
     def _check_makim_file(self):
         return Path(self.makim_file).exists()
@@ -153,7 +162,7 @@ class Makim(PrintPlugin):
         os._exit(1)
 
     def _load_shell_args(self):
-        self.shell_args = ['-c']
+        self.shell_args = []
 
     # run commands
 
