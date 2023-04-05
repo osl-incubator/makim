@@ -74,6 +74,12 @@ jobs:
         makim tests.makim-file-complex --verbose --verbose-mode
         makim tests.makim-file-complex
 
+    - name: Run smoke tests using makim and containers-sugar
+      if: ${{ matrix.os != 'macos' }}
+      run: |
+        makim tests.containers --verbose --verbose-mode
+        makim tests.containers
+
     - name: Run smoke tests using unittest makim file
       run: |
         #  --verbose-mode is an user-defined argument
