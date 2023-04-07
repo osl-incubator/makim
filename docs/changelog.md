@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.6.6](https://github.com/osl-incubator/makim/compare/1.6.5...1.6.6) (2023-04-07)
+
+
+### Bug Fixes
+
+* Fix both --version usage and the required property for arguments ([#35](https://github.com/osl-incubator/makim/issues/35)) ([3bc20e1](https://github.com/osl-incubator/makim/commit/3bc20e1941774ad07ca34ecfe511e4a54f766a7b))
+
 ## [1.6.5](https://github.com/osl-incubator/makim/compare/1.6.4...1.6.5) (2023-04-05)
 
 
