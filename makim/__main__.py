@@ -175,14 +175,14 @@ def app():
     args_parser = _get_args()
     args = args_parser.parse_args()
 
+    if args.version:
+        return show_version()
+
     if not args.target or args.help:
         return args_parser.print_help()
 
     if args.help:
         return args_parser.print_help()
-
-    if args.version:
-        return show_version()
 
     makim.load(args.makim_file)
     makim_args.update(dict(args._get_kwargs()))
