@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.6.7](https://github.com/osl-incubator/makim/compare/1.6.6...1.6.7) (2023-04-22)
+
+
+### Bug Fixes
+
+* Break bash target when any line fails ([#37](https://github.com/osl-incubator/makim/issues/37)) ([9dab0f4](https://github.com/osl-incubator/makim/commit/9dab0f497bb8f99051e924d8e0decf160f00972c))
+
 ## [1.6.6](https://github.com/osl-incubator/makim/compare/1.6.5...1.6.6) (2023-04-07)
 
 
