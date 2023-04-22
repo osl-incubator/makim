@@ -386,14 +386,14 @@ files = [
 
 [[package]]
 name = "containers-sugar"
-version = "1.4.4"
+version = "1.5.0"
 description = "Simplify the usage of containers"
 category = "dev"
 optional = false
 python-versions = ">=3.8.1,<4.0.0"
 files = [
-    {file = "containers_sugar-1.4.4-py3-none-any.whl", hash = "sha256:aabaedabdfdf212b2d93dcffb985589cad63b57cb813bb40ac4dc1aff88f9c6b"},
-    {file = "containers_sugar-1.4.4.tar.gz", hash = "sha256:962e8a75de85ebe37e41982b499c412314852afe3b25be695eb4d84a0ebd8d4b"},
+    {file = "containers_sugar-1.5.0-py3-none-any.whl", hash = "sha256:c50aa435046d33a2d72d41d3cdfbfc55c8b6a06025edf92ee85f532e7e839a6f"},
+    {file = "containers_sugar-1.5.0.tar.gz", hash = "sha256:9642d9745f6df518e807a68e6b4493a83ddd6ddb79c999d8583d3b22dc7d2026"},
 ]
 
 [package.dependencies]
@@ -2386,4 +2386,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "ab6c387fa60e9b95e98932fe9ba8451af18942f507282456cd151e71b742c948"
+content-hash = "be43a83289516977491c1be0b669d640744acb2a1b1f09c79914161745096a1a"
