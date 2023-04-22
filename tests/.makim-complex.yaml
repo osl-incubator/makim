@@ -204,6 +204,5 @@ groups:
           - target: containers.setup
         shell: bash
         run: |
-          export BASH_CMD="python -c \"print(1)\""
-          containers-sugar exec --group default --service service1 --options -T --cmd "$BASH_CMD"
+          containers-sugar exec --group default --service service1 --options -T --cmd python -c "print(1)"
           containers-sugar stop --all
