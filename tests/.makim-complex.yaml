@@ -197,13 +197,12 @@ groups:
         run: |
           containers-sugar pull --group default --all
           containers-sugar build --group default --all
-          containers-sugar restart --group default --all
+          containers-sugar restart --group default --all --options -d
       run:
         help: test running a docker service using containers-sugar
         dependencies:
           - target: containers.setup
         shell: bash
         run: |
-          export BASH_CMD="python -c \"print(1)\""
-          containers-sugar exec --service-group default --service service1 --cmd "$BASH_CMD"
+          containers-sugar exec --group default --service service1 --options -T --cmd python -c "print(1)"
           containers-sugar stop --all

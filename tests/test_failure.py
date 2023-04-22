@@ -12,6 +12,8 @@ import makim
     'target,args',
     [
         ('tests.test-7', {}),
+        ('tests.test-8', {}),
+        ('tests.test-9', {}),
     ],
 )
 def test_failure(target, args):
