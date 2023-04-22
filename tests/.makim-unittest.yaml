@@ -108,3 +108,15 @@ groups:
               required: true
               type: string
           run: echo "OK" > /tmp/makim-test.txt
+
+      test-8:
+          help: failure test in 1 line
+          shell: bash
+          run: "false"
+
+      test-9:
+          help: failure test in the first line of 2 lines
+          shell: bash
+          run: |
+            false
+            true

@@ -39,7 +39,6 @@ class Makim(PrintPlugin):
     makim_file: str = '.makim.yaml'
     config_data: dict = {}
     shell_app: sh.Command = sh.xonsh
-    shell_args: list = []
 
     # temporary variables
     env: dict = {}
@@ -161,8 +160,11 @@ class Makim(PrintPlugin):
         )
         os._exit(1)
 
-    def _load_shell_args(self):
-        self.shell_args = []
+    @property
+    def shell_args(self):
+        if self.shell_app.__dict__['__name__'].endswith('bash'):
+            return ['-e']
+        return []
 
     # run commands
 
@@ -342,7 +344,6 @@ class Makim(PrintPlugin):
         # setup
         self._verify_args()
         self._change_target(args['target'])
-        self._load_shell_args()
         self._load_target_args()
 
         # commands
