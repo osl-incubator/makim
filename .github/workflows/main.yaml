@@ -63,34 +63,23 @@ jobs:
       run: poetry install
 
     - name: Run smoke tests using simple makim file
-      run: |
-        #  --verbose-mode is an user-defined argument
-        makim tests.makim-file-simple --verbose --verbose-mode
-        makim tests.makim-file-simple
+      run: makim smoke-tests.simple
 
     - name: Run smoke tests using complex makim file
-      run: |
-        #  --verbose-mode is an user-defined argument
-        makim tests.makim-file-complex --verbose --verbose-mode
-        makim tests.makim-file-complex
+      run: makim smoke-tests.complex
 
     - name: Run smoke tests using makim and containers-sugar
       if: ${{ matrix.os != 'macos' }}
-      run: |
-        makim tests.containers --verbose --verbose-mode
-        makim tests.containers
+      run: makim smoke-tests.containers
 
     - name: Run smoke tests using unittest makim file
-      run: |
-        #  --verbose-mode is an user-defined argument
-        makim tests.makim-file-simple --verbose --verbose-mode
-        makim tests.makim-file-simple
+      run: makim smoke-tests.unittest
 
     - name: Run smoke test using bash
-      run: |
-        makim --makim-file tests/.makim-bash-main-scope.yaml main-scope.test
-        makim --makim-file tests/.makim-bash-group-scope.yaml group-scope.test
-        makim --makim-file tests/.makim-bash-target-scope.yaml target-scope.test
+      run: makim smoke-tests.bash
+
+    - name: Run smoke test for variable envs
+      run: makim smoke-tests.vars-env
 
     - name: Run unit tests
       run: makim tests.unittest

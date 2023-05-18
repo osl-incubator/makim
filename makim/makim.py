@@ -17,11 +17,11 @@ from jinja2 import Template
 
 
 def escape_template_tag(v: str) -> str:
-    return v.replace('{{', r'\{\{').replace('}}', r'\}\}')
+    return str(v).replace('{{', r'\{\{').replace('}}', r'\}\}')
 
 
 def unescape_template_tag(v: str) -> str:
-    return v.replace(r'\{\{', '{{').replace(r'\}\}', '}}')
+    return str(v).replace(r'\{\{', '{{').replace(r'\}\}', '}}')
 
 
 class PrintPlugin:
