@@ -48,11 +48,11 @@ groups:
     targets:
       ci:
         help: Run semantic release on CI
-        run: {{ app }} '--ci'
+        run: {{ vars.app }} '--ci'
 
       dry:
         help: Run semantic release in dry-run mode
-        run: {{ app }} '--dry-run'
+        run: {{ vars.app }} '--dry-run'
 
   tests:
     targets:
@@ -188,6 +188,9 @@ groups:
           makim --makim-file $MAKIM_FILE group-scope.test-var-env $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE target-scope.test-var-env-file $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE target-scope.test-var-env $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE rerender-env.from-global $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE rerender-env.from-group $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE rerender-env.from-target $VERBOSE_FLAG
 
       bash:
         help: ...

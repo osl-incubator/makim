@@ -240,7 +240,16 @@ class Makim(PrintPlugin):
             )
             os._exit(1)
 
-        variables = {k: v.strip() for k, v in self.group_data['vars'].items()}
+        variables = {}
+        variables.update(
+            {k: v.strip() for k, v in self.global_data.get('vars', {}).items()}
+        )
+        variables.update(
+            {k: v.strip() for k, v in self.group_data.get('vars', {}).items()}
+        )
+        variables.update(
+            {k: v.strip() for k, v in self.target_data.get('vars', {}).items()}
+        )
 
         args_input = {'makim_file': args['makim_file']}
         for k, v in self.target_data.get('args', {}).items():
@@ -287,13 +296,13 @@ class Makim(PrintPlugin):
             env.update(env_file)
             for k, v in env_user.items():
                 env[k] = Template(unescape_template_tag(v)).render(
-                    args=args_input, **variables
+                    args=args_input, env=env, vars=variables
                 )
         for k, v in env.items():
             os.environ[k] = v
 
         cmd = unescape_template_tag(cmd)
-        cmd = Template(cmd).render(args=args_input, **variables)
+        cmd = Template(cmd).render(args=args_input, env=env, vars=variables)
         if args.get('verbose'):
             self._print_info('=' * 80)
             self._print_info(
