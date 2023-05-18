@@ -6,4 +6,3 @@ dependencies:
   - python 3.8.1  # min version supported
   - poetry
   - nodejs  # used by semantic-release
-  - distlib  # used to fix a non-deterministic error on CI

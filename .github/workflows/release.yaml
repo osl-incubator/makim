@@ -32,7 +32,10 @@ jobs:
           miniforge-variant: Mambaforge
 
       - name: Install deps
-        run: poetry install
+        run: |
+          poetry config virtualenvs.create false
+          poetry config experimental.new-installer true
+          poetry install
 
       - name: Run semantic release (for tests)
         if: ${{ github.event_name != 'workflow_dispatch' }}
