@@ -89,11 +89,11 @@ groups:
     targets:
       ci:
         help: Run semantic-release on CI
-        run: {{ app }} --ci
+        run: {{ vars.app }} --ci
 
       dry:
         help: Run semantic-release on CI for tests in dry-run mode.
-        run: {{ app }} --dry-run
+        run: {{ vars.app }} --dry-run
 
   docs:
     targets:
