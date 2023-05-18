@@ -44,7 +44,7 @@ groups:
         env-file: .env-target
         run: |
           import os
-          assert str(os.getenv("ENV")) == "staging"
+          assert str(os.getenv("ENV")) == "test"
 
       test-var-env:
         help: Test env variable defined in the global scope in `env` section
