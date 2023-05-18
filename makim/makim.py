@@ -1,12 +1,12 @@
 """Makim class for containers"""
 import io
 import os
+import pprint
 import sys
 import tempfile
 import warnings
 from copy import deepcopy
 from pathlib import Path
-from pprint import pprint
 from typing import Optional
 
 import dotenv
@@ -26,13 +26,13 @@ def unescape_template_tag(v: str) -> str:
 
 class PrintPlugin:
     def _print_error(self, message: str):
-        print(Fore.RED, message, Fore.RESET)
+        print(Fore.RED, message, Fore.RESET, file=sys.stderr)
 
     def _print_info(self, message: str):
-        print(Fore.BLUE, message, Fore.RESET)
+        print(Fore.BLUE, message, Fore.RESET, file=sys.stdout)
 
     def _print_warning(self, message: str):
-        print(Fore.YELLOW, message, Fore.RESET)
+        print(Fore.YELLOW, message, Fore.RESET, file=sys.stdout)
 
 
 class Makim(PrintPlugin):
@@ -295,17 +295,19 @@ class Makim(PrintPlugin):
         cmd = unescape_template_tag(cmd)
         cmd = Template(cmd).render(args=args_input, **variables)
         if args.get('verbose'):
-            print('=' * 80)
-            print('TARGET:', f'{self.group_name}.{self.target_name}')
-            print('ARGS:')
-            pprint(args_input)
-            print('VARS:')
-            pprint(variables)
-            print('ENV:')
-            pprint(env)
-            print('-' * 80)
-            print('>>>', cmd.replace('\n', '\n>>> '))
-            print('=' * 80)
+            self._print_info('=' * 80)
+            self._print_info(
+                'TARGET: ' + f'{self.group_name}.{self.target_name}'
+            )
+            self._print_info('ARGS:')
+            self._print_info(pprint.pformat(args_input))
+            self._print_info('VARS:')
+            self._print_info(pprint.pformat(variables))
+            self._print_info('ENV:')
+            self._print_info(str(env))
+            self._print_info('-' * 80)
+            self._print_info('>>> ' + cmd.replace('\n', '\n>>> '))
+            self._print_info('=' * 80)
 
         if not args.get('dry_run') and cmd:
             self._call_shell_app(cmd)
