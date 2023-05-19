@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.7.1](https://github.com/osl-incubator/makim/compare/1.7.0...1.7.1) (2023-05-19)
+
+
+### Bug Fixes
+
+* Fix release workflow and broken dependencies ([#40](https://github.com/osl-incubator/makim/issues/40)) ([c77c6f9](https://github.com/osl-incubator/makim/commit/c77c6f96f4b550e8bafe6d877719bb137d40aa11)), closes [/github.com/ionrock/cachecontrol/issues/292#issuecomment-1536120527](https://github.com//github.com/ionrock/cachecontrol/issues/292/issues/issuecomment-1536120527)
+
 # [1.7.0](https://github.com/osl-incubator/makim/compare/1.6.7...1.7.0) (2023-05-19)
 
 
