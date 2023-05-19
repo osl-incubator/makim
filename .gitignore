@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# poetry: remove poetry.lock in order to avoid issues in the installation
+poetry.lock
