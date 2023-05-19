@@ -41,7 +41,7 @@ groups:
           echo "build file y"
           echo "build file z"
 
-  - name: print
+  print:
     targets:
       force-error:
         help: This target should print until item 3
