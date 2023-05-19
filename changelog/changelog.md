@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.7.0](https://github.com/osl-incubator/makim/compare/1.6.7...1.7.0) (2023-05-19)
+
+
+### Features
+
+* Increase coverage of the env and env-file options for global, group and target scope ([#39](https://github.com/osl-incubator/makim/issues/39)) ([2481221](https://github.com/osl-incubator/makim/commit/24812213cc91a25e9da1ae0afaebdef36bac896b))
+
 ## [1.6.7](https://github.com/osl-incubator/makim/compare/1.6.6...1.6.7) (2023-04-22)
 
 
