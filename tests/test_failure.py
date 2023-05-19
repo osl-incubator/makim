@@ -6,17 +6,18 @@ from pathlib import Path
 import pytest
 
 import makim
+from makim.error import MakimError
 
 
 @pytest.mark.parametrize(
-    'target,args',
+    'target,args,error_code',
     [
-        ('tests.test-7', {}),
-        ('tests.test-8', {}),
-        ('tests.test-9', {}),
+        ('tests.test-7', {}, MakimError.MAKIM_ARGUMENT_REQUIRED.value),
+        ('tests.test-8', {}, MakimError.SH_ERROR_RETURN_CODE.value),
+        ('tests.test-9', {}, MakimError.SH_ERROR_RETURN_CODE.value),
     ],
 )
-def test_failure(target, args):
+def test_failure(target, args, error_code):
     makim_file = Path(__file__).parent / '.makim-unittest.yaml'
 
     m = makim.Makim()
@@ -33,4 +34,4 @@ def test_failure(target, args):
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         m.run(args)
     assert pytest_wrapped_e.type == SystemExit
-    assert pytest_wrapped_e.value.code == 1
+    assert pytest_wrapped_e.value.code == error_code
