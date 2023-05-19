@@ -19,7 +19,6 @@ groups:
           rm -fr .pytest_cache
 
   docs:
-    env-file: .env
     targets:
       build:
         help: Build documentation
@@ -31,7 +30,6 @@ groups:
         run: mkdocs serve --watch docs --config-file docs/mkdocs.yaml
 
   release:
-    env-file: .env
     vars:
       app: |
         npx --yes \
@@ -48,11 +46,11 @@ groups:
     targets:
       ci:
         help: Run semantic release on CI
-        run: {{ app }} '--ci'
+        run: {{ vars.app }} '--ci'
 
       dry:
         help: Run semantic release in dry-run mode
-        run: {{ app }} '--dry-run'
+        run: {{ vars.app }} '--dry-run'
 
   tests:
     targets:
@@ -64,7 +62,9 @@ groups:
         help: Run tests
         run: pytest -s -vv tests
 
-      makim-file-simple:
+  smoke-tests:
+    targets:
+      simple:
         help: Test makim using a simple makimfile
         args:
           verbose-mode:
@@ -84,7 +84,7 @@ groups:
           makim --makim-file $MAKIM_FILE default.build $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE build --clean $VERBOSE_FLAG
 
-      makim-file-complex:
+      complex:
         help: Test makim using a complex makimfile
         env:
           MAKIM_FILE: ./tests/.makim-complex.yaml
@@ -143,7 +143,7 @@ groups:
           cd ./tests/
           makim --makim-file $MAKIM_FILE containers.run --verbose
 
-      makim-file-unittest:
+      unittest:
         help: Test makim using a unittest makimfile
         args:
           verbose-mode:
@@ -165,3 +165,34 @@ groups:
           makim --makim-file $MAKIM_FILE tests.test-4 --trigger-dep $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE tests.test-5 $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE tests.test-6 $VERBOSE_FLAG
+
+      vars-env:
+        help: Test makim using env makimfile
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: ./tests/.makim-env.yaml
+          VERBOSE_FLAG: '{{ "--verbose" if args.verbose_mode else "" }}'
+        shell: bash
+        run: |
+          makim --makim-file $MAKIM_FILE --help
+          makim --makim-file $MAKIM_FILE --version
+          makim --makim-file $MAKIM_FILE global-scope.test-var-env-file $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE global-scope.test-var-env $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE group-scope.test-var-env-file $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE group-scope.test-var-env $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE target-scope.test-var-env-file $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE target-scope.test-var-env $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE rerender-env.from-global $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE rerender-env.from-group $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE rerender-env.from-target $VERBOSE_FLAG
+
+      bash:
+        help: ...
+        run: |
+          makim --makim-file tests/.makim-bash-main-scope.yaml main-scope.test
+          makim --makim-file tests/.makim-bash-group-scope.yaml group-scope.test
+          makim --makim-file tests/.makim-bash-target-scope.yaml target-scope.test

@@ -1,12 +1,12 @@
 """Makim class for containers"""
 import io
 import os
+import pprint
 import sys
 import tempfile
 import warnings
 from copy import deepcopy
 from pathlib import Path
-from pprint import pprint
 from typing import Optional
 
 import dotenv
@@ -15,29 +15,31 @@ import yaml
 from colorama import Fore
 from jinja2 import Template
 
+from makim.error import MakimError
+
 
 def escape_template_tag(v: str) -> str:
-    return v.replace('{{', r'\{\{').replace('}}', r'\}\}')
+    return str(v).replace('{{', r'\{\{').replace('}}', r'\}\}')
 
 
 def unescape_template_tag(v: str) -> str:
-    return v.replace(r'\{\{', '{{').replace(r'\}\}', '}}')
+    return str(v).replace(r'\{\{', '{{').replace(r'\}\}', '}}')
 
 
 class PrintPlugin:
     def _print_error(self, message: str):
-        print(Fore.RED, message, Fore.RESET)
+        print(Fore.RED, message, Fore.RESET, file=sys.stderr)
 
     def _print_info(self, message: str):
-        print(Fore.BLUE, message, Fore.RESET)
+        print(Fore.BLUE, message, Fore.RESET, file=sys.stdout)
 
     def _print_warning(self, message: str):
-        print(Fore.YELLOW, message, Fore.RESET)
+        print(Fore.YELLOW, message, Fore.RESET, file=sys.stdout)
 
 
 class Makim(PrintPlugin):
     makim_file: str = '.makim.yaml'
-    config_data: dict = {}
+    global_data: dict = {}
     shell_app: sh.Command = sh.xonsh
 
     # temporary variables
@@ -72,13 +74,13 @@ class Makim(PrintPlugin):
         except sh.ErrorReturnCode as e:
             os.close(fd)
             self._print_error(str(e))
-            os._exit(1)
+            os._exit(MakimError.SH_ERROR_RETURN_CODE.value)
         except KeyboardInterrupt:
             os.close(fd)
             pid = p.pid
             p.kill_group()
             self._print_error(f'[EE] Process {pid} killed.')
-            os._exit(1)
+            os._exit(MakimError.SH_KEYBOARD_INTERRUPT.value)
         os.close(fd)
 
     def _check_makim_file(self):
@@ -92,23 +94,23 @@ class Makim(PrintPlugin):
             self._print_error(
                 '[EE] CONFIG: Config file .makim.yaml not found.'
             )
-            os._exit(1)
+            os._exit(MakimError.MAKIM_CONFIG_FILE_NOT_FOUND.value)
 
     def _verify_config(self):
-        if not len(self.config_data['groups']):
+        if not len(self.global_data['groups']):
             self._print_error('[EE] No target groups found.')
-            os._exit(1)
+            os._exit(MakimError.MAKIM_NO_TARGET_GROUPS_FOUND.value)
 
     def _load_config_data(self):
         with open(self.makim_file, 'r') as f:
             # escape template tags
             content = escape_template_tag(f.read())
             f = io.StringIO(content)
-            self.config_data = yaml.safe_load(f)
+            self.global_data = yaml.safe_load(f)
 
     def _load_shell_app(self, shell_app: str = ''):
         if not shell_app:
-            shell_app = self.config_data.get('shell', 'xonsh')
+            shell_app = self.global_data.get('shell', 'xonsh')
         self.shell_app = getattr(sh, shell_app)
 
     def _change_target(self, target_name: str):
@@ -131,14 +133,14 @@ class Makim(PrintPlugin):
             f'[EE] The given target "{self.target_name}" was not found in the '
             f'configuration file for the group {self.group_name}.'
         )
-        os._exit(1)
+        os._exit(MakimError.MAKIM_TARGET_NOT_FOUND.value)
 
     def _change_group_data(self, group_name=None):
-        groups = self.config_data['groups']
+        groups = self.global_data['groups']
 
         if group_name is not None:
             self.group_name = group_name
-        shell_app_default = self.config_data.get('shell', 'xonsh')
+        shell_app_default = self.global_data.get('shell', 'xonsh')
         if self.group_name == 'default' and len(groups) == 1:
             group = list(groups)[0]
             self.group_data = groups[group]
@@ -158,7 +160,7 @@ class Makim(PrintPlugin):
             f'[EE] The given group target "{self.group_name}" '
             'was not found in the configuration file.'
         )
-        os._exit(1)
+        os._exit(MakimError.MAKIM_GROUP_NOT_FOUND.value)
 
     @property
     def shell_args(self):
@@ -238,9 +240,18 @@ class Makim(PrintPlugin):
                 '[EE] `vars` attribute inside the group '
                 f'{self.group_name} is not a dictionary.'
             )
-            os._exit(1)
+            os._exit(MakimError.MAKIM_VARS_ATTRIBUTE_INVALID.value)
 
-        variables = {k: v.strip() for k, v in self.group_data['vars'].items()}
+        variables = {}
+        variables.update(
+            {k: v.strip() for k, v in self.global_data.get('vars', {}).items()}
+        )
+        variables.update(
+            {k: v.strip() for k, v in self.group_data.get('vars', {}).items()}
+        )
+        variables.update(
+            {k: v.strip() for k, v in self.target_data.get('vars', {}).items()}
+        )
 
         args_input = {'makim_file': args['makim_file']}
         for k, v in self.target_data.get('args', {}).items():
@@ -269,31 +280,45 @@ class Makim(PrintPlugin):
                     f'[EE] The argument `{k}` is set as required. '
                     'Please, provide that argument to proceed.'
                 )
-                os._exit(1)
+                os._exit(MakimError.MAKIM_ARGUMENT_REQUIRED.value)
 
         current_env = deepcopy(os.environ)
-        env = deepcopy(self.env)
-        for k, v in self.target_data.get('env', {}).items():
-            env[k] = Template(unescape_template_tag(v)).render(
-                args=args_input, **variables
-            )
+        env = {}
+        for env_user, env_file in [
+            (self.global_data.get('env', {}), deepcopy(self.env)),
+            (
+                self.group_data.get('env', {}),
+                self._load_dotenv(self.group_data),
+            ),
+            (
+                self.target_data.get('env', {}),
+                self._load_dotenv(self.target_data),
+            ),
+        ]:
+            env.update(env_file)
+            for k, v in env_user.items():
+                env[k] = Template(unescape_template_tag(v)).render(
+                    args=args_input, env=env, vars=variables
+                )
         for k, v in env.items():
             os.environ[k] = v
 
         cmd = unescape_template_tag(cmd)
-        cmd = Template(cmd).render(args=args_input, **variables)
+        cmd = Template(cmd).render(args=args_input, env=env, vars=variables)
         if args.get('verbose'):
-            print('=' * 80)
-            print('TARGET:', f'{self.group_name}.{self.target_name}')
-            print('ARGS:')
-            pprint(args_input)
-            print('VARS:')
-            pprint(variables)
-            print('ENV:')
-            pprint(env)
-            print('-' * 80)
-            print('>>>', cmd.replace('\n', '\n>>> '))
-            print('=' * 80)
+            self._print_info('=' * 80)
+            self._print_info(
+                'TARGET: ' + f'{self.group_name}.{self.target_name}'
+            )
+            self._print_info('ARGS:')
+            self._print_info(pprint.pformat(args_input))
+            self._print_info('VARS:')
+            self._print_info(pprint.pformat(variables))
+            self._print_info('ENV:')
+            self._print_info(str(env))
+            self._print_info('-' * 80)
+            self._print_info('>>> ' + cmd.replace('\n', '\n>>> '))
+            self._print_info('=' * 80)
 
         if not args.get('dry_run') and cmd:
             self._call_shell_app(cmd)
@@ -302,10 +327,10 @@ class Makim(PrintPlugin):
         os.environ.clear()
         os.environ.update(current_env)
 
-    def _load_dotenv(self):
-        env_file = self.config_data.get('env-file')
+    def _load_dotenv(self, data_scope: dict) -> dict:
+        env_file = data_scope.get('env-file')
         if not env_file:
-            return
+            return {}
 
         if not env_file.startswith('/'):
             # use makim file as reference for the working directory
@@ -314,9 +339,9 @@ class Makim(PrintPlugin):
 
         if not Path(env_file).exists():
             self._print_error('[EE] The given env-file was not found.')
-            os._exit(1)
+            os._exit(MakimError.MAKIM_ENV_FILE_NOT_FOUND.value)
 
-        self.env = dotenv.dotenv_values(env_file)
+        return dotenv.dotenv_values(env_file)
 
     def _load_target_args(self):
         for name, value in self.target_data.get('args', {}).items():
@@ -336,7 +361,7 @@ class Makim(PrintPlugin):
         self._load_config_data()
         self._verify_config()
         self._load_shell_app()
-        self._load_dotenv()
+        self.env = self._load_dotenv(self.global_data)
 
     def run(self, args: dict):
         self.args = args

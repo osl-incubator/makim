@@ -1,0 +1,102 @@
+version: 1.0.0
+env-file: .env
+env:
+  GLOBAL_VAR_1: 1
+  GLOBAL_VAR_2: 2
+groups:
+  global-scope:
+    targets:
+      test-var-env-file:
+        help: Test env variable defined in the global scope from env-file
+        run: |
+          import os
+          assert str(os.getenv("ENV")) == "dev"
+
+      test-var-env:
+        help: Test env variable defined in the global scope in `env` section
+        run: |
+          import os
+          assert str(os.getenv("GLOBAL_VAR_1")) == "1"
+          assert str(os.getenv("GLOBAL_VAR_2")) == "2"
+  group-scope:
+    env-file: .env-group
+    env:
+      GROUP_VAR_1: 1
+      GROUP_VAR_2: 2
+    targets:
+      test-var-env-file:
+        help: Test env variable defined in the global scope from env-file
+        run: |
+          import os
+          assert str(os.getenv("ENV")) == "prod"
+
+      test-var-env:
+        help: Test env variable defined in the global scope in `env` section
+        run: |
+          import os
+          assert str(os.getenv("GROUP_VAR_1")) == "1"
+          assert str(os.getenv("GROUP_VAR_2")) == "2"
+
+  target-scope:
+    targets:
+      test-var-env-file:
+        help: Test env variable defined in the global scope from env-file
+        env-file: .env-target
+        run: |
+          import os
+          assert str(os.getenv("ENV")) == "test"
+
+      test-var-env:
+        help: Test env variable defined in the global scope in `env` section
+        env-file: .env-target
+        env:
+          TARGET_VAR_1: 1
+          TARGET_VAR_2: 2
+          ENV: staging
+        run: |
+          import os
+          assert str(os.getenv("TARGET_VAR_1")) == "1"
+          assert str(os.getenv("TARGET_VAR_2")) == "2"
+          assert str(os.getenv("ENV")) == "staging"
+
+  rerender-env:
+    env-file: .env-group
+    env:
+      GROUP_VAR_1: 1
+      GROUP_VAR_2: 2
+
+    targets:
+      from-global:
+        help: Test a rerender from the global scope
+        env-file: .env
+        env:
+          MYVAR_1: {{ env.GLOBAL_VAR_1 }}
+          MYVAR_2: {{ env.GLOBAL_VAR_2 }}
+          MYVAR_3: {{ env.ENV }}
+        run: |
+          import os
+          assert str(os.getenv("MYVAR_1")) == "1"
+          assert str(os.getenv("MYVAR_2")) == "2"
+          assert str(os.getenv("MYVAR_3")) == "dev"
+
+      from-group:
+        help: Test a rerender from the group scope
+        env-file: .env-group
+        env:
+          MYVAR_1: {{ env.GROUP_VAR_1 }}
+          MYVAR_2: {{ env.GROUP_VAR_2 }}
+          MYVAR_3: {{ env.ENV }}
+        run: |
+          import os
+          assert str(os.getenv("MYVAR_1")) == "1"
+          assert str(os.getenv("MYVAR_2")) == "2"
+          assert str(os.getenv("MYVAR_3")) == "prod"
+
+      from-target:
+        help: Test a rerender from the group scope
+        env-file: .env-target
+        env:
+          MYVAR_1: {{ env.ENV }}
+        run: |
+          import os
+          assert str(os.getenv("MYVAR_1")) == "test"
