@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.8.0](https://github.com/osl-incubator/makim/compare/1.7.1...1.8.0) (2023-05-19)
+
+
+### Features
+
+* by default, for Xonsh shell, stop the target process if any command line fails ([#19](https://github.com/osl-incubator/makim/issues/19)) ([8fa4c1d](https://github.com/osl-incubator/makim/commit/8fa4c1ddb19af2ef215509feff2dd4055ca47561))
+
 ## [1.7.1](https://github.com/osl-incubator/makim/compare/1.7.0...1.7.1) (2023-05-19)
 
 
