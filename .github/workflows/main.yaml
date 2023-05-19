@@ -90,6 +90,10 @@ jobs:
       with:
         convention-name: conventionalcommits
 
+    - name: Setup tmate session
+      if: "${{ failure() && (contains(github.event.pull_request.labels.*.name, 'ci:enable-debugging')) }}"
+      uses: mxschmitt/action-tmate@v3
+
   linter-and-docs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -128,3 +132,7 @@ jobs:
       run: |
         pre-commit install
         makim tests.lint
+
+    - name: Setup tmate session
+      if: "${{ failure() && (contains(github.event.pull_request.labels.*.name, 'ci:enable-debugging')) }}"
+      uses: mxschmitt/action-tmate@v3
