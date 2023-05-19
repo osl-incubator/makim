@@ -6,3 +6,5 @@ dependencies:
   - python 3.8.1  # min version supported
   - poetry
   - nodejs  # used by semantic-release
+  # https://github.com/ionrock/cachecontrol/issues/292#issuecomment-1536120527
+  - urllib3 <2
