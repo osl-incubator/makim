@@ -15,6 +15,8 @@ import yaml
 from colorama import Fore
 from jinja2 import Template
 
+from makim.error import MakimError
+
 
 def escape_template_tag(v: str) -> str:
     return str(v).replace('{{', r'\{\{').replace('}}', r'\}\}')
@@ -72,13 +74,13 @@ class Makim(PrintPlugin):
         except sh.ErrorReturnCode as e:
             os.close(fd)
             self._print_error(str(e))
-            os._exit(1)
+            os._exit(MakimError.SH_ERROR_RETURN_CODE.value)
         except KeyboardInterrupt:
             os.close(fd)
             pid = p.pid
             p.kill_group()
             self._print_error(f'[EE] Process {pid} killed.')
-            os._exit(1)
+            os._exit(MakimError.SH_KEYBOARD_INTERRUPT.value)
         os.close(fd)
 
     def _check_makim_file(self):
@@ -92,12 +94,12 @@ class Makim(PrintPlugin):
             self._print_error(
                 '[EE] CONFIG: Config file .makim.yaml not found.'
             )
-            os._exit(1)
+            os._exit(MakimError.MAKIM_CONFIG_FILE_NOT_FOUND.value)
 
     def _verify_config(self):
         if not len(self.global_data['groups']):
             self._print_error('[EE] No target groups found.')
-            os._exit(1)
+            os._exit(MakimError.MAKIM_NO_TARGET_GROUPS_FOUND.value)
 
     def _load_config_data(self):
         with open(self.makim_file, 'r') as f:
@@ -131,7 +133,7 @@ class Makim(PrintPlugin):
             f'[EE] The given target "{self.target_name}" was not found in the '
             f'configuration file for the group {self.group_name}.'
         )
-        os._exit(1)
+        os._exit(MakimError.MAKIM_TARGET_NOT_FOUND.value)
 
     def _change_group_data(self, group_name=None):
         groups = self.global_data['groups']
@@ -158,7 +160,7 @@ class Makim(PrintPlugin):
             f'[EE] The given group target "{self.group_name}" '
             'was not found in the configuration file.'
         )
-        os._exit(1)
+        os._exit(MakimError.MAKIM_GROUP_NOT_FOUND.value)
 
     @property
     def shell_args(self):
@@ -238,7 +240,7 @@ class Makim(PrintPlugin):
                 '[EE] `vars` attribute inside the group '
                 f'{self.group_name} is not a dictionary.'
             )
-            os._exit(1)
+            os._exit(MakimError.MAKIM_VARS_ATTRIBUTE_INVALID.value)
 
         variables = {}
         variables.update(
@@ -278,7 +280,7 @@ class Makim(PrintPlugin):
                     f'[EE] The argument `{k}` is set as required. '
                     'Please, provide that argument to proceed.'
                 )
-                os._exit(1)
+                os._exit(MakimError.MAKIM_ARGUMENT_REQUIRED.value)
 
         current_env = deepcopy(os.environ)
         env = {}
@@ -337,7 +339,7 @@ class Makim(PrintPlugin):
 
         if not Path(env_file).exists():
             self._print_error('[EE] The given env-file was not found.')
-            os._exit(1)
+            os._exit(MakimError.MAKIM_ENV_FILE_NOT_FOUND.value)
 
         return dotenv.dotenv_values(env_file)
 

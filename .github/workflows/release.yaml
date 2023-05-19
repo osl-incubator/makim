@@ -57,3 +57,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/
+
+      - name: Setup tmate session
+        if: "${{ failure() && (contains(github.event.pull_request.labels.*.name, 'ci:enable-debugging')) }}"
+        uses: mxschmitt/action-tmate@v3
