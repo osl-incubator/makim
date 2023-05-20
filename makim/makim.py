@@ -43,7 +43,8 @@ class Makim(PrintPlugin):
     shell_app: sh.Command = sh.xonsh
 
     # temporary variables
-    env: dict = {}
+    env: dict = {}  # initial env
+    env_cur: dict = {}  # current env
     args: Optional[object] = None
     group_name: str = 'default'
     group_data: dict = {}
@@ -212,7 +213,9 @@ class Makim(PrintPlugin):
                 )
 
                 args_dep[f'--{arg_name}'] = yaml.safe_load(
-                    Template(unescaped_value).render(args=original_args_clean)
+                    Template(unescaped_value).render(
+                        args=original_args_clean, env=self.env_cur
+                    )
                 )
 
             args_dep['target'] = dep_data['target']
@@ -222,7 +225,7 @@ class Makim(PrintPlugin):
             if_stmt = dep_data.get('if')
             if if_stmt:
                 result = Template(unescape_template_tag(str(if_stmt))).render(
-                    args=original_args_clean
+                    args=original_args_clean, env=self.env_cur
                 )
                 if not yaml.safe_load(result):
                     if args.get('verbose'):
@@ -286,26 +289,11 @@ class Makim(PrintPlugin):
                 )
                 os._exit(MakimError.MAKIM_ARGUMENT_REQUIRED.value)
 
-        current_env = deepcopy(os.environ)
-        env = {}
-        for env_user, env_file in [
-            (self.global_data.get('env', {}), deepcopy(self.env)),
-            (
-                self.group_data.get('env', {}),
-                self._load_dotenv(self.group_data),
-            ),
-            (
-                self.target_data.get('env', {}),
-                self._load_dotenv(self.target_data),
-            ),
-        ]:
-            env.update(env_file)
-            for k, v in env_user.items():
-                env[k] = Template(unescape_template_tag(str(v))).render(
-                    args=args_input, env=env, vars=variables
-                )
+        env = self._load_current_env()
         for k, v in env.items():
             os.environ[k] = v
+
+        self.env_cur = deepcopy(env)
 
         cmd = unescape_template_tag(str(cmd))
         cmd = Template(cmd).render(args=args_input, env=env, vars=variables)
@@ -346,6 +334,30 @@ class Makim(PrintPlugin):
             os._exit(MakimError.MAKIM_ENV_FILE_NOT_FOUND.value)
 
         return dotenv.dotenv_values(env_file)
+
+    def _load_current_env(self):
+        env = deepcopy(os.environ)
+        for env_user, env_file in [
+            (
+                self.global_data.get('env', {}),
+                self._load_dotenv(self.global_data),
+            ),
+            (
+                self.group_data.get('env', {}),
+                self._load_dotenv(self.group_data),
+            ),
+            (
+                self.target_data.get('env', {}),
+                self._load_dotenv(self.target_data),
+            ),
+        ]:
+            env.update(env_file)
+            for k, v in env_user.items():
+                env[k] = Template(unescape_template_tag(str(v))).render(
+                    args=args_input, env=env, vars=variables
+                )
+                ######## ^^^
+        return env
 
     def _load_target_args(self):
         for name, value in self.target_data.get('args', {}).items():
