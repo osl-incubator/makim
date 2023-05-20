@@ -76,9 +76,9 @@ groups:
             action: store_true
         env:
           MAKIM_FILE: ./tests/.makim-simple.yaml
-          VERBOSE_FLAG: '{{ "--verbose" if args.verbose_mode else "" }}'
         shell: bash
         run: |
+          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
           makim --makim-file $MAKIM_FILE --help
           makim --makim-file $MAKIM_FILE --version
           makim --makim-file $MAKIM_FILE clean $VERBOSE_FLAG
@@ -91,7 +91,6 @@ groups:
         help: Test makim using a complex makimfile
         env:
           MAKIM_FILE: ./tests/.makim-complex.yaml
-          VERBOSE_FLAG: '{{ "--verbose" if args.verbose_mode else "" }}'
         args:
           verbose-mode:
             help: Run the all the tests in verbose mode
@@ -99,6 +98,7 @@ groups:
             action: store_true
         shell: bash
         run: |
+          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
           makim --makim-file $MAKIM_FILE --help
           makim --makim-file $MAKIM_FILE --version
           makim --makim-file $MAKIM_FILE default.lint --verbose
@@ -135,7 +135,6 @@ groups:
         help: Test makim with containers-sugar
         env:
           MAKIM_FILE: .makim-complex.yaml
-          VERBOSE_FLAG: '{{ "--verbose" if args.verbose_mode else "" }}'
         args:
           verbose-mode:
             help: Run the all the tests in verbose mode
@@ -143,6 +142,7 @@ groups:
             action: store_true
         shell: bash
         run: |
+          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
           cd ./tests/
           makim --makim-file $MAKIM_FILE containers.run --verbose
 
@@ -155,9 +155,9 @@ groups:
             action: store_true
         env:
           MAKIM_FILE: ./tests/.makim-unittest.yaml
-          VERBOSE_FLAG: '{{ "--verbose" if args.verbose_mode else "" }}'
         shell: bash
         run: |
+          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
           makim --makim-file $MAKIM_FILE --help
           makim --makim-file $MAKIM_FILE --version
           makim --makim-file $MAKIM_FILE tests.test-1 $VERBOSE_FLAG
@@ -178,9 +178,9 @@ groups:
             action: store_true
         env:
           MAKIM_FILE: ./tests/.makim-env.yaml
-          VERBOSE_FLAG: '{{ "--verbose" if args.verbose_mode else "" }}'
         shell: bash
         run: |
+          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
           makim --makim-file $MAKIM_FILE --help
           makim --makim-file $MAKIM_FILE --version
           makim --makim-file $MAKIM_FILE global-scope.test-var-env-file $VERBOSE_FLAG
