@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.8.1](https://github.com/osl-incubator/makim/compare/1.8.0...1.8.1) (2023-05-21)
+
+
+### Bug Fixes
+
+* Fix the rendering flow of env, vars and args ([#41](https://github.com/osl-incubator/makim/issues/41)) ([3235d98](https://github.com/osl-incubator/makim/commit/3235d988e93860d4224ca368bd7d39ed55014125))
+
 # [1.8.0](https://github.com/osl-incubator/makim/compare/1.7.1...1.8.0) (2023-05-19)
 
 
