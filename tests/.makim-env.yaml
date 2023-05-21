@@ -66,9 +66,23 @@ groups:
       GROUP_VAR_2: 2
 
     targets:
+      dep:
+        help: dummy dep
+        args:
+          my-value:
+            help: my_value
+            type: string
+        run: |
+          assert "{{ args.my_value }}" == "{{ env.GROUP_VAR_1 }}" == "1"
+
+
       from-global:
         help: Test a rerender from the global scope
         env-file: .env
+        dependencies:
+          - target: rerender-env.dep
+            args:
+              my-value: '{{ env.GROUP_VAR_1 }}'
         env:
           MYVAR_1: {{ env.GLOBAL_VAR_1 }}
           MYVAR_2: {{ env.GLOBAL_VAR_2 }}

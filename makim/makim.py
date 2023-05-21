@@ -1,4 +1,8 @@
-"""Makim class for containers"""
+"""
+`MakIm` or just `makim` is based on `make` and focus on improve
+the way to define targets and dependencies. Instead of using the
+`Makefile` format, it uses `yaml` format.
+"""
 import io
 import os
 import pprint
@@ -7,7 +11,7 @@ import tempfile
 import warnings
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional, Tuple
 
 import dotenv
 import sh
@@ -43,7 +47,8 @@ class Makim(PrintPlugin):
     shell_app: sh.Command = sh.xonsh
 
     # temporary variables
-    env: dict = {}
+    env: dict = {}  # initial env
+    env_scoped: dict = {}  # current env
     args: Optional[object] = None
     group_name: str = 'default'
     group_data: dict = {}
@@ -105,18 +110,6 @@ class Makim(PrintPlugin):
             self._print_error('[EE] No target groups found.')
             os._exit(MakimError.MAKIM_NO_TARGET_GROUPS_FOUND.value)
 
-    def _load_config_data(self):
-        with open(self.makim_file, 'r') as f:
-            # escape template tags
-            content = escape_template_tag(f.read())
-            f = io.StringIO(content)
-            self.global_data = yaml.safe_load(f)
-
-    def _load_shell_app(self, shell_app: str = ''):
-        if not shell_app:
-            shell_app = self.global_data.get('shell', 'xonsh')
-        self.shell_app = getattr(sh, shell_app)
-
     def _change_target(self, target_name: str):
         group_name = 'default'
         if '.' in target_name:
@@ -166,6 +159,117 @@ class Makim(PrintPlugin):
         )
         os._exit(MakimError.MAKIM_GROUP_NOT_FOUND.value)
 
+    def _load_config_data(self):
+        with open(self.makim_file, 'r') as f:
+            # escape template tags
+            content = escape_template_tag(f.read())
+            f = io.StringIO(content)
+            self.global_data = yaml.safe_load(f)
+
+    def _load_shell_app(self, shell_app: str = ''):
+        if not shell_app:
+            shell_app = self.global_data.get('shell', 'xonsh')
+        self.shell_app = getattr(sh, shell_app)
+
+    def _load_dotenv(self, data_scope: dict) -> dict:
+        env_file = data_scope.get('env-file')
+        if not env_file:
+            return {}
+
+        if not env_file.startswith('/'):
+            # use makim file as reference for the working directory
+            # for the .env file
+            env_file = str(Path(self.makim_file).parent / env_file)
+
+        if not Path(env_file).exists():
+            self._print_error('[EE] The given env-file was not found.')
+            os._exit(MakimError.MAKIM_ENV_FILE_NOT_FOUND.value)
+
+        return dotenv.dotenv_values(env_file)
+
+    def _load_scoped_data(
+        self, scope: str
+    ) -> Tuple[Dict[str, str], Dict[str, str]]:
+        scope_options = ('global', 'group', 'target')
+        if scope not in scope_options:
+            raise Exception(f'The given scope `{scope}` is not valid.')
+
+        def _render_env_inplace(
+            env_user: dict, env_file: dict, variables: dict, env: dict
+        ):
+            env.update(env_file)
+            for k, v in env_user.items():
+                env[k] = Template(unescape_template_tag(str(v))).render(
+                    env=env, vars=variables
+                )
+
+        scope_id = scope_options.index(scope)
+
+        env = deepcopy(dict(os.environ))
+        variables: dict = {}
+
+        if scope_id >= 0:
+            env_user = self.global_data.get('env', {})
+            env_file = self._load_dotenv(self.global_data)
+            _render_env_inplace(env_user, env_file, variables, env)
+            variables.update(self._load_scoped_vars('global', env=env))
+
+        if scope_id >= 1:
+            env_user = self.group_data.get('env', {})
+            env_file = self._load_dotenv(self.group_data)
+            _render_env_inplace(env_user, env_file, variables, env)
+            variables.update(self._load_scoped_vars('group', env=env))
+
+        if scope_id == 2:
+            env_user = self.target_data.get('env', {})
+            env_file = self._load_dotenv(self.target_data)
+            _render_env_inplace(env_user, env_file, variables, env)
+            variables.update(self._load_scoped_vars('target', env=env))
+
+        return env, variables
+
+    def _load_scoped_vars(self, scope: str, env) -> dict:
+        scope_options = ('global', 'group', 'target')
+        if scope not in scope_options:
+            raise Exception(f'The given scope `{scope}` is not valid.')
+        scope_id = scope_options.index(scope)
+
+        variables = {}
+
+        if scope_id >= 0:
+            variables.update(
+                {
+                    k: v.strip()
+                    for k, v in self.global_data.get('vars', {}).items()
+                }
+            )
+        if scope_id >= 1:
+            variables.update(
+                {
+                    k: v.strip()
+                    for k, v in self.group_data.get('vars', {}).items()
+                }
+            )
+        if scope_id == 2:
+            variables.update(
+                {
+                    k: v.strip()
+                    for k, v in self.target_data.get('vars', {}).items()
+                }
+            )
+        return variables
+
+    def _load_target_args(self):
+        for name, value in self.target_data.get('args', {}).items():
+            qualified_name = f'--{name}'
+            if self.args.get(qualified_name):
+                continue
+            default = value.get('default')
+            is_bool = value.get('type', '') == 'bool'
+            self.args[qualified_name] = (
+                default if default is not None else False if is_bool else None
+            )
+
     @property
     def shell_args(self):
         if self.shell_app.__dict__['__name__'].endswith('bash'):
@@ -201,6 +305,11 @@ class Makim(PrintPlugin):
             )
 
         for dep_data in self.target_data['dependencies']:
+            env, variables = makim_dep._load_scoped_data('target')
+            for k, v in env.items():
+                os.environ[k] = v
+
+            makim_dep.env_scoped = deepcopy(env)
             args_dep = {}
 
             # update the arguments
@@ -212,7 +321,9 @@ class Makim(PrintPlugin):
                 )
 
                 args_dep[f'--{arg_name}'] = yaml.safe_load(
-                    Template(unescaped_value).render(args=original_args_clean)
+                    Template(unescaped_value).render(
+                        args=original_args_clean, env=makim_dep.env_scoped
+                    )
                 )
 
             args_dep['target'] = dep_data['target']
@@ -222,7 +333,7 @@ class Makim(PrintPlugin):
             if_stmt = dep_data.get('if')
             if if_stmt:
                 result = Template(unescape_template_tag(str(if_stmt))).render(
-                    args=original_args_clean
+                    args=original_args_clean, env=self.env_scoped
                 )
                 if not yaml.safe_load(result):
                     if args.get('verbose'):
@@ -246,19 +357,16 @@ class Makim(PrintPlugin):
             )
             os._exit(MakimError.MAKIM_VARS_ATTRIBUTE_INVALID.value)
 
-        variables = {}
-        variables.update(
-            {k: v.strip() for k, v in self.global_data.get('vars', {}).items()}
-        )
-        variables.update(
-            {k: v.strip() for k, v in self.group_data.get('vars', {}).items()}
-        )
-        variables.update(
-            {k: v.strip() for k, v in self.target_data.get('vars', {}).items()}
-        )
+        env, variables = self._load_scoped_data('target')
+        for k, v in env.items():
+            os.environ[k] = v
+
+        self.env_scoped = deepcopy(env)
 
         args_input = {'makim_file': args['makim_file']}
         for k, v in self.target_data.get('args', {}).items():
+            if not isinstance(v, dict):
+                raise Exception('`args` attribute should be a dictionary.')
             k_clean = k.replace('-', '_')
             action = v.get('action', '').replace('-', '_')
             is_store_true = action == 'store_true'
@@ -286,27 +394,6 @@ class Makim(PrintPlugin):
                 )
                 os._exit(MakimError.MAKIM_ARGUMENT_REQUIRED.value)
 
-        current_env = deepcopy(os.environ)
-        env = {}
-        for env_user, env_file in [
-            (self.global_data.get('env', {}), deepcopy(self.env)),
-            (
-                self.group_data.get('env', {}),
-                self._load_dotenv(self.group_data),
-            ),
-            (
-                self.target_data.get('env', {}),
-                self._load_dotenv(self.target_data),
-            ),
-        ]:
-            env.update(env_file)
-            for k, v in env_user.items():
-                env[k] = Template(unescape_template_tag(str(v))).render(
-                    args=args_input, env=env, vars=variables
-                )
-        for k, v in env.items():
-            os.environ[k] = v
-
         cmd = unescape_template_tag(str(cmd))
         cmd = Template(cmd).render(args=args_input, env=env, vars=variables)
         if args.get('verbose'):
@@ -329,34 +416,7 @@ class Makim(PrintPlugin):
 
         # move back the environment variable to the previous values
         os.environ.clear()
-        os.environ.update(current_env)
-
-    def _load_dotenv(self, data_scope: dict) -> dict:
-        env_file = data_scope.get('env-file')
-        if not env_file:
-            return {}
-
-        if not env_file.startswith('/'):
-            # use makim file as reference for the working directory
-            # for the .env file
-            env_file = str(Path(self.makim_file).parent / env_file)
-
-        if not Path(env_file).exists():
-            self._print_error('[EE] The given env-file was not found.')
-            os._exit(MakimError.MAKIM_ENV_FILE_NOT_FOUND.value)
-
-        return dotenv.dotenv_values(env_file)
-
-    def _load_target_args(self):
-        for name, value in self.target_data.get('args', {}).items():
-            qualified_name = f'--{name}'
-            if self.args.get(qualified_name):
-                continue
-            default = value.get('default')
-            is_bool = value.get('type', '') == 'bool'
-            self.args[qualified_name] = (
-                default if default is not None else False if is_bool else None
-            )
+        os.environ.update(self.env_scoped)
 
     # public methods
 

@@ -4,7 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - python 3.8.1  # min version supported
-  - poetry
+  - poetry >=1.3
   - nodejs  # used by semantic-release
   # https://github.com/ionrock/cachecontrol/issues/292#issuecomment-1536120527
   - urllib3 <2
