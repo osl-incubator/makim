@@ -25,8 +25,6 @@ groups:
 
       release:
         help: Build package for release
-        env:
-          ASAN_OPTIONS: '{{ args.asan_options }}'
         args:
           asan-options:
             help: |
@@ -52,6 +50,7 @@ groups:
           - target: build.clean
             if: {{ args.clean }}
         run: |
+          $ASAN_OPTIONS = '{{ args.asan_options }}'
           echo "[II] Build the package for release options:"
           echo "\tbuild-type: {{ args.build_type }}"
           echo "\textras: {{ args.extras }}"
