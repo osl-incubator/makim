@@ -19,7 +19,7 @@ import yaml
 from colorama import Fore
 from jinja2 import Template
 
-from makim.error import MakimError
+from makim.errors import MakimError
 
 
 def escape_template_tag(v: str) -> str:
