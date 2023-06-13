@@ -1,11 +1,13 @@
-version: 1.0.0
+version: 1.0
 compose-app: docker-compose
+defaults:
+  group: group1
 service-groups:
-  - name: default
+  - name: group1
     project-name: makim-tests
     compose-path: containers/compose.yaml
     env-file: .env
     services:
       default: service1
-      list:
+      available:
         - name: service1

@@ -1,4 +1,4 @@
-version: 1.0.0
+version: 1.0
 env-file: .env
 groups:
   default:
@@ -194,14 +194,15 @@ groups:
       setup:
         help: build necessary docker image
         run: |
-          containers-sugar pull --group default --all
-          containers-sugar build --group default --all
-          containers-sugar restart --group default --all --options -d
+          pwd
+          kxgr pull --all
+          kxgr build --all
+          kxgr ext restart --all --options -d
       run:
         help: test running a docker service using containers-sugar
         dependencies:
           - target: containers.setup
         shell: bash
         run: |
-          containers-sugar exec --group default --service service1 --options -T --cmd python -c "print(1)"
-          containers-sugar stop --all
+          kxgr exec --service service1 --options -T --cmd python -c "print(1)"
+          kxgr stop --all

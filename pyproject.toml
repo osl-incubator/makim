@@ -68,6 +68,7 @@ ruff = "^0.0.272"
 bandit = "^1.7.5"
 vulture = "^2.7"
 pydocstyle = "^6.3.0"
+docker-compose = "^1.29.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
