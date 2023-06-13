@@ -1,4 +1,6 @@
 """
+Makim main class.
+
 `MakIm` or just `makim` is based on `make` and focus on improve
 the way to define targets and dependencies. Instead of using the
 `Makefile` format, it uses `yaml` format.
@@ -15,7 +17,7 @@ from typing import Dict, Optional, Tuple
 
 import dotenv
 import sh
-import yaml
+import yaml  # type: ignore
 from colorama import Fore
 from jinja2 import Template
 
@@ -23,14 +25,18 @@ from makim.errors import MakimError
 
 
 def escape_template_tag(v: str) -> str:
+    """Escape template tag when processing the template config file."""
     return v.replace('{{', r'\{\{').replace('}}', r'\}\}')
 
 
 def unescape_template_tag(v: str) -> str:
+    """Unescape template tag when processing the template config file."""
     return v.replace(r'\{\{', '{{').replace(r'\}\}', '}}')
 
 
 class PrintPlugin:
+    """Logs class."""
+
     def _print_error(self, message: str):
         print(Fore.RED, message, Fore.RESET, file=sys.stderr)
 
@@ -42,6 +48,8 @@ class PrintPlugin:
 
 
 class Makim(PrintPlugin):
+    """Makim main class."""
+
     makim_file: str = '.makim.yaml'
     global_data: dict = {}
     shell_app: sh.Command = sh.xonsh
@@ -56,6 +64,7 @@ class Makim(PrintPlugin):
     target_data: dict = {}
 
     def __init__(self):
+        """Prepare the Makim class with the default configuration."""
         os.environ['RAISE_SUBPROC_ERROR'] = '1'
         os.environ['XONSH_SHOW_TRACEBACK'] = '0'
 
@@ -96,7 +105,9 @@ class Makim(PrintPlugin):
         return Path(self.makim_file).exists()
 
     def _verify_target_conditional(self, conditional):
-        ...
+        # todo: implement verification
+        print(f'condition {conditional} not verified')
+        return False
 
     def _verify_args(self):
         if not self._check_makim_file():
@@ -272,6 +283,7 @@ class Makim(PrintPlugin):
 
     @property
     def shell_args(self):
+        """Return the arguments for the defined shell app."""
         if self.shell_app.__dict__['__name__'].endswith('bash'):
             return ['-e']
         return []
@@ -421,6 +433,7 @@ class Makim(PrintPlugin):
     # public methods
 
     def load(self, makim_file: str):
+        """Load makim configuration."""
         self.makim_file = makim_file
         self._load_config_data()
         self._verify_config()
@@ -428,6 +441,7 @@ class Makim(PrintPlugin):
         self.env = self._load_dotenv(self.global_data)
 
     def run(self, args: dict):
+        """Run makim target code."""
         self.args = args
 
         # setup

@@ -1,3 +1,6 @@
+default_stages:
+  - commit
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.1.0
@@ -6,56 +9,70 @@ repos:
 
   - repo: local
     hooks:
-    - entry: blue
-      id: blue
+    - id: blue
       name: blue
+      entry: blue
       exclude: |
         (?x)(
           docs
         )
-      files: ""
       language: system
       pass_filenames: true
-      stages:
-        - commit
       types:
         - python
-        - file
-        - python
 
-    - entry: flake8
-      exclude: ^$
-      files: ""
-      id: flake8
-      language: python
-      name: flake8
+    - id: ruff
+      name: ruff
+      entry: ruff check
+      language: system
+      exclude: "docs/"
       pass_filenames: true
-      stages:
-        - commit
       types:
         - python
 
-    - entry: isort
-      exclude: "^.*/js/.*$"
-      files: ""
-      id: isort
-      language: python
+    - id: isort
       name: isort
+      entry: isort
+      language: system
       pass_filenames: true
-      stages:
-        - commit
       types:
         - python
 
-    - entry: mypy
-      exclude: ^$
-      # note: it would be good to extend this to other apps as well
-      files: "makim/"
-      id: mypy
-      language: python
+    - id: mypy
       name: mypy
+      entry: mypy
+      language: system
+      files: "makim/"
       pass_filenames: true
-      stages:
-        - commit
+      types:
+        - python
+
+
+    - id: bandit
+      name: bandit
+      entry: bandit
+      language: system
+      args: ['--configfile', 'pyproject.toml']
+      pass_filenames: true
+      types:
+        - python
+
+    - id: vulture
+      name: vulture
+      entry: vulture
+      language: system
+      files: "makim/"
+      description: Find unused Python code.
+      pass_filenames: true
+      types:
+        - python
+
+    - id: pydocstyle
+      name: pydocstyle
+      entry: pydocstyle
+      exclude: ^$
+      files: "makim/"
+      language: system
+      pass_filenames: true
       types:
         - python
