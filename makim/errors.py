@@ -1,7 +1,10 @@
+"""Classes and function for handling logs."""
 from enum import Enum
 
 
 class MakimError(Enum):
+    """Type error class."""
+
     SH_ERROR_RETURN_CODE = 1
     SH_KEYBOARD_INTERRUPT = 2
     MAKIM_CONFIG_FILE_NOT_FOUND = 3

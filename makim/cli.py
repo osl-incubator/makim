@@ -1,3 +1,4 @@
+"""Cli functions to define the arguments and to call Makim."""
 import argparse
 import os
 import sys
@@ -21,6 +22,7 @@ class CustomHelpFormatter(argparse.RawTextHelpFormatter):
         width=None,
         **kwargs,
     ):
+        """Define the parameters for the argparse help text."""
         super().__init__(
             prog,
             indent_increment=indent_increment,
@@ -35,6 +37,8 @@ makim = Makim()
 
 def _get_args():
     """
+    Define the arguments for the CLI.
+
     note: when added new flags, update the list of flags to be
           skipped at extract_makim_args function.
     """
@@ -123,10 +127,12 @@ def _get_args():
 
 
 def show_version():
+    """Show version."""
     print(__version__)
 
 
 def extract_makim_args():
+    """Extract makim arguments from the CLI call."""
     makim_args = {}
     index_to_remove = []
     for ind, arg in enumerate(list(sys.argv)):
@@ -171,6 +177,7 @@ def extract_makim_args():
 
 
 def app():
+    """Call the makim program with the arguments defined by the user."""
     makim_args = extract_makim_args()
     args_parser = _get_args()
     args = args_parser.parse_args()
