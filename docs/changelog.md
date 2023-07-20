@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.8.2](https://github.com/osl-incubator/makim/compare/1.8.1...1.8.2) (2023-07-20)
+
+
+### Bug Fixes
+
+* Trigger release for the latest refactoring commits ([077479c](https://github.com/osl-incubator/makim/commit/077479c9ed15800a08bd175bdeca09b8969cc788))
+
 ## [1.8.1](https://github.com/osl-incubator/makim/compare/1.8.0...1.8.1) (2023-05-21)
 
 
