@@ -132,7 +132,7 @@ jobs:
       if: success() || failure()
       run: |
         pre-commit install
-        makim tests.lint
+        makim tests.linter
 
     - name: Setup tmate session
       if: "${{ failure() && (contains(github.event.pull_request.labels.*.name, 'ci:enable-debugging')) }}"

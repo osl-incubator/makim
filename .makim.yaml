@@ -57,13 +57,23 @@ groups:
 
   tests:
     targets:
-      lint:
+      linter:
         help: Run linter tools
         run: pre-commit run --all-files --verbose
 
       unittest:
         help: Run tests
         run: pytest -s -vv tests
+
+      smoke:
+        help: Run smoke tests
+        dependencies:
+          - target: smoke-tests.simple
+          - target: smoke-tests.complex
+          - target: smoke-tests.containers
+          - target: smoke-tests.unittest
+          - target: smoke-tests.vars-env
+          - target: smoke-tests.bash
 
   smoke-tests:
     targets:

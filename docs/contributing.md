@@ -86,8 +86,9 @@ $ git checkout -b name-of-your-bugfix-or-feature
 6.  When you’re done makimg changes, check that your changes pass flake8
     and the tests, including testing other Python versions with tox::
 ```bash
-$ makim lint
-$ makim test
+$ makim tests.linter
+$ makim tests.unittest
+$ makim tests.smoke
 ```
 7.  Commit your changes and push your branch to GitHub::
 ```bash
