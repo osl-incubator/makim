@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.8.3](https://github.com/osl-incubator/makim/compare/1.8.2...1.8.3) (2023-08-15)
+
+
+### Bug Fixes
+
+* **deps:** Fix the dependencies pinning ([#54](https://github.com/osl-incubator/makim/issues/54)) ([1038ec3](https://github.com/osl-incubator/makim/commit/1038ec355929454f192142a3546aadcb0a52ee1e))
+
 ## [1.8.2](https://github.com/osl-incubator/makim/compare/1.8.1...1.8.2) (2023-07-20)
 
 
