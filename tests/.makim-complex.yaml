@@ -195,14 +195,14 @@ groups:
         help: build necessary docker image
         run: |
           pwd
-          kxgr pull --all
-          kxgr build --all
-          kxgr ext restart --all --options -d
+          sugar pull --all
+          sugar build --all
+          sugar ext restart --all --options -d
       run:
         help: test running a docker service using containers-sugar
         dependencies:
           - target: containers.setup
         shell: bash
         run: |
-          kxgr exec --service service1 --options -T --cmd python -c "print(1)"
-          kxgr stop --all
+          sugar exec --service service1 --options -T --cmd python -c "print(1)"
+          sugar stop --all
