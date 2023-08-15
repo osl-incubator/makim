@@ -75,6 +75,14 @@ groups:
           - target: smoke-tests.vars-env
           - target: smoke-tests.bash
 
+      ci:
+        help: Run all targets used on CI
+        dependencies:
+          - target: tests.linter
+          - target: tests.unittest
+          - target: tests.smoke
+          - target: docs.build
+
   smoke-tests:
     targets:
       simple:
