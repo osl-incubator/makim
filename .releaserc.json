@@ -2,9 +2,12 @@
   "branches": ["main"],
   "tagFormat": "${version}",
   "plugins": [
-    "@semantic-release/commit-analyzer",
     [
-      "@google/semantic-release-replace-plugin",
+      "@semantic-release/commit-analyzer", {
+        "preset": "conventionalcommits"
+    }],
+    [
+      "semantic-release-replace-plugin",
       {
         "replacements": [
           {
