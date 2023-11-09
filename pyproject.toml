@@ -51,8 +51,6 @@ colorama = ">=0.4.6"
 [tool.poetry.group.dev.dependencies]
 containers-sugar = "1.9.0"
 pytest = ">=7"
-blue = ">=0.9.1"
-isort = ">=5"
 pre-commit = ">=3"
 mypy = ">=1"
 pytest-cov = ">=3.0.0"
@@ -63,10 +61,9 @@ mkdocs-literate-nav = ">=0.4.1"
 mkdocs-macros-plugin = ">=0.6.3"
 mkdocs-material = ">=8"
 mkdocstrings = {version=">=0.19.0", extras=["python"]}
-ruff = ">=0.0.278"
+ruff = ">=0.1.5"
 bandit = ">=1.7.5"
 vulture = ">=2.7"
-pydocstyle = ">=6.3.0"
 compose-go = ">=2.20.2"
 
 [build-system]
@@ -78,24 +75,40 @@ testpaths = [
     "tests",
 ]
 
-[tool.blue]
-line-length = 79  # this is the default
-
-[tool.isort]
-ensure_newline_before_comments = true
-line_length = 79
-multi_line_output = 3
-include_trailing_comma = true
-skip_glob = ["docs/*", "*.egg-info"]
-
 [tool.mypy]
 ignore_missing_imports = true
 
+
 [tool.ruff]
 line-length = 79
+force-exclude = true
+src = ["./makim", "./tests"]
+ignore = ["RUF012"]
 exclude = [
   "docs",
 ]
+select = [
+  "E",   # pycodestyle
+  "F",   # pyflakes
+  "D",   # pydocstyle
+  "YTT", # flake8-2020
+  "PL",  # PL
+  "RUF", # Ruff-specific rules
+  "I001", # isort
+]
+# fixable = ["I001"]
+fix = true
+
+[tool.ruff.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.isort]
+# Use a single line between direct and from import
+lines-between-types = 1
+
+[tool.ruff.format]
+quote-style = "single"
+
 
 [tool.bandit]
 exclude_dirs = ["tests"]
