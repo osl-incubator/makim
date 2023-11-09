@@ -21,6 +21,7 @@ import makim
     ],
 )
 def test_success(target, args):
+    """Test makim when expects success."""
     makim_file = Path(__file__).parent / '.makim-unittest.yaml'
 
     m = makim.Makim()

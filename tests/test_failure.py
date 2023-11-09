@@ -1,11 +1,13 @@
 """Tests for `makim` package."""
 import os
 import sys
+
 from pathlib import Path
 
 import pytest
 
 import makim
+
 from makim.errors import MakimError
 
 
@@ -18,6 +20,7 @@ from makim.errors import MakimError
     ],
 )
 def test_failure(target, args, error_code):
+    """Test makim with expected failures."""
     makim_file = Path(__file__).parent / '.makim-unittest.yaml'
 
     m = makim.Makim()

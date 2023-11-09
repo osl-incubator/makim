@@ -11,6 +11,7 @@ import pprint
 import sys
 import tempfile
 import warnings
+
 from copy import deepcopy
 from pathlib import Path
 from typing import Dict, Optional, Tuple
@@ -18,10 +19,15 @@ from typing import Dict, Optional, Tuple
 import dotenv
 import sh
 import yaml  # type: ignore
+
 from colorama import Fore
 from jinja2 import Template
 
 from makim.errors import MakimError
+
+SCOPE_GLOBAL = 0
+SCOPE_GROUP = 1
+SCOPE_TARGET = 2
 
 
 def escape_template_tag(v: str) -> str:
@@ -150,7 +156,7 @@ class Makim(PrintPlugin):
             self.group_name = group_name
         shell_app_default = self.global_data.get('shell', 'xonsh')
         if self.group_name == 'default' and len(groups) == 1:
-            group = list(groups)[0]
+            group = next(iter(groups))
             self.group_data = groups[group]
 
             shell_app = self.group_data.get('shell', shell_app_default)
@@ -174,8 +180,8 @@ class Makim(PrintPlugin):
         with open(self.makim_file, 'r') as f:
             # escape template tags
             content = escape_template_tag(f.read())
-            f = io.StringIO(content)
-            self.global_data = yaml.safe_load(f)
+            content_io = io.StringIO(content)
+            self.global_data = yaml.safe_load(content_io)
 
     def _load_shell_app(self, shell_app: str = ''):
         if not shell_app:
@@ -219,19 +225,19 @@ class Makim(PrintPlugin):
         env = deepcopy(dict(os.environ))
         variables: dict = {}
 
-        if scope_id >= 0:
+        if scope_id >= SCOPE_GLOBAL:
             env_user = self.global_data.get('env', {})
             env_file = self._load_dotenv(self.global_data)
             _render_env_inplace(env_user, env_file, variables, env)
             variables.update(self._load_scoped_vars('global', env=env))
 
-        if scope_id >= 1:
+        if scope_id >= SCOPE_GROUP:
             env_user = self.group_data.get('env', {})
             env_file = self._load_dotenv(self.group_data)
             _render_env_inplace(env_user, env_file, variables, env)
             variables.update(self._load_scoped_vars('group', env=env))
 
-        if scope_id == 2:
+        if scope_id == SCOPE_TARGET:
             env_user = self.target_data.get('env', {})
             env_file = self._load_dotenv(self.target_data)
             _render_env_inplace(env_user, env_file, variables, env)
@@ -247,21 +253,21 @@ class Makim(PrintPlugin):
 
         variables = {}
 
-        if scope_id >= 0:
+        if scope_id >= SCOPE_GLOBAL:
             variables.update(
                 {
                     k: v.strip()
                     for k, v in self.global_data.get('vars', {}).items()
                 }
             )
-        if scope_id >= 1:
+        if scope_id >= SCOPE_GROUP:
             variables.update(
                 {
                     k: v.strip()
                     for k, v in self.group_data.get('vars', {}).items()
                 }
             )
-        if scope_id == 2:
+        if scope_id == SCOPE_TARGET:
             variables.update(
                 {
                     k: v.strip()
