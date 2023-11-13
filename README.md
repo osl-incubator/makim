@@ -34,7 +34,7 @@ This is an example of a configuration file:
 ```yaml
 version: 1.0.0
 groups:
-  - name: default
+  default:
     env-file: .env
     targets:
       clean:
