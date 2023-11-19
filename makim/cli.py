@@ -100,6 +100,8 @@ def _get_args():
     target_help = []
     groups = makim.global_data.get('groups', [])
     for group in groups:
+        target_help.append('\n' + group + ':')
+        target_help.append('-' * (len(group) + 1))
         for target_name, target_data in groups[group]['targets'].items():
             target_name_qualified = f'{group}.{target_name}'
             help_text = target_data['help'] if 'help' in target_data else ''
@@ -119,8 +121,7 @@ def _get_args():
         nargs='?',
         default=None,
         help=(
-            'Specify the target command to be performed. '
-            '\nOptions are:\n' + '\n'.join(target_help)
+            'Specify the target command to be performed. Options are:\n' + '\n'.join(target_help)
         ),
     )
 
