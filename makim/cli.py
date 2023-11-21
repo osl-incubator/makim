@@ -122,7 +122,7 @@ def _get_args():
         default=None,
         help=(
             'Specify the target command to be performed. Options are:\n'
-              + '\n'.join(target_help)
+            + '\n'.join(target_help)
         ),
     )
 
