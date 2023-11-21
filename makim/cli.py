@@ -121,8 +121,8 @@ def _get_args():
         nargs='?',
         default=None,
         help=(
-            'Specify the target command to be performed. Options are:\n' + 
-            '\n'.join(target_help)
+            'Specify the target command to be performed. Options are:\n'
+              + '\n'.join(target_help)
         ),
     )
 
