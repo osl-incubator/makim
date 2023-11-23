@@ -7,29 +7,7 @@ license = "BSD 3 Clause"
 repository = "https://github.com/osl-incubator/makim"
 homepage = "https://github.com/osl-incubator/makim"
 readme = "README.md"
-include = [
-  "*.cfg",
-  "*.ini",
-  "*.js",
-  "*.json",
-  "*.lock",
-  "*.md",
-  "*.py",
-  "*.sh",
-  "*.rst",
-  "*.txt",
-  "*.toml",
-  "*.yml",
-  "*.yaml",
-  ".github",
-  "conda",
-  "docker",
-  "docs",
-  ".dockerignore",
-  ".env.tpl",
-  ".gitignore",
-  "Makefile",
-]
+include = ["src/makim/*"]
 exclude = [
   ".git/*",
   ".env*",
@@ -37,7 +15,6 @@ exclude = [
 
 [tool.poetry.scripts]
 "makim" = "makim.__main__:app"
-
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
@@ -82,7 +59,7 @@ ignore_missing_imports = true
 [tool.ruff]
 line-length = 79
 force-exclude = true
-src = ["./makim", "./tests"]
+src = ["./src/makim", "./tests"]
 ignore = ["RUF012"]
 exclude = [
   "docs",
@@ -112,7 +89,7 @@ quote-style = "single"
 
 [tool.bandit]
 exclude_dirs = ["tests"]
-targets = "makim/"
+targets = "src/makim/"
 
 [tool.vulture]
 exclude = ["tests"]
@@ -120,6 +97,6 @@ ignore_decorators = []
 ignore_names = []
 make_whitelist = true
 min_confidence = 80
-paths = ["makim/"]
+paths = ["src/makim/"]
 sort_by_size = true
 verbose = false
