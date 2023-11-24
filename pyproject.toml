@@ -7,7 +7,13 @@ license = "BSD 3 Clause"
 repository = "https://github.com/osl-incubator/makim"
 homepage = "https://github.com/osl-incubator/makim"
 readme = "README.md"
-include = ["src/makim/*"]
+
+packages = [
+  {include = "makim", from="src"},
+]
+
+include = ["src/makim/py.typed"]
+
 exclude = [
   ".git/*",
   ".env*",
