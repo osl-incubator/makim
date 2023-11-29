@@ -80,9 +80,7 @@ class Makim(PrintPlugin):
         with open(filepath, 'w') as f:
             f.write(cmd)
 
-        p = self.shell_app(
-            *self.shell_args,
-            filepath,
+        sh_args = dict(
             _in=sys.stdin,
             _out=sys.stdout,
             _err=sys.stderr,
@@ -92,6 +90,19 @@ class Makim(PrintPlugin):
             _env=os.environ,
             _new_session=True,
         )
+
+        working_directory_target = self._load_working_directory('target')
+        working_directory_group = self._load_working_directory('group')
+        working_directory_global = self._load_working_directory('global')
+
+        if working_directory_group:
+            sh_args['_cwd'] = working_directory_group
+        elif working_directory_target:
+            sh_args['_cwd'] = working_directory_target
+        elif working_directory_global:
+            sh_args['_cwd'] = working_directory_global
+
+        p = self.shell_app(*self.shell_args, filepath, **sh_args)
 
         try:
             p.wait()
@@ -182,6 +193,40 @@ class Makim(PrintPlugin):
             content = escape_template_tag(f.read())
             content_io = io.StringIO(content)
             self.global_data = yaml.safe_load(content_io)
+
+    def _load_working_directory(self, scope):
+        """Load working directory based on scope."""
+        if scope == 'target' and self.target_data.get('working-directory'):
+            working_dir = self.target_data['working-directory']
+            return (
+                Path(working_dir)
+                if Path(working_dir).is_absolute()
+                else Path(self.global_data['working-directory'] / working_dir)
+            )
+
+        elif scope == 'group' and self.group_data.get('working-directory'):
+            return (
+                Path(self.group_data['working-directory'])
+                if Path(self.group_data['working-directory']).is_absolute()
+                else Path(
+                    self.target_data['working-directory']
+                    / self.group_data['working-directory']
+                )
+                if Path(
+                    self.target_data['working-directory']
+                    / self.group_data['working-directory']
+                ).is_absolute()
+                else Path(
+                    self.global_data['working-directory']
+                    / self.target_data['working-directory']
+                    / self.group_data['working-directory']
+                )
+            )
+
+        elif scope == 'global' and self.global_data.get('working-directory'):
+            return Path(self.global_data['working-directory'])
+        else:
+            return None
 
     def _load_shell_app(self, shell_app: str = ''):
         if not shell_app:
