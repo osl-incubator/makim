@@ -63,6 +63,10 @@ class Makim(PrintPlugin):
     # temporary variables
     env: dict = {}  # initial env
     env_scoped: dict = {}  # current env
+    working_directory: Optional[Path] = None  # initial working directory
+    working_directory_scoped: Optional[
+        Path
+    ] = None  # current working directory
     args: Optional[object] = None
     group_name: str = 'default'
     group_data: dict = {}
@@ -91,16 +95,13 @@ class Makim(PrintPlugin):
             _new_session=True,
         )
 
-        working_directory_target = self._load_working_directory('target')
-        working_directory_group = self._load_working_directory('group')
-        working_directory_global = self._load_working_directory('global')
+        self.working_directory_scoped = None  # Reset scoped working directory
+        self._load_working_directory('target')
+        self._load_working_directory('group')
+        self._load_working_directory('global')
 
-        if working_directory_group:
-            sh_args['_cwd'] = working_directory_group
-        elif working_directory_target:
-            sh_args['_cwd'] = working_directory_target
-        elif working_directory_global:
-            sh_args['_cwd'] = working_directory_global
+        if self.working_directory_scoped:
+            sh_args['_cwd'] = self.working_directory_scoped
 
         p = self.shell_app(*self.shell_args, filepath, **sh_args)
 
@@ -196,37 +197,49 @@ class Makim(PrintPlugin):
 
     def _load_working_directory(self, scope):
         """Load working directory based on scope."""
+        working_dir = (
+            None  # Local variable to hold the resolved working directory
+        )
+
         if scope == 'target' and self.target_data.get('working-directory'):
             working_dir = self.target_data['working-directory']
-            return (
-                Path(working_dir)
-                if Path(working_dir).is_absolute()
-                else Path(self.global_data['working-directory'] / working_dir)
-            )
 
         elif scope == 'group' and self.group_data.get('working-directory'):
-            return (
-                Path(self.group_data['working-directory'])
-                if Path(self.group_data['working-directory']).is_absolute()
-                else Path(
-                    self.target_data['working-directory']
-                    / self.group_data['working-directory']
-                )
-                if Path(
-                    self.target_data['working-directory']
-                    / self.group_data['working-directory']
-                ).is_absolute()
-                else Path(
-                    self.global_data['working-directory']
-                    / self.target_data['working-directory']
-                    / self.group_data['working-directory']
-                )
-            )
+            working_dir = self.group_data['working-directory']
 
         elif scope == 'global' and self.global_data.get('working-directory'):
-            return Path(self.global_data['working-directory'])
-        else:
-            return None
+            working_dir = self.global_data['working-directory']
+
+        if working_dir:
+            working_dir_path = Path(working_dir)
+            if not working_dir_path.is_absolute():
+                # If the working directory is not absolute,
+                # #resolve it based on the current context
+                if scope == 'target':
+                    working_dir_path = (
+                        Path(
+                            self.group_data['working-directory'] / working_dir
+                        )
+                        if Path(
+                            self.group_data['working-directory'] / working_dir
+                        ).is_absolute()
+                        else Path(
+                            self.global_data['working-directory']
+                            / self.group_data['working-directory']
+                            / working_dir
+                        )
+                    )
+
+                elif scope == 'group':
+                    working_dir_path = Path(
+                        self.global_data['working-directory'] / working_dir
+                    )
+
+                elif scope == 'global':
+                    working_dir_path = Path(working_dir)
+
+            # Set the scoped working directory
+            self.working_directory_scoped = working_dir_path
 
     def _load_shell_app(self, shell_app: str = ''):
         if not shell_app:
