@@ -13,6 +13,7 @@ groups:
           mkdir -p /tmp/group2/target-relative
           mkdir -p /tmp/group1/target4
           import os
+          print(os.getcwd())
           assert os.getcwd() == "/tmp"
           echo "working-directory-absolute-path [I] Done!"
 
