@@ -34,7 +34,6 @@ jobs:
       if: ${{ matrix.os == 'macos' }}
       run: |
         sudo mkdir -p /tmp
-        sudo chown -R $(whoami)
         sudo chmod 777 /tmp
 
         brew install gnu-sed
