@@ -22,7 +22,7 @@ groups:
         help: Test global absolute path, group no path, target absolute path
         run: |
           import os
-          assert os.getcwd() == "private/tmp"
+          assert os.getcwd() == "/private/tmp"
           echo "working-directory-absolute-path [II] Done!"
 
       target-relative:
@@ -30,7 +30,7 @@ groups:
         help: est global absolute path, group no path, target relative path
         run: |
           import os
-          assert os.getcwd() == "private/tmp/group1/target4"
+          assert os.getcwd() == "/private/tmp/group1/target4"
           echo "working-directory-absolute-path [III] Done!"
           
   group-relative:
@@ -40,7 +40,7 @@ groups:
         help: Test global absolute path, group relative path, target no path
         run: |
           import os
-          assert os.getcwd() == "private/tmp/group1"
+          assert os.getcwd() == "/private/tmp/group1"
           echo "working-directory-absolute-path [IV] Done!"
 
       target-absolute:
@@ -48,7 +48,7 @@ groups:
         help: Test global absolute path, group relative path, target absolute path
         run: |
           import os
-          assert os.getcwd() == "private/tmp"
+          assert os.getcwd() == "/private/tmp"
           echo "working-directory-absolute-path [V] Done!"
 
       target-relative:
@@ -56,7 +56,7 @@ groups:
         help: Test global absolute path, group relative path, target relative path
         run: |
           import os
-          assert os.getcwd() == "private/tmp/group1/target3"
+          assert os.getcwd() == "/private/tmp/group1/target3"
           echo "working-directory-absolute-path [VI] Done!"
 
   group-absolute:
@@ -66,7 +66,7 @@ groups:
         help: Test global absolute path, group absolute path, target no path
         run: |
           import os 
-          assert os.getcwd() == "private/tmp/group2"
+          assert os.getcwd() == "/private/tmp/group2"
           echo "working-directory-absolute-path [VII] Done!"
 
       target-absolute:
@@ -74,7 +74,7 @@ groups:
         help: Test global absolute path, group absolute path, target absolute path
         run: |
           import os
-          assert os.getcwd() == "private/tmp"
+          assert os.getcwd() == "/private/tmp"
           echo "working-directory-absolute-path [VIII] Done!"
 
       target-relative:
@@ -82,5 +82,5 @@ groups:
         help: Test global absolute path, group absolute path, target relative path
         run: |
           import os
-          assert os.getcwd() == "/tmp/group2/target-relative"
+          assert os.getcwd() == "/private/tmp/group2/target-relative"
           echo "working-directory-absolute-path [IX] Done!"
