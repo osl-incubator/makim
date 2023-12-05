@@ -83,6 +83,9 @@ jobs:
     - name: Run smoke test for variable envs
       run: makim smoke-tests.vars-env
 
+    - name: Run smoke test for working-directory-absolute-path
+      run:  makim smoke-tests.working-directory-absolute-path
+
     - name: Run unit tests
       run: makim tests.unittest
 
