@@ -234,12 +234,13 @@ groups:
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
           makim --makim-file $MAKIM_FILE --help
           makim --makim-file $MAKIM_FILE --version
+          makim --makim-file $MAKIM_FILE group-no-path.target-no-path $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE group-no-path.target-absolute $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE group-no-path.target-relative $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE group-relative.target-no-path $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE group-relative.target-absolute $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE group-relative.target-relative $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE group-absolute.target-no-path $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE group-absolute.target-absolute $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE group-absolute.target-relative $VERBOSE_FLAG
-          makim --makim-file $MAKIM_FILE group-no-path.target-no-path $VERBOSE_FLAG
-          makim --makim-file $MAKIM_FILE group-no-path.target-absolute $VERBOSE_FLAG
-          makim --makim-file $MAKIM_FILE group-no-path.target-relative $VERBOSE_FLAG
+          
