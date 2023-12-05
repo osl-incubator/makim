@@ -2,16 +2,23 @@ version: 1.0
 working-directory: "/tmp"
 
 groups:
-  group-no-path:
+  setup:
     targets:
-      target-no-path:
-        help: Test global absolute path, group no path, target no path
+      folders:
         run: |
           mkdir -p /tmp/group1
           mkdir -p /tmp/group1/target3
           mkdir -p /tmp/group2
           mkdir -p /tmp/group2/target-relative
           mkdir -p /tmp/group1/target4
+
+  group-no-path:
+    targets:
+      target-no-path:
+        help: Test global absolute path, group no path, target no path
+        dependencies: 
+          - target: setup.folders
+        run: |
           import os
           print(os.getcwd())
           assert os.getcwd() == "/tmp"
@@ -20,6 +27,8 @@ groups:
       target-absolute:
         working-directory: "/tmp"
         help: Test global absolute path, group no path, target absolute path
+        dependencies: 
+          - target: setup.folders
         run: |
           import os
           assert os.getcwd() == "/tmp"
@@ -28,6 +37,8 @@ groups:
       target-relative:
         working-directory: "/tmp/group1/target4"
         help: est global absolute path, group no path, target relative path
+        dependencies: 
+          - target: setup.folders
         run: |
           import os
           assert os.getcwd() == "/tmp/group1/target4"
@@ -38,6 +49,8 @@ groups:
     targets:
       target-no-path:
         help: Test global absolute path, group relative path, target no path
+        dependencies: 
+          - target: setup.folders
         run: |
           import os
           assert os.getcwd() == "/tmp/group1"
@@ -46,6 +59,8 @@ groups:
       target-absolute:
         working-directory: "/tmp"
         help: Test global absolute path, group relative path, target absolute path
+        dependencies: 
+          - target: setup.folders
         run: |
           import os
           assert os.getcwd() == "/tmp"
@@ -54,6 +69,8 @@ groups:
       target-relative:
         working-directory: "target3"
         help: Test global absolute path, group relative path, target relative path
+        dependencies: 
+          - target: setup.folders
         run: |
           import os
           assert os.getcwd() == "/tmp/group1/target3"
@@ -64,6 +81,8 @@ groups:
     targets:
       target-no-path:
         help: Test global absolute path, group absolute path, target no path
+        dependencies: 
+          - target: setup.folders
         run: |
           import os 
           assert os.getcwd() == "/tmp/group2"
@@ -72,6 +91,8 @@ groups:
       target-absolute:
         working-directory: "/tmp"
         help: Test global absolute path, group absolute path, target absolute path
+        dependencies: 
+          - target: setup.folders
         run: |
           import os
           assert os.getcwd() == "/tmp"
@@ -79,7 +100,10 @@ groups:
 
       target-relative:
         working-directory: "target-relative"
-        help: Test global absolute path, group absolute path, target relative path
+        help: |
+          Test global absolute path, group absolute path, target relative  path
+        dependencies: 
+          - target: setup.folders
         run: |
           import os
           assert os.getcwd() == "/tmp/group2/target-relative"
