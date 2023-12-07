@@ -231,13 +231,10 @@ groups:
             type: bool
             action: store_true
         env:
-          MAKIM_FILE: tests/.makim-working-directory-absolute.yaml
+          MAKIM_FILE: tests/.makim-working-directory-absolute-path.yaml
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
-          export MAKIM_FILE="$(pwd)/${MAKIM_FILE}"
-          # not necessary .. but just to check if would fix the issue with macos
-          cd /tmp
           makim --makim-file $MAKIM_FILE --help
           makim --makim-file $MAKIM_FILE --version
           makim --makim-file $MAKIM_FILE group-no-path.target-no-path $VERBOSE_FLAG
