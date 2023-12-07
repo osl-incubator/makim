@@ -245,4 +245,30 @@ groups:
           makim --makim-file $MAKIM_FILE group-absolute.target-no-path $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE group-absolute.target-absolute $VERBOSE_FLAG
           makim --makim-file $MAKIM_FILE group-absolute.target-relative $VERBOSE_FLAG
+
+      working-directory-no-path:
+        help: Test makim with working-directory for global no-path and its various combinations with group and target working-directory
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/.makim-working-directory-no-path.yaml
+        shell: bash
+        run: |
+          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
+          export MAKIM_FILE="$(pwd)/${MAKIM_FILE}"
+          cd /tmp
+          makim --makim-file $MAKIM_FILE --help
+          makim --makim-file $MAKIM_FILE --version
+          makim --makim-file $MAKIM_FILE group-no-path.target-no-path $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE group-no-path.target-absolute $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE group-no-path.target-relative $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE group-absolute.target-no-path $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE group-absolute.target-absolute $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE group-absolute.target-relative $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE group-relative.target-no-path $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE group-relative.target-absolute $VERBOSE_FLAG
+          makim --makim-file $MAKIM_FILE group-relative.target-relative $VERBOSE_FLAG
           
