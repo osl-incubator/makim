@@ -5,6 +5,7 @@ groups:
   setup:
     targets:
       folders:
+        help: Create necessary folders
         run: |
           mkdir -p /tmp/group1
           mkdir -p /tmp/group1/target3

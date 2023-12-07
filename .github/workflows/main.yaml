@@ -30,19 +30,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Create the /tmp folder for MacOS
-      if: ${{ matrix.os == 'macos'}}
-      run: |
-        sudo mkdir -p /tmp
-        sudo chmod -R 777 /tmp
-
-    - name: Install MacOS extra tools and add extra config
     - name: Install MacOS extra tools and add extra setup
       if: ${{ matrix.os == 'macos' }}
       run: |
-        sudo mkdir -p /tmp
-        sudo chmod 777 /tmp
-
         brew install gnu-sed
         echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bashrc
         echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bash_profile
@@ -95,6 +85,9 @@ jobs:
 
     - name: Run smoke test for working-directory-absolute-path
       run:  makim smoke-tests.working-directory-absolute-path
+
+    - name: Run smoke test for working-directory-no-path
+      run:  makim smoke-tests.working-directory-no-path
 
     - name: Run unit tests
       run: makim tests.unittest
