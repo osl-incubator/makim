@@ -37,8 +37,12 @@ jobs:
         sudo chmod -R 777 /tmp
 
     - name: Install MacOS extra tools and add extra config
+    - name: Install MacOS extra tools and add extra setup
       if: ${{ matrix.os == 'macos' }}
       run: |
+        sudo mkdir -p /tmp
+        sudo chmod 777 /tmp
+
         brew install gnu-sed
         echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bashrc
         echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bash_profile
