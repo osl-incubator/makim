@@ -36,7 +36,7 @@ jobs:
         brew install gnu-sed
         echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bashrc
         echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bash_profile
-        sed -i s:/tmp:/private/tmp:g tests/.makim-working-directory-absolute-path.yaml
+        gsed -i s:/tmp:/private/tmp:g tests/.makim-working-directory-absolute-path.yaml
 
     - name: Prepare conda environment (windows)
       if: ${{ matrix.os == 'windows' }}
