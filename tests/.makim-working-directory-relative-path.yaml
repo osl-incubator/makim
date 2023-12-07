@@ -1,0 +1,113 @@
+version: 1.0
+working-directrory: "global-relative"
+
+groups:
+  setup:
+    targets:
+       create-folders:
+        run: |
+          mkdir -p /tmp/global-relative
+          mkdir -p /tmp/global-relative/target1
+          mkdir -p /tmp/global-relative/target2
+          mkdir -p /tmp/global-relative/group-absolute/target1
+          mkdir -p /tmp/global-relative/group-relative/target1
+
+  group-no-path:
+    targets: 
+      target-no-path: 
+        help: Test global relative path, group no-path, target no-path
+        dependencies:
+          - target: setup.create-folders
+        run: |
+          import os
+          print(os.getcwd())
+          assert os.getcwd() == "/tmp/global-relative"
+          echo "working-directory-relative-path [I] Done!"
+
+      target-absolute:
+        working-directory: "/tmp/global-relative/target1"
+        help: Test global relative path, group no-path, target absolute path
+        dependencies:
+          - target: setup.create-folders 
+        run: |
+          import os
+          assert os.getcwd() == "/tmp/global-relative/target1"
+          echo "working-directory-relative-path [II] Done!"
+
+      target-relative:
+        working-directory: "target2"
+        help: Test global relative path, group no-path, target relative path
+        dependencies:
+          - target: setup.create-folders 
+        run: |
+          import os
+          assert os.getcwd() == "/tmp/global-relative/target2"
+          echo "working-directory-relative-path [III] Done!"
+
+  group-absolute:
+    working-directory: "/tmp/global-relative/group-absolute" 
+    targets:
+      target-no-path: 
+        help: Test global relative path, group absolute path, target no-path
+        dependencies:
+          - target: setup.create-folders 
+        run: |
+          import os
+          assert os.getcwd() == "/tmp/global-relative/group-absolute" 
+          echo "working-directory-relative-path [IV] Done!"
+
+      target-absolute:
+        working-directory: "/tmp/global-relative/target2"
+        help: |
+          Test global relative path, group absolute path, target absolute path
+        dependencies:
+          - target: setup.create-folders 
+        run: |
+          import os
+          assert os.getcwd() == "/tmp/global-relative/target2"
+          echo "working-directory-relative-path [V] Done!"
+
+      target-relative:
+        working-directory: "target1"
+        help: |
+          Test global relative path, group absolute path, target relative path
+        dependencies:
+          - target: setup.create-folders 
+        run: |
+          import os
+          assert os.getcwd() == "/tmp/global-relative/group-absolute/target1"
+          echo "working-directory-relative-path [VI] Done!"
+
+  group-relative:
+    working-directory: "group-relative"
+    targets:
+      target-no-path:
+        help: Test global relative path, group relative path, target no-path
+        dependencies:
+          - target: setup.create-folders 
+        run: |
+          import os
+          assert os.getcwd() == "/tmp/global-relative/group-relative" 
+          echo "working-directory-relative-path [VII] Done!"
+
+      target-absolute:
+        working-directory: "/tmp/global-relative/target2"
+        help: |
+          Test global relative path, group absolute path, target absolute path
+        dependencies:
+          - target: setup.create-folders 
+        run: |
+          import os
+          assert os.getcwd() == "/tmp/global-relative/target2"
+          echo "working-directory-relative-path [VIII] Done!"
+
+      target-relative:
+        working-directory: "target1"
+        help: |
+          Test global relative path, group absolute path, target relative path
+        dependencies:
+          - target: setup.create-folders 
+        run: |
+          import os
+          assert os.getcwd() == "/tmp/global-relative/group-relative/target1"
+          echo "working-directory-relative-path [IX] Done!"

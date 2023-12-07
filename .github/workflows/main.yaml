@@ -88,6 +88,9 @@ jobs:
 
     - name: Run smoke test for working-directory-no-path
       run:  makim smoke-tests.working-directory-no-path
+    
+    - name: Run smoke test for working-directory-relative-path
+      run: makim smoke-tests.working-directory-relative-path
 
     - name: Run unit tests
       run: makim tests.unittest
