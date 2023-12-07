@@ -210,12 +210,12 @@ class Makim(PrintPlugin):
             )
 
         if scope_id >= SCOPE_GROUP:
-            working_dir = working_dir = update_working_directory(
+            working_dir = update_working_directory(
                 working_dir, self.group_data.get('working-directory', '')
             )
 
         if scope_id == SCOPE_TARGET:
-            working_dir = working_dir = update_working_directory(
+            working_dir = update_working_directory(
                 working_dir, self.target_data.get('working-directory', '')
             )
 
