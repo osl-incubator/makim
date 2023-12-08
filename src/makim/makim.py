@@ -14,7 +14,7 @@ import warnings
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, Union
 
 import dotenv
 import sh
@@ -63,6 +63,10 @@ class Makim(PrintPlugin):
     # temporary variables
     env: dict = {}  # initial env
     env_scoped: dict = {}  # current env
+    # initial working directory
+    working_directory: Optional[Path] = None
+    # current working directory
+    working_directory_scoped: Optional[Path] = None
     args: Optional[object] = None
     group_name: str = 'default'
     group_data: dict = {}
@@ -91,6 +95,7 @@ class Makim(PrintPlugin):
             _no_err=True,
             _env=os.environ,
             _new_session=True,
+            _cwd=str(self._resolve_working_directory('target')),
         )
 
         try:
@@ -182,6 +187,39 @@ class Makim(PrintPlugin):
             content = escape_template_tag(f.read())
             content_io = io.StringIO(content)
             self.global_data = yaml.safe_load(content_io)
+
+    def _resolve_working_directory(self, scope: str) -> Optional[Path]:
+        scope_options = ('global', 'group', 'target')
+        if scope not in scope_options:
+            raise Exception(f'The given scope `{scope}` is not valid.')
+
+        def update_working_directory(
+            current_path: Union[None, Path], new_path: str
+        ) -> Path:
+            if not current_path:
+                return Path(new_path)
+            return current_path / Path(new_path)
+
+        scope_id = scope_options.index(scope)
+
+        working_dir: Optional[Path] = None
+
+        if scope_id >= SCOPE_GLOBAL:
+            working_dir = update_working_directory(
+                working_dir, self.global_data.get('working-directory', '')
+            )
+
+        if scope_id >= SCOPE_GROUP:
+            working_dir = update_working_directory(
+                working_dir, self.group_data.get('working-directory', '')
+            )
+
+        if scope_id == SCOPE_TARGET:
+            working_dir = update_working_directory(
+                working_dir, self.target_data.get('working-directory', '')
+            )
+
+        return working_dir
 
     def _load_shell_app(self, shell_app: str = ''):
         if not shell_app:

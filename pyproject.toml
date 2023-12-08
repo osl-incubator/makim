@@ -70,6 +70,8 @@ ignore = ["RUF012"]
 exclude = [
   "docs",
 ]
+
+[tool.ruff.lint]
 select = [
   "E",   # pycodestyle
   "F",   # pyflakes
@@ -79,8 +81,6 @@ select = [
   "RUF", # Ruff-specific rules
   "I001", # isort
 ]
-# fixable = ["I001"]
-fix = true
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
