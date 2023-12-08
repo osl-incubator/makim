@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.9.0](https://github.com/osl-incubator/makim/compare/1.8.3...1.9.0) (2023-12-08)
+
+
+### Features
+
+* Add working-directory to the target, group and global scope ([#65](https://github.com/osl-incubator/makim/issues/65)) ([3fbd61e](https://github.com/osl-incubator/makim/commit/3fbd61efdefe22e29a53c8f0d46b6ef91bc55073))
+
 ## [1.8.3](https://github.com/osl-incubator/makim/compare/1.8.2...1.8.3) (2023-08-15)
 
 
