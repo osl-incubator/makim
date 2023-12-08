@@ -36,7 +36,7 @@ directory for a specific target, a group of targets, or globally.
 ### Syntax and Scopes
 The working-directory attribute can be applied to three different scopes:
 
-- #### **Global Scope:**
+- #### **Global Scope**
     Setting the global working directory impacts all targets and groups in
     the Makim configuration.
 
