@@ -12,27 +12,6 @@ The `working-directory` attribute can be specified at three different
 scopes: global, group, and target. It allows users to set the working
 directory for a specific target, a group of targets, or globally.
 
-### Benefits:
-
-- **Isolation of Commands:**
-  Users can isolate commands within specific directories, preventing
-  potential conflicts and ensuring that commands run in the expected
-  environment.
-
-- **Flexibility in Configuration:**
-  Different targets or groups may require different execution environments.
-  The `working-directory` attribute offers the flexibility to customize
-  these environments based on specific project needs.
-
-- **Ease of Use:**
-  The Makim configuration becomes more readable and maintainable as users
-  can easily understand and manage the execution context of commands.
-
-- **Support for Absolute and Relative Paths:**
-  The feature supports both absolute and relative paths, allowing users to
-  specify directories based on their project requirements.
-
-
 ### Syntax and Scopes
 The working-directory attribute can be applied to three different scopes:
 
