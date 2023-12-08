@@ -42,7 +42,7 @@ groups:
         -p "@semantic-release/exec" \
         -p "@semantic-release/github" \
         -p "@semantic-release/git" \
-        -p "semantic-release-replace-plugin@1.2.7" \
+        -p "semantic-release-replace-plugin" \
         semantic-release
 
     targets:
