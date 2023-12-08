@@ -1,12 +1,10 @@
-# Makim Features
+# Features
 
-## Working Directory Feature
+## Attribute: working-directory
 
 The working-directory feature in Makim allows users to define the directory
 from which commands associated with specific targets or groups are executed.
 This provides greater flexibility and control over the execution environment.
-
-### Attribute: working-directory
 
 The `working-directory` attribute can be specified at three different
 scopes: global, group, and target. It allows users to set the working
@@ -57,7 +55,7 @@ The working-directory attribute can be applied to three different scopes:
             targets:
                 my-target:
                     working-directory: /path/to/target/directory
-                    run: | 
+                    run: |
                     # This target will run with the working directory set to
                     # /path/to/target/directory
     ```
@@ -86,18 +84,4 @@ groups:
           echo "Running backend tests..."
           # Additional test commands specific to the backend
 
-  frontend:
-    working-directory: frontend
-    targets:
-      build:
-        help: Build the frontend application
-        run: |
-          echo "Building frontend application..."
-          # Additional build commands specific to the frontend
-
-      test:
-        help: Run frontend tests
-        run: |
-          echo "Running frontend tests..."
-          # Additional test commands specific to the frontend
 ```
