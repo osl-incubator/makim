@@ -1,4 +1,0 @@
-{
-  "python.formatting.blackPath": "/home/xmn/mambaforge/envs/makim/bin/blue",
-  "python.formatting.provider": "black"
-}
