@@ -2,19 +2,20 @@
 
 ## Stable release
 
-To install makim, run this command in your
-terminal:
+To install makim, run this command in your terminal:
 
 ```bash
 $ pip install makim
 ```
 
+Makim is also available on conda-forge:
+
+```bash
+$ conda install -c conda-forge makim
+```
+
 This is the preferred method to install makim,
 as it will always install the most recent stable release.
-
-If you don't have [pip](https://pip.pypa.io) installed, this
-[Python installation guide](http://docs.python-guide.org/en/latest/starting/installation/)
-can guide you through the process.
 
 ## From sources
 
