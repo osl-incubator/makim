@@ -14,13 +14,13 @@ Makim is also available on conda-forge:
 $ conda install -c conda-forge makim
 ```
 
-This is the preferred method to install makim,
-as it will always install the most recent stable release.
+This is the preferred method to install makim, as it will always install the
+most recent stable release.
 
 ## From sources
 
-The sources for makim can be downloaded from
-the [Github repo](https://github.com/osl-incubator/makim.git).
+The sources for makim can be downloaded from the
+[Github repo](https://github.com/osl-incubator/makim.git).
 
 You can either clone the public repository:
 
@@ -35,8 +35,8 @@ Or download the
 $ curl -OJL https://github.com/osl-incubator/makim.git/tarball/main
 ```
 
-Once you have a copy of the source, change to the project root directory
-and install it with:
+Once you have a copy of the source, change to the project root directory and
+install it with:
 
 ```bash
 $ poetry install
