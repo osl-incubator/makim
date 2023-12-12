@@ -24,11 +24,12 @@ groups:
       build:
         help: Build documentation
         run: |
-          mkdocs build --config-file docs/mkdocs.yaml
+          mkdocs build --config-file mkdocs.yaml
 
       preview:
         help: Preview documentation page locally
-        run: mkdocs serve --watch docs --config-file docs/mkdocs.yaml
+        run: |
+          mkdocs serve --watch docs --config-file mkdocs.yaml --no-directory-urls
 
   release:
     vars:
