@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.9.1](https://github.com/osl-incubator/makim/compare/1.9.0...1.9.1) (2023-12-13)
+
+
+### Bug Fixes
+
+* Fix documentation and add folder for artwork ([#70](https://github.com/osl-incubator/makim/issues/70)) ([2823053](https://github.com/osl-incubator/makim/commit/2823053b4decd400434c35c51cb94f5af3670274))
+
 # [1.9.0](https://github.com/osl-incubator/makim/compare/1.8.3...1.9.0) (2023-12-08)
 
 
