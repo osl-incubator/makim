@@ -1,7 +1,7 @@
 """
 Makim main class.
 
-`MakIm` or just `makim` is based on `make` and focus on improve
+`Makim` or just `makim` is based on `make` and focus on improve
 the way to define targets and dependencies. Instead of using the
 `Makefile` format, it uses `yaml` format.
 """

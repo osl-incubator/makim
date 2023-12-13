@@ -46,9 +46,9 @@ def _get_args():
     makim_file_default = str(Path(os.getcwd()) / '.makim.yaml')
 
     parser = argparse.ArgumentParser(
-        prog='MakIm',
+        prog='Makim',
         description=(
-            'MakIm is a tool that helps you to organize '
+            'Makim is a tool that helps you to organize '
             'and simplify your helper commands.'
         ),
         epilog=(
@@ -68,7 +68,7 @@ def _get_args():
     parser.add_argument(
         '--version',
         action='store_true',
-        help='Show the version of the installed MakIm tool.',
+        help='Show the version of the installed Makim tool.',
     )
 
     parser.add_argument(
