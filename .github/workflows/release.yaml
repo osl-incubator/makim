@@ -29,7 +29,7 @@ jobs:
           channels: conda-forge,nodefaults
           activate-environment: makim
           auto-update-conda: true
-        conda-solver: libmamba
+          conda-solver: libmamba
 
       - name: Install deps
         run: |
