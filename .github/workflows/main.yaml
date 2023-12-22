@@ -1,9 +1,35 @@
 name: build
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
+  check-branch:
+    runs-on: ubuntu-latest
+
+    timeout-minutes: 2
+    concurrency:
+      group: ci-check-branch-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - uses: actions/checkout@v3
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          fetch-depth: 0
+
+      - name: Check if the PR's branch is updated
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: osl-incubator/gh-check-pr-is-updated@1.0.0
+        with:
+          remote_branch: origin/main
+          pr_sha: ${{ github.event.pull_request.head.sha }}
+
   tests:
+    needs: check-branch
     strategy:
       matrix:
         python_version:
@@ -114,6 +140,7 @@ jobs:
       uses: mxschmitt/action-tmate@v3
 
   linter-and-docs:
+    needs: check-branch
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
