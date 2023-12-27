@@ -30,6 +30,7 @@ jinja2 = ">=2.0"
 xonsh = ">=0.14.0"
 python-dotenv = ">=0.21.1"
 colorama = ">=0.4.6"
+typer = "^0.9.0"
 
 [tool.poetry.group.dev.dependencies]
 containers-sugar = "1.9.0"
@@ -66,7 +67,7 @@ ignore_missing_imports = true
 line-length = 79
 force-exclude = true
 src = ["./src/makim", "./tests"]
-ignore = ["RUF012"]
+ignore = ["RUF012", "PLR0913"]
 exclude = [
   "docs",
 ]
@@ -83,6 +84,9 @@ select = [
   "I001", # isort
   "I002", # isort
 ]
+
+[tool.ruff.lint.pylint]
+max-args = 6
 
 [tool.ruff.pydocstyle]
 convention = "numpy"
