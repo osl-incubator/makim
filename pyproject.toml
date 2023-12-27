@@ -70,6 +70,7 @@ ignore = ["RUF012"]
 exclude = [
   "docs",
 ]
+fix = true
 
 [tool.ruff.lint]
 select = [
@@ -80,6 +81,7 @@ select = [
   "PL",  # PL
   "RUF", # Ruff-specific rules
   "I001", # isort
+  "I002", # isort
 ]
 
 [tool.ruff.pydocstyle]
