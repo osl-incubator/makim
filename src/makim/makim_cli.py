@@ -4,7 +4,6 @@ Makim CLI module.
 This module defines the command-line interface for the Makim tool.
 """
 import os
-import sys
 
 from pathlib import Path
 
@@ -69,15 +68,12 @@ def main(
             help='Specify the target command to be performed.',
         ),
     ] = '',
-):# noqa: PLR0913
+):
     """
     Makim is a tool.
 
     that helps you to organize and simplify your helper commands.
     """
-    makim_args = extract_makim_args()
-    print('Makim-Args: ', makim_args)
-
     if version:
         return show_version()
 
@@ -94,10 +90,6 @@ def main(
     }
 
     makim.load(makim_file)
-    makim_args.update(args)
-
-    print('After update, Makim_Args: ', makim_args)
-
     return makim.run(args)
 
 
@@ -152,51 +144,6 @@ Positonal Arguments:
 def show_version():
     """Show version."""
     echo(__version__)
-
-
-def extract_makim_args():
-    """Extract makim arguments from the CLI call."""
-    makim_args = {}
-    index_to_remove = []
-    for ind, arg in enumerate(list(sys.argv)):
-        if arg in [
-            '--help',
-            '--version',
-            '--verbose',
-            '--makim-file',
-            '--dry-run',
-        ]:
-            continue
-
-        if not arg.startswith('--'):
-            continue
-
-        index_to_remove.append(ind)
-
-        arg_name = None
-        arg_value = None
-
-        next_ind = ind + 1
-
-        arg_name = sys.argv[ind]
-
-        if (
-            len(sys.argv) == next_ind
-            or len(sys.argv) > next_ind
-            and sys.argv[next_ind].startswith('--')
-        ):
-            arg_value = True
-        else:
-            arg_value = sys.argv[next_ind]
-            index_to_remove.append(next_ind)
-
-        makim_args[arg_name] = arg_value
-
-    # remove exclusive makim flags from original sys.argv
-    for ind in sorted(index_to_remove, reverse=True):
-        sys.argv.pop(ind)
-
-    return makim_args
 
 
 if __name__ == '__main__':
