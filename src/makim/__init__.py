@@ -6,4 +6,4 @@ __email__ = 'ivan.ogasawara@gmail.com'
 __version__ = '1.9.1'  # semantic-release
 
 
-from makim.makim import Makim  # noqa: F401
+from makim.core import Makim  # noqa: F401
