@@ -80,6 +80,11 @@ class Makim(PrintPlugin):
         os.environ['RAISE_SUBPROC_ERROR'] = '1'
         os.environ['XONSH_SHOW_TRACEBACK'] = '0'
 
+        # default
+        self.file = '.makim.yaml'
+        self.dry_run = False
+        self.verbose = False
+
     def _call_shell_app(self, cmd):
         fd, filepath = tempfile.mkstemp(suffix='.makim', text=True)
 
