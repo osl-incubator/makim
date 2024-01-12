@@ -38,17 +38,17 @@ jobs:
 
       - name: Run semantic release (for tests)
         if: ${{ github.event_name != 'workflow_dispatch' }}
-        run: makim release.dry --verbose
+        run: makim --verbose release.dry
 
       - name: Run semantic release
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           poetry config pypi-token.pypi ${PYPI_TOKEN}
-          makim release.ci --verbose
+          makim --verbose release.ci
 
       - name: Generate documentation with changes from semantic-release
         if: ${{ github.event_name == 'workflow_dispatch' }}
-        run: makim docs.build --verbose
+        run: makim --verbose docs.build
 
       - name: GitHub Pages action
         if: ${{ github.event_name == 'workflow_dispatch' }}
