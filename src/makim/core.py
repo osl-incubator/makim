@@ -58,6 +58,7 @@ class Makim(PrintPlugin):
 
     file: str = '.makim.yaml'
     dry_run: bool = False
+    verbose: bool = False
     global_data: dict = {}
     shell_app: sh.Command = sh.xonsh
 
@@ -342,8 +343,6 @@ class Makim(PrintPlugin):
         args_dep_original = {
             'file': args['file'],
             'help': args.get('help', False),
-            'verbose': args.get('verbose', False),
-            'dry-run': args.get('dry-run', False),
             'version': args.get('version', False),
             'args': {},
         }
@@ -393,7 +392,7 @@ class Makim(PrintPlugin):
                     args=original_args_clean, env=self.env_scoped
                 )
                 if not yaml.safe_load(result):
-                    if args.get('verbose'):
+                    if self.verbose:
                         self._print_info(
                             '[II] Skipping dependency: '
                             f'{dep_data.get("target")}'
@@ -453,7 +452,7 @@ class Makim(PrintPlugin):
 
         cmd = unescape_template_tag(str(cmd))
         cmd = Template(cmd).render(args=args_input, env=env, vars=variables)
-        if args.get('verbose'):
+        if self.verbose:
             self._print_info('=' * 80)
             self._print_info(
                 'TARGET: ' + f'{self.group_name}.{self.target_name}'
@@ -477,10 +476,11 @@ class Makim(PrintPlugin):
 
     # public methods
 
-    def load(self, file: str, dry_run: bool = False):
+    def load(self, file: str, dry_run: bool = False, verbose: bool = False):
         """Load makim configuration."""
         self.file = file
         self.dry_run = dry_run
+        self.verbose = verbose
 
         self._load_config_data()
         self._verify_config()

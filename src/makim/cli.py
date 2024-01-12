@@ -45,6 +45,12 @@ def main(
         is_flag=True,
         help='Execute the command in dry mode',
     ),
+    verbose: bool = typer.Option(
+        None,
+        '--verbose',
+        is_flag=True,
+        help='Execute the command in verbose mode',
+    ),
 ) -> None:
     """Process envers for specific flags, otherwise show the help menu."""
     typer.echo(f'Makim file: {file}')
@@ -226,12 +232,14 @@ def extract_root_config() -> Dict[str, str | bool]:
         '--dry-run': 0,
         '--file': 1,
         '--help': 0,  # not necessary to store this value
+        '--verbose': 0,
         '--version': 0,  # not necessary to store this value
     }
 
     # default values
     makim_file = '.makim.yaml'
     dry_run = False
+    verbose = False
 
     try:
         idx = 0
@@ -242,9 +250,10 @@ def extract_root_config() -> Dict[str, str | bool]:
 
             if arg == '--file':
                 makim_file = params[idx + 1]
-
             elif arg == '--dry-run':
                 dry_run = True
+            elif arg == '--verbose':
+                verbose = True
 
             idx += 1 + root_args_values_count[arg]
     except Exception:
@@ -259,6 +268,7 @@ def extract_root_config() -> Dict[str, str | bool]:
     return {
         'file': makim_file,
         'dry_run': dry_run,
+        'verbose': verbose,
     }
 
 
@@ -269,6 +279,7 @@ def run_app() -> None:
     makim.load(
         file=cast(str, root_config.get('file', '.makim.yaml')),
         dry_run=cast(bool, root_config.get('dry_run', False)),
+        verbose=cast(bool, root_config.get('verbose', False)),
     )
 
     # create targets data
