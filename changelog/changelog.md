@@ -1,6 +1,18 @@
 # Release Notes
 ---
 
+# [1.10.0](https://github.com/osl-incubator/makim/compare/1.9.1...1.10.0) (2024-01-12)
+
+
+### Bug Fixes
+
+* Fix distlib installation failure ([#72](https://github.com/osl-incubator/makim/issues/72)) ([f7a9fb7](https://github.com/osl-incubator/makim/commit/f7a9fb7d11132651ded9b32856bf6863e5d1c80a))
+
+
+### Features
+
+* Replace argparse by typer ([#82](https://github.com/osl-incubator/makim/issues/82)) ([614ffd3](https://github.com/osl-incubator/makim/commit/614ffd39979801d7b0b65dc385206c56ecc5a132))
+
 ## [1.9.1](https://github.com/osl-incubator/makim/compare/1.9.0...1.9.1) (2023-12-13)
 
 
