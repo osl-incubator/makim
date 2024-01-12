@@ -117,6 +117,17 @@ def normalize_string_type(type_name) -> str:
     return type_mapping.get(type_name, 'str')
 
 
+def get_default_value_str(arg_type: str, value: Any) -> str:
+    """Return the default value regarding its type in a string format."""
+    if arg_type == 'str':
+        return f'"{value}"'
+
+    if arg_type == 'bool':
+        return 'False'
+
+    return f'{value or 0}'
+
+
 def create_args_string(args: Dict[str, str]) -> str:
     """Return a string for arguments for a function for typer."""
     args_rendered = []
@@ -134,12 +145,11 @@ def create_args_string(args: Dict[str, str]) -> str:
         name_clean = name.replace('-', '_')
         arg_type = normalize_string_type(spec.get('type', 'str'))
         help_text = spec.get('help', '')
-        default_value = spec.get('default')
+        default_value = '...'
 
-        if default_value and spec['type'] == 'str':
-            default_value = f'"{default_value}"'
-        else:
-            default_value = f'{default_value}'
+        if not spec.get('required', False):
+            default_value = spec.get('default', '')
+            default_value = get_default_value_str(arg_type, default_value)
 
         arg_str = arg_template.format(
             **{
@@ -147,12 +157,12 @@ def create_args_string(args: Dict[str, str]) -> str:
                 'arg_type': arg_type,
                 'default_value': default_value,
                 'name_flag': name,
-                'help_text': help_text,
+                'help_text': help_text.replace('\n', '\\n'),
             }
         )
         args_rendered.append(arg_str)
 
-    return ''.join(args_rendered)
+    return ', '.join(args_rendered)
 
 
 def apply_click_options(
@@ -203,7 +213,8 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
     args_data = cast(Dict[str, str], args.get('args', {}))
 
     for arg in list(args_data.keys()):
-        args_param_list.append(f'"{arg}": {arg}')
+        arg_clean = arg.replace('-', '_')
+        args_param_list.append(f'"{arg}": {arg_clean}')
 
     args_param_str = '{' + ','.join(args_param_list) + '}'
     decorator = app.command(name, help=args['help'])
@@ -215,7 +226,12 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
     )
 
     local_vars: Dict[str, Any] = {}
-    exec(function_code, globals(), local_vars)
+    try:
+        exec(function_code, globals(), local_vars)
+    except Exception as e:
+        breakpoint()
+        print(e)
+        print(function_code)
     dynamic_command = decorator(local_vars['dynamic_command'])
 
     # Apply Click options to the Typer command

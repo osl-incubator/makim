@@ -32,7 +32,7 @@ groups:
             type: bool
             action: store_true
         dependencies:
-          - target: clean
+          - target: default.clean
             if: {{ args.clean or args.clean_all }}
             args:
               all: {{ args.clean_all }}

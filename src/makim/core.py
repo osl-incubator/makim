@@ -346,7 +346,6 @@ class Makim(PrintPlugin):
             return
         makim_dep = deepcopy(self)
         args_dep_original = {
-            'file': args['file'],
             'help': args.get('help', False),
             'version': args.get('version', False),
             'args': {},

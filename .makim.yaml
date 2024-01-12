@@ -62,7 +62,7 @@ groups:
     targets:
       linter:
         help: Run linter tools
-        run: pre-commit run --all-files --verbose
+        run: pre-commit run --all-files
 
       unittest:
         help: Run tests
@@ -105,11 +105,8 @@ groups:
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
-          makim $VERBOSE_FLAG --file $MAKIM_FILE clean
           makim $VERBOSE_FLAG --file $MAKIM_FILE default.clean
-          makim $VERBOSE_FLAG --file $MAKIM_FILE build
           makim $VERBOSE_FLAG --file $MAKIM_FILE default.build
-          makim $VERBOSE_FLAG --file $MAKIM_FILE build --clean
 
       complex:
         help: Test makim using a complex makimfile
@@ -125,35 +122,35 @@ groups:
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
-          makim $VERBOSE_FLAG --file $MAKIM_FILE default.lint --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE build.clean-gcda --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE build.clean --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE build.install --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --build-type debug --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --extras '-D' --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --clean --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE build.dev --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE env.create-file --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE conda.build --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE release.ci --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE release.dry --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.api --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.build --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.clean --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.preview --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.sanitizer --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.code-coverage --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.gen-object --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.gen-ast --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.gen-llvm-ir --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.examples --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.all --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE debug.fibonacci --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE print.local-env-vars --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE print.makim-env-vars --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE print.dotenv-var --verbose
-          makim $VERBOSE_FLAG --file $MAKIM_FILE print.nested --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE default.lint
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.clean-gcda
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.clean
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.install
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --build-type debug
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --extras '-D'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --clean
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.dev
+          makim $VERBOSE_FLAG --file $MAKIM_FILE env.create-file
+          makim $VERBOSE_FLAG --file $MAKIM_FILE conda.build
+          makim $VERBOSE_FLAG --file $MAKIM_FILE release.ci
+          makim $VERBOSE_FLAG --file $MAKIM_FILE release.dry
+          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.api
+          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.build
+          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.clean
+          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.preview
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.sanitizer
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.code-coverage
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.gen-object
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.gen-ast
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.gen-llvm-ir
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.examples
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.all
+          makim $VERBOSE_FLAG --file $MAKIM_FILE debug.fibonacci
+          makim $VERBOSE_FLAG --file $MAKIM_FILE print.local-env-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE print.makim-env-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE print.dotenv-var
+          makim $VERBOSE_FLAG --file $MAKIM_FILE print.nested
 
       containers:
         help: Test makim with containers-sugar
@@ -168,7 +165,7 @@ groups:
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
           cd ./tests/
-          makim $VERBOSE_FLAG --file $MAKIM_FILE containers.run --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE containers.run
 
       unittest:
         help: Test makim using a unittest makimfile
