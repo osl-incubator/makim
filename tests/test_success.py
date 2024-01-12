@@ -1,9 +1,8 @@
 """Tests for `makim` package."""
 from pathlib import Path
 
-import pytest
-
 import makim
+import pytest
 
 
 @pytest.mark.parametrize(
@@ -25,12 +24,12 @@ def test_success(target, args):
     makim_file = Path(__file__).parent / '.makim-unittest.yaml'
 
     m = makim.Makim()
-    m.load(makim_file)
+    m.load(file=makim_file)
 
     args.update(
         {
             'target': target,
-            'makim_file': makim_file,
+            'file': makim_file,
         }
     )
 

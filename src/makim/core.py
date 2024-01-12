@@ -56,7 +56,9 @@ class PrintPlugin:
 class Makim(PrintPlugin):
     """Makim main class."""
 
-    makim_file: str = '.makim.yaml'
+    file: str = '.makim.yaml'
+    dry_run: bool = False
+    verbose: bool = False
     global_data: dict = {}
     shell_app: sh.Command = sh.xonsh
 
@@ -77,6 +79,11 @@ class Makim(PrintPlugin):
         """Prepare the Makim class with the default configuration."""
         os.environ['RAISE_SUBPROC_ERROR'] = '1'
         os.environ['XONSH_SHOW_TRACEBACK'] = '0'
+
+        # default
+        self.file = '.makim.yaml'
+        self.dry_run = False
+        self.verbose = False
 
     def _call_shell_app(self, cmd):
         fd, filepath = tempfile.mkstemp(suffix='.makim', text=True)
@@ -113,7 +120,7 @@ class Makim(PrintPlugin):
         os.close(fd)
 
     def _check_makim_file(self):
-        return Path(self.makim_file).exists()
+        return Path(self.file).exists()
 
     def _verify_target_conditional(self, conditional):
         # todo: implement verification
@@ -182,7 +189,7 @@ class Makim(PrintPlugin):
         os._exit(MakimError.MAKIM_GROUP_NOT_FOUND.value)
 
     def _load_config_data(self):
-        with open(self.makim_file, 'r') as f:
+        with open(self.file, 'r') as f:
             # escape template tags
             content = escape_template_tag(f.read())
             content_io = io.StringIO(content)
@@ -234,7 +241,7 @@ class Makim(PrintPlugin):
         if not env_file.startswith('/'):
             # use makim file as reference for the working directory
             # for the .env file
-            env_file = str(Path(self.makim_file).parent / env_file)
+            env_file = str(Path(self.file).parent / env_file)
 
         if not Path(env_file).exists():
             self._print_error('[EE] The given env-file was not found.')
@@ -339,10 +346,7 @@ class Makim(PrintPlugin):
             return
         makim_dep = deepcopy(self)
         args_dep_original = {
-            'makim_file': args['makim_file'],
             'help': args.get('help', False),
-            'verbose': args.get('verbose', False),
-            'dry-run': args.get('dry-run', False),
             'version': args.get('version', False),
             'args': {},
         }
@@ -392,7 +396,7 @@ class Makim(PrintPlugin):
                     args=original_args_clean, env=self.env_scoped
                 )
                 if not yaml.safe_load(result):
-                    if args.get('verbose'):
+                    if self.verbose:
                         self._print_info(
                             '[II] Skipping dependency: '
                             f'{dep_data.get("target")}'
@@ -419,7 +423,7 @@ class Makim(PrintPlugin):
 
         self.env_scoped = deepcopy(env)
 
-        args_input = {'makim_file': args['makim_file']}
+        args_input = {'file': self.file}
         for k, v in self.target_data.get('args', {}).items():
             if not isinstance(v, dict):
                 raise Exception('`args` attribute should be a dictionary.')
@@ -452,7 +456,7 @@ class Makim(PrintPlugin):
 
         cmd = unescape_template_tag(str(cmd))
         cmd = Template(cmd).render(args=args_input, env=env, vars=variables)
-        if args.get('verbose'):
+        if self.verbose:
             self._print_info('=' * 80)
             self._print_info(
                 'TARGET: ' + f'{self.group_name}.{self.target_name}'
@@ -467,7 +471,7 @@ class Makim(PrintPlugin):
             self._print_info('>>> ' + cmd.replace('\n', '\n>>> '))
             self._print_info('=' * 80)
 
-        if not args.get('dry_run') and cmd:
+        if not self.dry_run and cmd:
             self._call_shell_app(cmd)
 
         # move back the environment variable to the previous values
@@ -476,9 +480,12 @@ class Makim(PrintPlugin):
 
     # public methods
 
-    def load(self, makim_file: str):
+    def load(self, file: str, dry_run: bool = False, verbose: bool = False):
         """Load makim configuration."""
-        self.makim_file = makim_file
+        self.file = file
+        self.dry_run = dry_run
+        self.verbose = verbose
+
         self._load_config_data()
         self._verify_config()
         self._load_shell_app()

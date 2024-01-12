@@ -1,199 +1,342 @@
 """Cli functions to define the arguments and to call Makim."""
-import argparse
-import os
+from __future__ import annotations
+
 import sys
 
-from pathlib import Path
+from typing import Any, Callable, Dict, Optional, Type, Union, cast
+
+import click
+import typer
 
 from makim import Makim, __version__
 
-
-class CustomHelpFormatter(argparse.RawTextHelpFormatter):
-    """Formatter for generating usage messages and argument help strings.
-
-    Only the name of this class is considered a public API. All the methods
-    provided by the class are considered an implementation detail.
-    """
-
-    def __init__(
-        self,
-        prog,
-        indent_increment=2,
-        max_help_position=4,
-        width=None,
-        **kwargs,
-    ):
-        """Define the parameters for the argparse help text."""
-        super().__init__(
-            prog,
-            indent_increment=indent_increment,
-            max_help_position=max_help_position,
-            width=width,
-            **kwargs,
-        )
-
+app = typer.Typer(
+    help=(
+        'Makim is a tool that helps you to organize '
+        'and simplify your helper commands.'
+    ),
+    epilog=(
+        'If you have any problem, open an issue at: '
+        'https://github.com/osl-incubator/makim'
+    ),
+)
 
 makim = Makim()
 
 
-def _get_args():
-    """
-    Define the arguments for the CLI.
-
-    note: when added new flags, update the list of flags to be
-          skipped at extract_makim_args function.
-    """
-    makim_file_default = str(Path(os.getcwd()) / '.makim.yaml')
-
-    parser = argparse.ArgumentParser(
-        prog='Makim',
-        description=(
-            'Makim is a tool that helps you to organize '
-            'and simplify your helper commands.'
-        ),
-        epilog=(
-            'If you have any problem, open an issue at: '
-            'https://github.com/osl-incubator/makim'
-        ),
-        add_help=False,
-        formatter_class=CustomHelpFormatter,
-    )
-    parser.add_argument(
-        '--help',
-        '-h',
-        action='store_true',
-        help='Show the help menu',
-    )
-
-    parser.add_argument(
+@app.callback(invoke_without_command=True)
+def main(
+    ctx: typer.Context,
+    version: bool = typer.Option(
+        None,
         '--version',
-        action='store_true',
-        help='Show the version of the installed Makim tool.',
-    )
-
-    parser.add_argument(
-        '--verbose',
-        action='store_true',
-        help='Show the commands to be executed.',
-    )
-
-    parser.add_argument(
+        '-v',
+        is_flag=True,
+        help='Show the version and exit',
+    ),
+    file: str = typer.Option(
+        '.makim.yaml',
+        '--file',
+        help='Makim config file',
+    ),
+    dry_run: bool = typer.Option(
+        None,
         '--dry-run',
-        action='store_true',
-        help="Show the commands but don't execute them.",
+        is_flag=True,
+        help='Execute the command in dry mode',
+    ),
+    verbose: bool = typer.Option(
+        None,
+        '--verbose',
+        is_flag=True,
+        help='Execute the command in verbose mode',
+    ),
+) -> None:
+    """Process envers for specific flags, otherwise show the help menu."""
+    typer.echo(f'Makim file: {file}')
+
+    if version:
+        typer.echo(f'Version: {__version__}')
+        raise typer.Exit()
+
+    if ctx.invoked_subcommand is None:
+        typer.echo(ctx.get_help())
+        raise typer.Exit(0)
+
+
+def map_type_from_string(type_name) -> Type:
+    """
+    Return a type object mapped from the type name.
+
+    Parameters
+    ----------
+    type_name : str
+        The string representation of the type.
+
+    Returns
+    -------
+    type
+        The corresponding Python type.
+    """
+    type_mapping = {
+        'str': str,
+        'string': str,
+        'int': int,
+        'integer': int,
+        'float': float,
+        'bool': bool,
+        'boolean': bool,
+    }
+    return type_mapping.get(type_name, str)
+
+
+def normalize_string_type(type_name) -> str:
+    """
+    Normalize the user type definition to the correct name.
+
+    Parameters
+    ----------
+    type_name : str
+        The string representation of the type.
+
+    Returns
+    -------
+    str
+        The corresponding makim type name.
+    """
+    type_mapping = {
+        'str': 'str',
+        'string': 'str',
+        'int': 'int',
+        'integer': 'int',
+        'float': 'float',
+        'bool': 'bool',
+        'boolean': 'bool',
+        # Add more mappings as needed
+    }
+    return type_mapping.get(type_name, 'str')
+
+
+def get_default_value(
+    arg_type: str, value: Any
+) -> Optional[Union[str, int, float, bool]]:
+    """Return the default value regarding its type in a string format."""
+    if arg_type == 'bool':
+        return False
+
+    return value
+
+
+def get_default_value_str(arg_type: str, value: Any) -> str:
+    """Return the default value regarding its type in a string format."""
+    if arg_type == 'str':
+        return f'"{value}"'
+
+    if arg_type == 'bool':
+        return 'False'
+
+    return f'{value or 0}'
+
+
+def create_args_string(args: Dict[str, str]) -> str:
+    """Return a string for arguments for a function for typer."""
+    args_rendered = []
+
+    arg_template = (
+        '{arg_name}: {arg_type} = typer.Option('
+        '{default_value}, '
+        '"--{name_flag}", '
+        'help="{help_text}"'
+        ')'
     )
 
-    parser.add_argument(
-        '--makim-file',
-        type=str,
-        default=makim_file_default,
-        help='Specify a custom location for the makim file.',
+    args_data = cast(Dict[str, Dict[str, str]], args.get('args', {}))
+    for name, spec in args_data.items():
+        name_clean = name.replace('-', '_')
+        arg_type = normalize_string_type(spec.get('type', 'str'))
+        help_text = spec.get('help', '')
+        default_value = '...'
+
+        if not spec.get('required', False):
+            default_value = spec.get('default', '')
+            default_value = get_default_value_str(arg_type, default_value)
+
+        arg_str = arg_template.format(
+            **{
+                'arg_name': name_clean,
+                'arg_type': arg_type,
+                'default_value': default_value,
+                'name_flag': name,
+                'help_text': help_text.replace('\n', '\\n'),
+            }
+        )
+
+        args_rendered.append(arg_str)
+
+    return ', '.join(args_rendered)
+
+
+def apply_click_options(
+    command_function: Callable, options: Dict[str, str]
+) -> Callable:
+    """
+    Apply Click options to a Typer command function.
+
+    Parameters
+    ----------
+    command_function : callable
+        The Typer command function to which options will be applied.
+    options : dict
+        A dictionary of options to apply.
+
+    Returns
+    -------
+    callable
+        The command function with options applied.
+    """
+    for opt_name, opt_details in options.items():
+        opt_args: dict[str, Optional[Union[str, int, float, bool, Type]]] = {}
+
+        opt_data = cast(Dict[str, str], opt_details)
+        opt_type_str = normalize_string_type(opt_data.get('type', 'str'))
+        opt_default = get_default_value(opt_type_str, opt_data.get('default'))
+
+        if opt_type_str == 'bool':
+            opt_args.update({'is_flag': True})
+
+        opt_args.update(
+            {
+                'default': opt_default,
+                'type': map_type_from_string(opt_type_str),
+                'help': opt_data.get('help', ''),
+                'show_default': True,
+            }
+        )
+
+        click_option = click.option(
+            f'--{opt_name}',
+            **opt_args,  # type: ignore[arg-type]
+        )
+        command_function = click_option(command_function)
+
+    return command_function
+
+
+def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
+    """
+    Dynamically create a Typer command with the specified options.
+
+    Parameters
+    ----------
+    name : str
+        The command name.
+    args : dict
+        The command arguments and options.
+    """
+    args_str = create_args_string(args)
+    args_param_list = [f'"target": "{name}"']
+
+    args_data = cast(Dict[str, str], args.get('args', {}))
+
+    for arg in list(args_data.keys()):
+        arg_clean = arg.replace('-', '_')
+        args_param_list.append(f'"--{arg}": {arg_clean}')
+
+    args_param_str = '{' + ','.join(args_param_list) + '}'
+    decorator = app.command(name, help=args.get('help', ''))
+
+    function_code = (
+        f'def dynamic_command({args_str}):\n'
+        f'    makim.run({args_param_str})\n'
+        '\n'
     )
+
+    local_vars: Dict[str, Any] = {}
+    try:
+        exec(function_code, globals(), local_vars)
+    except Exception as e:
+        breakpoint()
+        print(e)
+        print(function_code)
+    dynamic_command = decorator(local_vars['dynamic_command'])
+
+    # Apply Click options to the Typer command
+    if 'args' in args:
+        options_data = cast(Dict[str, str], args.get('args', {}))
+        dynamic_command = apply_click_options(dynamic_command, options_data)
+
+
+def extract_root_config() -> Dict[str, str | bool]:
+    """Extract the root configuration from the CLI."""
+    params = sys.argv[1:]
+
+    root_args_values_count = {
+        '--dry-run': 0,
+        '--file': 1,
+        '--help': 0,  # not necessary to store this value
+        '--verbose': 0,
+        '--version': 0,  # not necessary to store this value
+    }
+
+    # default values
+    makim_file = '.makim.yaml'
+    dry_run = False
+    verbose = False
 
     try:
-        idx = sys.argv.index('--makim-file')
-        makim_file = sys.argv[idx + 1]
-    except ValueError:
-        makim_file = makim_file_default
+        idx = 0
+        while idx < len(params):
+            arg = params[idx]
+            if arg not in root_args_values_count:
+                break
 
-    makim.load(makim_file)
-    target_help = []
-    groups = makim.global_data.get('groups', [])
-    for group in groups:
-        target_help.append('\n' + group + ':')
-        target_help.append('-' * (len(group) + 1))
-        for target_name, target_data in groups[group]['targets'].items():
-            target_name_qualified = f'{group}.{target_name}'
-            help_text = target_data['help'] if 'help' in target_data else ''
-            target_help.append(f'  {target_name_qualified} => {help_text}')
+            if arg == '--file':
+                makim_file = params[idx + 1]
+            elif arg == '--dry-run':
+                dry_run = True
+            elif arg == '--verbose':
+                verbose = True
 
-            if 'args' in target_data:
-                target_help.append('    ARGS:')
+            idx += 1 + root_args_values_count[arg]
+    except Exception:
+        red_text = typer.style(
+            'The makim config file was not correctly detected. '
+            'Using the default .makim.yaml.',
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        typer.echo(red_text, err=True, color=True)
 
-                for arg_name, arg_data in target_data['args'].items():
-                    target_help.append(
-                        f'      --{arg_name}: ({arg_data["type"]}) '
-                        f'{arg_data["help"]}'
-                    )
+    return {
+        'file': makim_file,
+        'dry_run': dry_run,
+        'verbose': verbose,
+    }
 
-    parser.add_argument(
-        'target',
-        nargs='?',
-        default=None,
-        help=(
-            'Specify the target command to be performed. Options are:\n'
-            + '\n'.join(target_help)
-        ),
+
+def run_app() -> None:
+    """Run the typer app."""
+    root_config = extract_root_config()
+
+    makim.load(
+        file=cast(str, root_config.get('file', '.makim.yaml')),
+        dry_run=cast(bool, root_config.get('dry_run', False)),
+        verbose=cast(bool, root_config.get('verbose', False)),
     )
 
-    return parser
+    # create targets data
+    # group_names = list(makim.global_data.get('groups', {}).keys())
+    targets: Dict[str, Any] = {}
+    for group_name, group_data in makim.global_data.get('groups', {}).items():
+        for target_name, target_data in group_data.get('targets', {}).items():
+            targets[f'{group_name}.{target_name}'] = target_data
+
+    # Add dynamically created commands to Typer app
+    for name, args in targets.items():
+        create_dynamic_command(name, args)
+
+    app()
 
 
-def show_version():
-    """Show version."""
-    print(__version__)
-
-
-def extract_makim_args():
-    """Extract makim arguments from the CLI call."""
-    makim_args = {}
-    index_to_remove = []
-    for ind, arg in enumerate(list(sys.argv)):
-        if arg in [
-            '--help',
-            '--version',
-            '--verbose',
-            '--makim-file',
-            '--dry-run',
-        ]:
-            continue
-
-        if not arg.startswith('--'):
-            continue
-
-        index_to_remove.append(ind)
-
-        arg_name = None
-        arg_value = None
-
-        next_ind = ind + 1
-
-        arg_name = sys.argv[ind]
-
-        if (
-            len(sys.argv) == next_ind
-            or len(sys.argv) > next_ind
-            and sys.argv[next_ind].startswith('--')
-        ):
-            arg_value = True
-        else:
-            arg_value = sys.argv[next_ind]
-            index_to_remove.append(next_ind)
-
-        makim_args[arg_name] = arg_value
-
-    # remove exclusive makim flags from original sys.argv
-    for ind in sorted(index_to_remove, reverse=True):
-        sys.argv.pop(ind)
-
-    return makim_args
-
-
-def app():
-    """Call the makim program with the arguments defined by the user."""
-    makim_args = extract_makim_args()
-    args_parser = _get_args()
-    args = args_parser.parse_args()
-
-    if args.version:
-        return show_version()
-
-    if not args.target or args.help:
-        return args_parser.print_help()
-
-    if args.help:
-        return args_parser.print_help()
-
-    makim.load(args.makim_file)
-    makim_args.update(dict(args._get_kwargs()))
-    return makim.run(makim_args)
+if __name__ == '__main__':
+    run_app()
