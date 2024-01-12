@@ -103,13 +103,13 @@ groups:
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
-          makim --file $MAKIM_FILE --help
-          makim --file $MAKIM_FILE --version
-          makim --file $MAKIM_FILE clean $VERBOSE_FLAG
-          makim --file $MAKIM_FILE default.clean $VERBOSE_FLAG
-          makim --file $MAKIM_FILE build $VERBOSE_FLAG
-          makim --file $MAKIM_FILE default.build $VERBOSE_FLAG
-          makim --file $MAKIM_FILE build --clean $VERBOSE_FLAG
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE clean
+          makim $VERBOSE_FLAG --file $MAKIM_FILE default.clean
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build
+          makim $VERBOSE_FLAG --file $MAKIM_FILE default.build
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build --clean
 
       complex:
         help: Test makim using a complex makimfile
@@ -123,37 +123,37 @@ groups:
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
-          makim --file $MAKIM_FILE --help
-          makim --file $MAKIM_FILE --version
-          makim --file $MAKIM_FILE default.lint --verbose
-          makim --file $MAKIM_FILE build.clean-gcda --verbose
-          makim --file $MAKIM_FILE build.clean --verbose
-          makim --file $MAKIM_FILE build.install --verbose
-          makim --file $MAKIM_FILE build.release --verbose
-          makim --file $MAKIM_FILE build.release --build-type debug --verbose
-          makim --file $MAKIM_FILE build.release --extras '-D' --verbose
-          makim --file $MAKIM_FILE build.release --clean --verbose
-          makim --file $MAKIM_FILE build.dev --verbose
-          makim --file $MAKIM_FILE env.create-file --verbose
-          makim --file $MAKIM_FILE conda.build --verbose
-          makim --file $MAKIM_FILE release.ci --verbose
-          makim --file $MAKIM_FILE release.dry --verbose
-          makim --file $MAKIM_FILE docs.api --verbose
-          makim --file $MAKIM_FILE docs.build --verbose
-          makim --file $MAKIM_FILE docs.clean --verbose
-          makim --file $MAKIM_FILE docs.preview --verbose
-          makim --file $MAKIM_FILE tests.sanitizer --verbose
-          makim --file $MAKIM_FILE tests.code-coverage --verbose
-          makim --file $MAKIM_FILE tests.gen-object --verbose
-          makim --file $MAKIM_FILE tests.gen-ast --verbose
-          makim --file $MAKIM_FILE tests.gen-llvm-ir --verbose
-          makim --file $MAKIM_FILE tests.examples --verbose
-          makim --file $MAKIM_FILE tests.all --verbose
-          makim --file $MAKIM_FILE debug.fibonacci --verbose
-          makim --file $MAKIM_FILE print.local-env-vars --verbose
-          makim --file $MAKIM_FILE print.makim-env-vars --verbose
-          makim --file $MAKIM_FILE print.dotenv-var --verbose
-          makim --file $MAKIM_FILE print.nested --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE default.lint --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.clean-gcda --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.clean --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.install --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --build-type debug --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --extras '-D' --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --clean --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.dev --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE env.create-file --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE conda.build --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE release.ci --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE release.dry --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.api --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.build --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.clean --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.preview --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.sanitizer --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.code-coverage --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.gen-object --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.gen-ast --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.gen-llvm-ir --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.examples --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.all --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE debug.fibonacci --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE print.local-env-vars --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE print.makim-env-vars --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE print.dotenv-var --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE print.nested --verbose
 
       containers:
         help: Test makim with containers-sugar
@@ -168,7 +168,7 @@ groups:
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
           cd ./tests/
-          makim --file $MAKIM_FILE containers.run --verbose
+          makim $VERBOSE_FLAG --file $MAKIM_FILE containers.run --verbose
 
       unittest:
         help: Test makim using a unittest makimfile
@@ -182,16 +182,16 @@ groups:
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
-          makim --file $MAKIM_FILE --help
-          makim --file $MAKIM_FILE --version
-          makim --file $MAKIM_FILE tests.test-1 $VERBOSE_FLAG
-          makim --file $MAKIM_FILE tests.test-2 --all $VERBOSE_FLAG
-          makim --file $MAKIM_FILE tests.test-3-a $VERBOSE_FLAG
-          makim --file $MAKIM_FILE tests.test-3-b $VERBOSE_FLAG
-          makim --file $MAKIM_FILE tests.test-4 $VERBOSE_FLAG
-          makim --file $MAKIM_FILE tests.test-4 --trigger-dep $VERBOSE_FLAG
-          makim --file $MAKIM_FILE tests.test-5 $VERBOSE_FLAG
-          makim --file $MAKIM_FILE tests.test-6 $VERBOSE_FLAG
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-1
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-2 --all
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-3-a
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-3-b
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-4
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-4 --trigger-dep
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-5
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-6
 
       vars-env:
         help: Test makim using env makimfile
@@ -205,24 +205,24 @@ groups:
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
-          makim --file $MAKIM_FILE --help
-          makim --file $MAKIM_FILE --version
-          makim --file $MAKIM_FILE global-scope.test-var-env-file $VERBOSE_FLAG
-          makim --file $MAKIM_FILE global-scope.test-var-env $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-scope.test-var-env-file $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-scope.test-var-env $VERBOSE_FLAG
-          makim --file $MAKIM_FILE target-scope.test-var-env-file $VERBOSE_FLAG
-          makim --file $MAKIM_FILE target-scope.test-var-env $VERBOSE_FLAG
-          makim --file $MAKIM_FILE rerender-env.from-global $VERBOSE_FLAG
-          makim --file $MAKIM_FILE rerender-env.from-group $VERBOSE_FLAG
-          makim --file $MAKIM_FILE rerender-env.from-target $VERBOSE_FLAG
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE global-scope.test-var-env-file
+          makim $VERBOSE_FLAG --file $MAKIM_FILE global-scope.test-var-env
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-scope.test-var-env-file
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-scope.test-var-env
+          makim $VERBOSE_FLAG --file $MAKIM_FILE target-scope.test-var-env-file
+          makim $VERBOSE_FLAG --file $MAKIM_FILE target-scope.test-var-env
+          makim $VERBOSE_FLAG --file $MAKIM_FILE rerender-env.from-global
+          makim $VERBOSE_FLAG --file $MAKIM_FILE rerender-env.from-group
+          makim $VERBOSE_FLAG --file $MAKIM_FILE rerender-env.from-target
 
       bash:
         help: Test makim shell attribute with bash
         run: |
-          makim --file tests/.makim-bash-main-scope.yaml main-scope.test
-          makim --file tests/.makim-bash-group-scope.yaml group-scope.test
-          makim --file tests/.makim-bash-target-scope.yaml target-scope.test
+          makim $VERBOSE_FLAG --file tests/.makim-bash-main-scope.yaml main-scope.test
+          makim $VERBOSE_FLAG --file tests/.makim-bash-group-scope.yaml group-scope.test
+          makim $VERBOSE_FLAG --file tests/.makim-bash-target-scope.yaml target-scope.test
 
       working-directory-absolute-path:
         help: |
@@ -237,17 +237,17 @@ groups:
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
-          makim --file $MAKIM_FILE --help
-          makim --file $MAKIM_FILE --version
-          makim --file $MAKIM_FILE group-no-path.target-no-path $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-no-path.target-absolute $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-no-path.target-relative $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-relative.target-no-path $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-relative.target-absolute $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-relative.target-relative $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-absolute.target-no-path $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-absolute.target-absolute $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-absolute.target-relative $VERBOSE_FLAG
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-relative
 
       working-directory-no-path:
         help: Test makim with working-directory for global no-path and its various combinations with group and target working-directory
@@ -263,17 +263,17 @@ groups:
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
           export MAKIM_FILE="$(pwd)/${MAKIM_FILE}"
           cd /tmp
-          makim --file $MAKIM_FILE --help
-          makim --file $MAKIM_FILE --version
-          makim --file $MAKIM_FILE group-no-path.target-no-path $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-no-path.target-absolute $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-no-path.target-relative $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-absolute.target-no-path $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-absolute.target-absolute $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-absolute.target-relative $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-relative.target-no-path $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-relative.target-absolute $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-relative.target-relative $VERBOSE_FLAG
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-relative
 
       working-directory-relative-path:
         help: Test makim with working-directory for global no-path and its various combinations with group and target working-directory
@@ -290,14 +290,14 @@ groups:
           export MAKIM_FILE="$(pwd)/${MAKIM_FILE}"
           mkdir -p /tmp/global-relative
           cd /tmp
-          makim --file $MAKIM_FILE --help
-          makim --file $MAKIM_FILE --version
-          makim --file $MAKIM_FILE group-no-path.target-no-path $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-no-path.target-absolute $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-no-path.target-relative $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-absolute.target-no-path $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-absolute.target-absolute $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-absolute.target-relative $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-relative.target-no-path $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-relative.target-absolute $VERBOSE_FLAG
-          makim --file $MAKIM_FILE group-relative.target-relative $VERBOSE_FLAG
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-relative
