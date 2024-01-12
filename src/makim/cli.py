@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import sys
 
-from typing import Any, Callable, Dict, Type, cast
+from typing import Any, Callable, Dict, Optional, Type, Union, cast
 
 import click
 import typer
@@ -117,6 +117,16 @@ def normalize_string_type(type_name) -> str:
     return type_mapping.get(type_name, 'str')
 
 
+def get_default_value(
+    arg_type: str, value: Any
+) -> Optional[Union[str, int, float, bool]]:
+    """Return the default value regarding its type in a string format."""
+    if arg_type == 'bool':
+        return False
+
+    return value
+
+
 def get_default_value_str(arg_type: str, value: Any) -> str:
     """Return the default value regarding its type in a string format."""
     if arg_type == 'str':
@@ -160,6 +170,7 @@ def create_args_string(args: Dict[str, str]) -> str:
                 'help_text': help_text.replace('\n', '\\n'),
             }
         )
+
         args_rendered.append(arg_str)
 
     return ', '.join(args_rendered)
@@ -184,12 +195,27 @@ def apply_click_options(
         The command function with options applied.
     """
     for opt_name, opt_details in options.items():
+        opt_args: dict[str, Optional[Union[str, int, float, bool, Type]]] = {}
+
         opt_data = cast(Dict[str, str], opt_details)
+        opt_type_str = normalize_string_type(opt_data.get('type', 'str'))
+        opt_default = get_default_value(opt_type_str, opt_data.get('default'))
+
+        if opt_type_str == 'bool':
+            opt_args.update({'is_flag': True})
+
+        opt_args.update(
+            {
+                'default': opt_default,
+                'type': map_type_from_string(opt_type_str),
+                'help': opt_data.get('help', ''),
+                'show_default': True,
+            }
+        )
+
         click_option = click.option(
             f'--{opt_name}',
-            default=opt_data.get('default'),
-            type=map_type_from_string(opt_data.get('type', 'str')),
-            help=opt_data.get('help', ''),
+            **opt_args,  # type: ignore[arg-type]
         )
         command_function = click_option(command_function)
 
@@ -214,7 +240,7 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
 
     for arg in list(args_data.keys()):
         arg_clean = arg.replace('-', '_')
-        args_param_list.append(f'"{arg}": {arg_clean}')
+        args_param_list.append(f'"--{arg}": {arg_clean}')
 
     args_param_str = '{' + ','.join(args_param_list) + '}'
     decorator = app.command(name, help=args['help'])
