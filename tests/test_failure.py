@@ -4,9 +4,8 @@ import sys
 
 from pathlib import Path
 
-import pytest
-
 import makim
+import pytest
 
 from makim.errors import MakimError
 
@@ -24,12 +23,12 @@ def test_failure(target, args, error_code):
     makim_file = Path(__file__).parent / '.makim-unittest.yaml'
 
     m = makim.Makim()
-    m.load(makim_file)
+    m.load(file=makim_file)
 
     args.update(
         {
             'target': target,
-            'makim_file': makim_file,
+            'file': makim_file,
         }
     )
     # mock the exit function used by makim

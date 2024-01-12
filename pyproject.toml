@@ -99,6 +99,7 @@ quote-style = "single"
 [tool.bandit]
 exclude_dirs = ["tests"]
 targets = "src/makim/"
+skips = ["B102"]
 
 [tool.vulture]
 exclude = ["tests"]

@@ -1,7 +1,9 @@
 """Cli functions to define the arguments and to call Makim."""
 from __future__ import annotations
 
-from typing import Any, Callable
+import sys
+
+from typing import Any, Callable, Type, cast
 
 import click
 import typer
@@ -19,6 +21,8 @@ app = typer.Typer(
     ),
 )
 
+makim = Makim()
+
 
 @app.callback(invoke_without_command=True)
 def main(
@@ -28,7 +32,18 @@ def main(
         '--version',
         '-v',
         is_flag=True,
-        help='Show the version and exit.',
+        help='Show the version and exit',
+    ),
+    file: str = typer.Option(
+        '.makim.yaml',
+        '--file',
+        help='Makim config file',
+    ),
+    dry_run: bool = typer.Option(
+        None,
+        '--dry-run',
+        is_flag=True,
+        help='Execute the command in dry mode',
     ),
 ) -> None:
     """Process envers for specific flags, otherwise show the help menu."""
@@ -41,9 +56,9 @@ def main(
         raise typer.Exit(0)
 
 
-def type_mapper(type_name):
+def map_type_from_string(type_name) -> Type:
     """
-    Return a mapped string representation of a type to the actual Python type.
+    Return a type object mapped from the type name.
 
     Parameters
     ----------
@@ -57,12 +72,41 @@ def type_mapper(type_name):
     """
     type_mapping = {
         'str': str,
+        'string': str,
         'int': int,
+        'integer': int,
         'float': float,
         'bool': bool,
-        # Add more mappings as needed
+        'boolean': bool,
     }
     return type_mapping.get(type_name, str)
+
+
+def normalize_string_type(type_name) -> str:
+    """
+    Normalize the user type definition to the correct name.
+
+    Parameters
+    ----------
+    type_name : str
+        The string representation of the type.
+
+    Returns
+    -------
+    str
+        The corresponding makim type name.
+    """
+    type_mapping = {
+        'str': 'str',
+        'string': 'str',
+        'int': 'int',
+        'integer': 'int',
+        'float': 'float',
+        'bool': 'bool',
+        'boolean': 'bool',
+        # Add more mappings as needed
+    }
+    return type_mapping.get(type_name, 'str')
 
 
 def create_args_string(args: dict[str, str]) -> str:
@@ -77,9 +121,10 @@ def create_args_string(args: dict[str, str]) -> str:
         ')'
     )
 
-    for name, spec in args.get('args', {}).items():
+    args_data = cast(dict[str, dict[str, str]], args.get('args', {}))
+    for name, spec in args_data.items():
         name_clean = name.replace('-', '_')
-        arg_type = spec.get('type', 'str')
+        arg_type = normalize_string_type(spec.get('type', 'str'))
         help_text = spec.get('help', '')
         default_value = spec.get('default')
 
@@ -121,11 +166,12 @@ def apply_click_options(
         The command function with options applied.
     """
     for opt_name, opt_details in options.items():
+        opt_data = cast(dict[str, str], opt_details)
         click_option = click.option(
             f'--{opt_name}',
-            default=opt_details.get('default'),
-            type=type_mapper(opt_details.get('type', 'str')),
-            help=opt_details.get('help', ''),
+            default=opt_data.get('default'),
+            type=map_type_from_string(opt_data.get('type', 'str')),
+            help=opt_data.get('help', ''),
         )
         command_function = click_option(command_function)
 
@@ -144,30 +190,87 @@ def create_dynamic_command(name: str, args: dict[str, str]) -> None:
         The command arguments and options.
     """
     args_str = create_args_string(args)
+    args_param_list = [f'"target": "{name}"']
 
-    decorator = app.command(name=name, help=args['help'])
+    args_data = cast(dict[str, str], args.get('args', {}))
+
+    for arg in list(args_data.keys()):
+        args_param_list.append(f'"{arg}": {arg}')
+
+    args_param_str = '{' + ','.join(args_param_list) + '}'
+    decorator = app.command(name, help=args['help'])
 
     function_code = (
         f'def dynamic_command({args_str}):\n'
-        "    typer.echo(f'Executing ' + name)\n"
+        f'    makim.run({args_param_str})\n'
         '\n'
     )
 
-    local_vars = {}
+    local_vars: dict[str, Any] = {}
     exec(function_code, globals(), local_vars)
     dynamic_command = decorator(local_vars['dynamic_command'])
 
     # Apply Click options to the Typer command
     if 'args' in args:
-        dynamic_command = apply_click_options(dynamic_command, args['args'])
+        options_data = cast(dict[str, str], args.get('args', {}))
+        dynamic_command = apply_click_options(dynamic_command, options_data)
+
+
+def extract_root_config() -> dict[str, str | bool]:
+    """Extract the root configuration from the CLI."""
+    params = sys.argv[1:]
+
+    root_args_values_count = {
+        '--dry-run': 0,
+        '--file': 1,
+        '--help': 0,  # not necessary to store this value
+        '--version': 0,  # not necessary to store this value
+    }
+
+    # default values
+    makim_file = '.makim.yaml'
+    dry_run = False
+
+    try:
+        idx = 0
+        while idx < len(params):
+            arg = params[idx]
+            if arg not in root_args_values_count:
+                break
+
+            if arg == '--file':
+                makim_file = params[idx + 1]
+
+            elif arg == '--dry-run':
+                dry_run = True
+
+            idx += 1 + root_args_values_count[arg]
+    except Exception:
+        red_text = typer.style(
+            'The makim config file was not correctly detected. '
+            'Using the default .makim.yaml.',
+            fg=typer.colors.RED,
+            bold=True,
+        )
+        typer.echo(red_text, err=True, color=True)
+
+    return {
+        'file': makim_file,
+        'dry_run': dry_run,
+    }
 
 
 def run_app() -> None:
-    makim = Makim()
-    makim.load('.makim.yaml')
+    """Run the typer app."""
+    root_config = extract_root_config()
+
+    makim.load(
+        file=cast(str, root_config.get('file', '.makim.yaml')),
+        dry_run=cast(bool, root_config.get('dry_run', False)),
+    )
 
     # create targets data
-    group_names = list(makim.global_data.get('groups', {}).keys())
+    # group_names = list(makim.global_data.get('groups', {}).keys())
     targets: dict[str, Any] = {}
     for group_name, group_data in makim.global_data.get('groups', {}).items():
         for target_name, target_data in group_data.get('targets', {}).items():
@@ -176,6 +279,7 @@ def run_app() -> None:
     # Add dynamically created commands to Typer app
     for name, args in targets.items():
         create_dynamic_command(name, args)
+
     app()
 
 
