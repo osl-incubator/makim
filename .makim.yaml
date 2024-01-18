@@ -167,6 +167,21 @@ groups:
           cd ./tests/
           makim $VERBOSE_FLAG --file $MAKIM_FILE containers.run
 
+      shell-app:
+        help: Test makim with working-directory for global no-path and its various combinations with group and target working-directory
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/.makim-interpreters.yaml
+        shell: bash
+        run: |
+          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
+          export MAKIM_FILE="$(pwd)/${MAKIM_FILE}"
+          makim $VERBOSE_FLAG --file $MAKIM_FILE main.all
+
       unittest:
         help: Test makim using a unittest makimfile
         args:
