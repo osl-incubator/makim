@@ -10,3 +10,7 @@ dependencies:
   - perl
   - r-base
   - sh
+  - pip
+  - pip:
+    # note: workaround ci issue for macos
+    - setuptools >= 40.8.0
