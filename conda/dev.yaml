@@ -3,5 +3,10 @@ channels:
   - nodefaults
   - conda-forge
 dependencies:
+  - bash
   - python 3.8.1  # min version supported
   - poetry >=1.5
+  - nodejs
+  - perl
+  - r-base
+  - sh

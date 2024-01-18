@@ -1,0 +1,43 @@
+version: 1.0
+env-file: .env
+groups:
+  main:
+    targets:
+      node:
+        help: Test using nodejs
+        shell: node
+        run: console.log("Hello, World!");
+      perl:
+        help: Test using perl
+        shell: perl
+        run: print "Hello, World!\n";
+
+      php:
+        help: Test using php
+        shell: php
+        run: print "Hello, World!\n";
+
+      python:
+        help: Test using php
+        shell: python
+        run: print("Hello, World!")
+
+      r:
+        help: Test using R
+        shell: Rscript
+        run: print("Hello World!")
+
+      sh:
+        help: Test using sh
+        shell: sh
+        run: echo "Hello, World!"
+
+      all:
+        dependencies:
+          - target: node
+          - target: perl
+          # note: php from conda-forge has conflicts with r-base
+          # - target: php
+          - target: python
+          - target: r
+          - target: sh
