@@ -5,6 +5,8 @@ Makim main class.
 the way to define targets and dependencies. Instead of using the
 `Makefile` format, it uses `yaml` format.
 """
+from __future__ import annotations
+
 import io
 import os
 import pprint
@@ -14,7 +16,7 @@ import warnings
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Union
+from typing import Optional, Union
 
 import dotenv
 import sh
@@ -28,6 +30,12 @@ from makim.errors import MakimError
 SCOPE_GLOBAL = 0
 SCOPE_GROUP = 1
 SCOPE_TARGET = 2
+
+
+KNOWN_SHELL_APP_ARGS = {
+    'bash': ['-e'],
+    'php': ['-f'],
+}
 
 
 def escape_template_tag(v: str) -> str:
@@ -61,6 +69,7 @@ class Makim(PrintPlugin):
     verbose: bool = False
     global_data: dict = {}
     shell_app: sh.Command = sh.xonsh
+    shell_args: list[str] = []
 
     # temporary variables
     env: dict = {}  # initial env
@@ -84,6 +93,7 @@ class Makim(PrintPlugin):
         self.file = '.makim.yaml'
         self.dry_run = False
         self.verbose = False
+        self.shell_args: list[str] = []
 
     def _call_shell_app(self, cmd):
         if self.global_data.get('virtual-environment'):
@@ -277,10 +287,17 @@ class Makim(PrintPlugin):
 
         return working_dir
 
-    def _load_shell_app(self, shell_app: str = ''):
+    def _load_shell_app(self, shell_app: str = '') -> None:
         if not shell_app:
             shell_app = self.global_data.get('shell', 'xonsh')
-        self.shell_app = getattr(sh, shell_app)
+            return
+
+        cmd = shell_app.split(' ')
+        cmd_name = cmd[0]
+        self.shell_app = getattr(sh, cmd_name)
+
+        args: list[str] = KNOWN_SHELL_APP_ARGS.get(cmd_name, [])
+        self.shell_args = args + cmd[1:]
 
     def _load_dotenv(self, data_scope: dict) -> dict:
         env_file = data_scope.get('env-file')
@@ -300,7 +317,7 @@ class Makim(PrintPlugin):
 
     def _load_scoped_data(
         self, scope: str
-    ) -> Tuple[Dict[str, str], Dict[str, str]]:
+    ) -> tuple[dict[str, str], dict[str, str]]:
         scope_options = ('global', 'group', 'target')
         if scope not in scope_options:
             raise Exception(f'The given scope `{scope}` is not valid.')
@@ -380,13 +397,6 @@ class Makim(PrintPlugin):
             self.args[qualified_name] = (
                 default if default is not None else False if is_bool else None
             )
-
-    @property
-    def shell_args(self):
-        """Return the arguments for the defined shell app."""
-        if self.shell_app.__dict__['__name__'].endswith('bash'):
-            return ['-e']
-        return []
 
     # run commands
 
