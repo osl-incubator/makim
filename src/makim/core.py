@@ -86,6 +86,11 @@ class Makim(PrintPlugin):
         self.verbose = False
 
     def _call_shell_app(self, cmd):
+        if self.global_data.get('virtual-environment'):
+            self._activate_conda_environment(
+                self.global_data['virtual-environment']
+            )
+
         fd, filepath = tempfile.mkstemp(suffix='.makim', text=True)
 
         with open(filepath, 'w') as f:
@@ -118,6 +123,50 @@ class Makim(PrintPlugin):
             self._print_error(f'[EE] Process {pid} killed.')
             os._exit(MakimError.SH_KEYBOARD_INTERRUPT.value)
         os.close(fd)
+
+    def _activate_conda_environment(self, env_data: dict):
+        app = env_data.get('application', '')
+        env_name = env_data.get('name', '')
+
+        if app not in ['conda', 'mamba']:
+            self._print_error(
+                f'[EE] Unsupported virtual environment application: {app}.'
+            )
+            os._exit(MakimError.SH_ERROR_RETURN_CODE.value)
+
+        sh.Command('xonsh')(
+            '-c',
+            f'{app} init xonsh',
+            _in=sys.stdin,
+            _out=sys.stdout,
+            _err=sys.stderr,
+            _bg=False,
+            _bg_exc=False,
+            _no_err=True,
+            _env=os.environ,
+            _new_session=False,
+        )
+
+        activate_command = f'{app} activate {env_name}'
+        try:
+            sh.Command('xonsh')(
+                '-c',
+                activate_command,
+                _in=sys.stdin,
+                _out=sys.stdout,
+                _err=sys.stderr,
+                _bg=False,
+                _bg_exc=False,
+                _no_err=True,
+                _env=os.environ,
+                _new_session=False,
+            )
+        except sh.ErrorReturnCode as e:
+            self._print_error(
+                f'[EE] Failed to activate environment: {env_name}. '
+                f'Error: {e!s}'
+            )
+            os._exit(MakimError.SH_ERROR_RETURN_CODE.value)
 
     def _check_makim_file(self):
         return Path(self.file).exists()
