@@ -357,15 +357,19 @@ def run_app() -> None:
         app()
     except SystemExit as e:
         error_code = 2
-        # index of target command in cmd with .yaml file address
-        target_index = 3
+        target_index = None
         if e.code == error_code:
+            if '--file' in sys.argv and '--verbose' in sys.argv:
+                target_index = 4
+            elif '--file' in sys.argv:
+                target_index = 3
+            elif '--verbose' in sys.argv:
+                target_index = 2
+            else:
+                target_index = 1
+
             command_used = (
-                sys.argv[3]
-                if len(sys.argv) > target_index
-                else sys.argv[1]
-                if sys.argv != ''
-                else ''
+                sys.argv[target_index] if target_index < len(sys.argv) else ''
             )
             available_cmds = [cmd.name for cmd in app.registered_commands]
             suggestion = suggest_command(command_used, available_cmds)
