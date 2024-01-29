@@ -8,6 +8,8 @@ from typing import Any, Callable, Dict, Optional, Type, Union, cast
 import click
 import typer
 
+from fuzzywuzzy import process
+
 from makim import Makim, __version__
 
 app = typer.Typer(
@@ -62,6 +64,23 @@ def main(
     if ctx.invoked_subcommand is None:
         typer.echo(ctx.get_help())
         raise typer.Exit(0)
+
+
+def suggest_command(user_input: str, available_commands: list) -> str:
+    """
+    Suggest the closest command to the user input using fuzzy search.
+
+    Parameters
+    ----------
+    user_input (str): The command input by the user.
+    available_commands (list): A list of available commands.
+
+    Returns
+    -------
+    str: The suggested command.
+    """
+    suggestion, _ = process.extractOne(user_input, available_commands)
+    return suggestion
 
 
 def map_type_from_string(type_name) -> Type:
@@ -255,7 +274,7 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
     try:
         exec(function_code, globals(), local_vars)
     except Exception as e:
-        breakpoint()
+        # breakpoint()
         print(e)
         print(function_code)
     dynamic_command = decorator(local_vars['dynamic_command'])
@@ -334,8 +353,28 @@ def run_app() -> None:
     # Add dynamically created commands to Typer app
     for name, args in targets.items():
         create_dynamic_command(name, args)
-
-    app()
+    try:
+        app()
+    except SystemExit as e:
+        error_code = 2
+        # index of target command in cmd with .yaml file address
+        target_index = 3
+        if e.code == error_code:
+            command_used = (
+                sys.argv[3]
+                if len(sys.argv) > target_index
+                else sys.argv[1]
+                if sys.argv != ''
+                else ''
+            )
+            available_cmds = [cmd.name for cmd in app.registered_commands]
+            suggestion = suggest_command(command_used, available_cmds)
+            typer.secho(
+                f"Command {command_used} not found.\
+ Did you mean '{suggestion}'?",
+                fg=typer.colors.RED,
+            )
+        raise e
 
 
 if __name__ == '__main__':
