@@ -357,16 +357,14 @@ def run_app() -> None:
         app()
     except SystemExit as e:
         error_code = 2
-        target_index = None
+        target_index = 1
         if e.code == error_code:
-            if '--file' in sys.argv and '--verbose' in sys.argv:
-                target_index = 4
-            elif '--file' in sys.argv:
-                target_index = 3
-            elif '--verbose' in sys.argv:
-                target_index = 2
-            else:
-                target_index = 1
+            for flag in ['--file', '--verbose', '--dry-run']:
+                if flag in sys.argv:
+                    target_index = max(
+                        target_index,
+                        sys.argv.index(flag) + (2 if flag == '--file' else 1),
+                    )
 
             command_used = (
                 sys.argv[target_index] if target_index < len(sys.argv) else ''
