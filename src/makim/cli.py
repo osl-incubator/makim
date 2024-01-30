@@ -8,6 +8,8 @@ from typing import Any, Callable, Dict, Optional, Type, Union, cast
 import click
 import typer
 
+from fuzzywuzzy import process
+
 from makim import Makim, __version__
 
 app = typer.Typer(
@@ -62,6 +64,23 @@ def main(
     if ctx.invoked_subcommand is None:
         typer.echo(ctx.get_help())
         raise typer.Exit(0)
+
+
+def suggest_command(user_input: str, available_commands: list) -> str:
+    """
+    Suggest the closest command to the user input using fuzzy search.
+
+    Parameters
+    ----------
+    user_input (str): The command input by the user.
+    available_commands (list): A list of available commands.
+
+    Returns
+    -------
+    str: The suggested command.
+    """
+    suggestion, _ = process.extractOne(user_input, available_commands)
+    return suggestion
 
 
 def map_type_from_string(type_name) -> Type:
@@ -255,7 +274,7 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
     try:
         exec(function_code, globals(), local_vars)
     except Exception as e:
-        breakpoint()
+        # breakpoint()
         print(e)
         print(function_code)
     dynamic_command = decorator(local_vars['dynamic_command'])
@@ -314,6 +333,37 @@ def extract_root_config() -> Dict[str, str | bool]:
     }
 
 
+def _get_command_from_cli() -> str:
+    """
+    Get the group and target from CLI.
+
+    This function is based on `root_args_values_count`.
+    """
+    params = sys.argv[1:]
+    command = ''
+    root_args_values_count = {
+        '--dry-run': 0,
+        '--file': 1,
+        '--help': 0,
+        '--verbose': 0,
+        '--version': 0,
+    }
+
+    try:
+        idx = 0
+        while idx < len(params):
+            arg = params[idx]
+            if arg not in root_args_values_count:
+                command = f'flag `{arg}`' if arg.startswith('--') else arg
+                break
+
+            idx += 1 + root_args_values_count[arg]
+    except Exception as e:
+        print(e)
+
+    return command
+
+
 def run_app() -> None:
     """Run the typer app."""
     root_config = extract_root_config()
@@ -334,8 +384,25 @@ def run_app() -> None:
     # Add dynamically created commands to Typer app
     for name, args in targets.items():
         create_dynamic_command(name, args)
+    try:
+        app()
+    except SystemExit as e:
+        # code 2 means code not found
+        error_code = 2
+        if e.code != error_code:
+            raise e
 
-    app()
+        command_used = _get_command_from_cli()
+
+        available_cmds = [cmd.name for cmd in app.registered_commands]
+        suggestion = suggest_command(command_used, available_cmds)
+
+        typer.secho(
+            f"Command {command_used} not found. Did you mean {suggestion}'?",
+            fg='red',
+        )
+
+        raise e
 
 
 if __name__ == '__main__':
