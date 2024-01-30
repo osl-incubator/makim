@@ -333,6 +333,37 @@ def extract_root_config() -> Dict[str, str | bool]:
     }
 
 
+def _get_command_from_cli() -> str:
+    """
+    Get the group and target from CLI.
+
+    This function is based on `root_args_values_count`.
+    """
+    params = sys.argv[1:]
+    command = ''
+    root_args_values_count = {
+        '--dry-run': 0,
+        '--file': 1,
+        '--help': 0,
+        '--verbose': 0,
+        '--version': 0,
+    }
+
+    try:
+        idx = 0
+        while idx < len(params):
+            arg = params[idx]
+            if arg not in root_args_values_count:
+                command = f'flag `{arg}`' if arg.startswith('--') else arg
+                break
+
+            idx += 1 + root_args_values_count[arg]
+    except Exception as e:
+        print(e)
+
+    return command
+
+
 def run_app() -> None:
     """Run the typer app."""
     root_config = extract_root_config()
@@ -356,26 +387,21 @@ def run_app() -> None:
     try:
         app()
     except SystemExit as e:
+        # code 2 means code not found
         error_code = 2
-        target_index = 1
-        if e.code == error_code:
-            for flag in ['--file', '--verbose', '--dry-run']:
-                if flag in sys.argv:
-                    target_index = max(
-                        target_index,
-                        sys.argv.index(flag) + (2 if flag == '--file' else 1),
-                    )
+        if e.code != error_code:
+            raise e
 
-            command_used = (
-                sys.argv[target_index] if target_index < len(sys.argv) else ''
-            )
-            available_cmds = [cmd.name for cmd in app.registered_commands]
-            suggestion = suggest_command(command_used, available_cmds)
-            typer.secho(
-                f"Command {command_used} not found.\
- Did you mean '{suggestion}'?",
-                fg=typer.colors.RED,
-            )
+        command_used = _get_command_from_cli()
+
+        available_cmds = [cmd.name for cmd in app.registered_commands]
+        suggestion = suggest_command(command_used, available_cmds)
+
+        typer.secho(
+            f"Command {command_used} not found. Did you mean {suggestion}'?",
+            fg='red',
+        )
+
         raise e
 
 
