@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.12.0](https://github.com/osl-incubator/makim/compare/1.11.0...1.12.0) (2024-01-30)
+
+
+### Features
+
+* suggest probable command ([#87](https://github.com/osl-incubator/makim/issues/87)) ([cbc05aa](https://github.com/osl-incubator/makim/commit/cbc05aaa70a080d7cf42e1bbbfd1d092deddb1f0))
+
 # [1.11.0](https://github.com/osl-incubator/makim/compare/1.10.0...1.11.0) (2024-01-18)
 
 
