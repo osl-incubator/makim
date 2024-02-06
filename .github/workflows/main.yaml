@@ -93,6 +93,9 @@ jobs:
         auto-update-conda: true
         conda-solver: libmamba
 
+    - name: Check Poetry lock
+      run: poetry check
+
     - name: Install dependencies
       run: |
         poetry config virtualenvs.create false
