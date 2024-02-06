@@ -14,5 +14,6 @@ dependencies:
   - pip:
     # note: workaround ci issue for macos
     - setuptools >= 40.8.0
+    - wheel >=0.42.0
     # fix the distlib issue
     - paginate >=0.5
