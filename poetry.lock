@@ -378,22 +378,24 @@ files = [
 
 [[package]]
 name = "containers-sugar"
-version = "1.9.0"
+version = "1.11.1"
 description = "Simplify the usage of containers"
 optional = false
-python-versions = ">=3.8.1,<4.0.0"
+python-versions = ">=3.8.1,<4"
 files = [
-    {file = "containers_sugar-1.9.0-py3-none-any.whl", hash = "sha256:3f4dbca349db227b4b259d69179df04cc2299a30b919500557ff522edc315c27"},
-    {file = "containers_sugar-1.9.0.tar.gz", hash = "sha256:28c9ed69d61a52016065af927f00eea147eb148ff383c313543da1e9514a15c6"},
+    {file = "containers_sugar-1.11.1-py3-none-any.whl", hash = "sha256:f6c4f3c47352d90beac0073dc9e663aae1d55abc59253649e6ef6022eeabc368"},
+    {file = "containers_sugar-1.11.1.tar.gz", hash = "sha256:14c32e25fbb5b0375f45dee0824690523de89e532c7b1090f96936517dcf5dc7"},
 ]
 
 [package.dependencies]
-colorama = ">=0.4.6,<0.5.0"
-Jinja2 = "<3.1.0"
-python-dotenv = ">=0.21.1,<0.22.0"
-pyyaml = ">=5"
-sh = ">=2.0.0,<3.0.0"
-urllib3 = "<2"
+colorama = ">=0.4.6"
+Jinja2 = ">=2"
+plotille = ">=5"
+python-dotenv = ">=0.21.1"
+pyyaml = ">=6"
+rich = ">=13.7"
+sh = ">=2.0.0"
+textual = ">=0.48"
 
 [[package]]
 name = "coverage"
@@ -1030,6 +1032,26 @@ files = [
 rapidfuzz = ">=3.1.0,<4.0.0"
 
 [[package]]
+name = "linkify-it-py"
+version = "2.0.3"
+description = "Links recognition library with FULL unicode support."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "linkify-it-py-2.0.3.tar.gz", hash = "sha256:68cda27e162e9215c17d786649d1da0021a451bdc436ef9e0fa0ba5234b9b048"},
+    {file = "linkify_it_py-2.0.3-py3-none-any.whl", hash = "sha256:6bcbc417b0ac14323382aef5c5192c0075bf8a9d6b41820a2b66371eac6b6d79"},
+]
+
+[package.dependencies]
+uc-micro-py = "*"
+
+[package.extras]
+benchmark = ["pytest", "pytest-benchmark"]
+dev = ["black", "flake8", "isort", "pre-commit", "pyproject-flake8"]
+doc = ["myst-parser", "sphinx", "sphinx-book-theme"]
+test = ["coverage", "pytest", "pytest-cov"]
+
+[[package]]
 name = "markdown"
 version = "3.5.2"
 description = "Python implementation of John Gruber's Markdown."
@@ -1059,6 +1081,8 @@ files = [
 ]
 
 [package.dependencies]
+linkify-it-py = {version = ">=1,<3", optional = true, markers = "extra == \"linkify\""}
+mdit-py-plugins = {version = "*", optional = true, markers = "extra == \"plugins\""}
 mdurl = ">=0.1,<1.0"
 
 [package.extras]
@@ -1689,6 +1713,16 @@ files = [
 [package.extras]
 docs = ["furo (>=2023.9.10)", "proselint (>=0.13)", "sphinx (>=7.2.6)", "sphinx-autodoc-typehints (>=1.25.2)"]
 test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.4.3)", "pytest-cov (>=4.1)", "pytest-mock (>=3.12)"]
+
+[[package]]
+name = "plotille"
+version = "5.0.0"
+description = "Plot in the terminal using braille dots."
+optional = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "plotille-5.0.0.tar.gz", hash = "sha256:99e5ca51a2e4c922ead3a3b0863cc2c6a9a4b3f701944589df10f42ce02ab3dc"},
+]
 
 [[package]]
 name = "pluggy"
@@ -2618,6 +2652,25 @@ files = [
 tests = ["pytest", "pytest-cov"]
 
 [[package]]
+name = "textual"
+version = "0.49.0"
+description = "Modern Text User Interface framework"
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "textual-0.49.0-py3-none-any.whl", hash = "sha256:bc516ca3e3ab36c653059321a2a05262db3a4c0a62f275d3eb2a30ed8c94fd6b"},
+    {file = "textual-0.49.0.tar.gz", hash = "sha256:a66f981bde8f64c5cbb524d029946136d85602e82b595f4f5793f7bdc2e965b7"},
+]
+
+[package.dependencies]
+markdown-it-py = {version = ">=2.1.0", extras = ["linkify", "plugins"]}
+rich = ">=13.3.3"
+typing-extensions = ">=4.4.0,<5.0.0"
+
+[package.extras]
+syntax = ["tree-sitter (>=0.20.1,<0.21.0)", "tree_sitter_languages (>=1.7.0)"]
+
+[[package]]
 name = "tinycss2"
 version = "1.2.1"
 description = "A tiny CSS parser"
@@ -2723,6 +2776,20 @@ files = [
     {file = "typing_extensions-4.9.0-py3-none-any.whl", hash = "sha256:af72aea155e91adfc61c3ae9e0e342dbc0cba726d6cba4b6c72c1f34e47291cd"},
     {file = "typing_extensions-4.9.0.tar.gz", hash = "sha256:23478f88c37f27d76ac8aee6c905017a143b0b1b886c3c9f66bc2fd94f9f5783"},
 ]
+
+[[package]]
+name = "uc-micro-py"
+version = "1.0.2"
+description = "Micro subset of unicode data files for linkify-it-py projects."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "uc-micro-py-1.0.2.tar.gz", hash = "sha256:30ae2ac9c49f39ac6dce743bd187fcd2b574b16ca095fa74cd9396795c954c54"},
+    {file = "uc_micro_py-1.0.2-py3-none-any.whl", hash = "sha256:8c9110c309db9d9e87302e2f4ad2c3152770930d88ab385cd544e7a7e75f3de0"},
+]
+
+[package.extras]
+test = ["coverage", "pytest", "pytest-cov"]
 
 [[package]]
 name = "urllib3"
@@ -2879,4 +2946,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<4"
-content-hash = "373bc9fa2732ee3a6be8b32c56af19a1f72f264e8f3b0927da1e667b9b6c54ca"
+content-hash = "84b05707e10c4e4d557b5a9303cd15d628aac70c2c943c768a3c1a142d684eee"

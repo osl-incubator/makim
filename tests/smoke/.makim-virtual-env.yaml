@@ -1,0 +1,17 @@
+version: 1.0
+env-file: .env
+groups:
+  main:
+    targets:
+      virtual-environment:
+        help: Use this target to clean up temporary files
+        virtual-environment:
+          application: conda
+          name: jlab
+        args:
+          all:
+            type: bool
+            action: store_true
+            help: Remove all files that are tracked by git
+        run: |
+          conda env list

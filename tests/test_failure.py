@@ -20,7 +20,7 @@ from makim.errors import MakimError
 )
 def test_failure(target, args, error_code):
     """Test makim with expected failures."""
-    makim_file = Path(__file__).parent / '.makim-unittest.yaml'
+    makim_file = Path(__file__).parent / 'smoke' / '.makim-unittest.yaml'
 
     m = makim.Makim()
     m.load(file=makim_file)

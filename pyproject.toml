@@ -35,7 +35,7 @@ fuzzywuzzy = ">=0.18.0"
 python-levenshtein = ">=0.23.0"
 
 [tool.poetry.group.dev.dependencies]
-containers-sugar = "1.9.0"
+containers-sugar = "1.11.1"
 pytest = ">=7"
 pre-commit = ">=3"
 mypy = ">=1"
