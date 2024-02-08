@@ -148,28 +148,44 @@ usage: MakIm [--help] [--version] [--config-file MAKIM_FILE] [target]
 
 MakIm is a tool that helps you to organize and simplify your helper commands.
 
-positional arguments:
-  target
-    Specify the target command to be performed. Options are:
+Options:
+  -v, --version                   Show the version and exit
+  --file TEXT                     Makim config file  [default: .makim.yaml]
+  --dry-run                       Execute the command in dry mode
+  --verbose                       Execute the command in verbose mode
+  --install-completion [bash|zsh|fish|powershell|pwsh]
+                                  Install completion for the specified shell.
+  --show-completion [bash|zsh|fish|powershell|pwsh]
+                                  Show completion for the specified shell, to
+                                  copy it or customize the installation.
+  --help                          Show this message and exit.
 
-    default:
-    --------
-      default.clean => Use this target to clean up temporary files
-        ARGS:
-          --all: (bool) Remove all files that are tracked by git
-      default.build => Build the program
-        ARGS:
-          --clean: (bool) if not set, the clean dependency will not be triggered.
+Commands:
+  clean.tmp                       Clean unnecessary...
+  docs.build                      Build documentation
+  docs.preview                    Preview documentation page...
+  release.ci                      Run semantic release on CI
+  release.dry                     Run semantic release in...
+  smoke-tests.bash                Test makim shell attribute...
+  smoke-tests.complex             Test makim using a complex...
+  smoke-tests.containers          Test makim with...
+  smoke-tests.shell-app           Test makim with...
+  smoke-tests.simple              Test makim using a simple...
+  smoke-tests.unittest            Test makim using a...
+  smoke-tests.vars-env            Test makim using env...
+  smoke-tests.working-directory-absolute-path
+                                  Test makim with...
+  smoke-tests.working-directory-no-path
+                                  Test makim with...
+  smoke-tests.working-directory-relative-path
+                                  Test makim with...
+  tests.ci                        Run all targets used on CI
+  tests.linter                    Run linter tools
+  tests.smoke                     Run smoke tests
+  tests.unittest                  Run tests
 
-options:
-  --help, -h
-    Show the help menu
-  --version
-    Show the version of the installed MakIm tool.
-  --config-file MAKIM_FILE
-    Specify a custom location for the config file.
-
-If you have any problem, open an issue at: https://github.com/osl-incubator/makim
+  If you have any problem, open an issue at: https://github.com/osl-
+  incubator/makim
 ```
 
 As you can see, the help menu automatically adds information defined by all the help key, inside the .makim.yaml file.
@@ -221,7 +237,7 @@ Some examples of how to use it:
 
 - run the build target with the clean flag: makim build --clean
 
-### Attribute: dependencies
+## Attribute: dependencies
  
  Makim needs the following directories to install and  run smoothly.
 
