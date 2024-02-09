@@ -328,3 +328,15 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-no-path
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-absolute
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-relative
+
+  error:
+    help: This group helps tests failure targets
+    targets:
+      python-assert:
+        help: Raise an system error
+        shell: python
+        run: assert False, "Failed"
+      code-3:
+        help: Raise an system error
+        shell: bash
+        run: exit 3

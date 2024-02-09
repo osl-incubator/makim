@@ -25,7 +25,8 @@ import yaml  # type: ignore
 from colorama import Fore
 from jinja2 import Template
 
-from makim.errors import MakimError
+from makim.console import get_terminal_size
+from makim.exceptions import ExceptionNotification, MakimError
 
 SCOPE_GLOBAL = 0
 SCOPE_GROUP = 1
@@ -119,37 +120,44 @@ class Makim(PrintPlugin):
             p.wait()
         except sh.ErrorReturnCode as e:
             os.close(fd)
-            self._print_error(str(e))
-            os._exit(MakimError.SH_ERROR_RETURN_CODE.value)
+            ExceptionNotification.raise_error(
+                str(e.full_cmd),
+                MakimError.SH_ERROR_RETURN_CODE,
+                e.exit_code or 1,
+            )
         except KeyboardInterrupt:
             os.close(fd)
             pid = p.pid
             p.kill_group()
-            self._print_error(f'[EE] Process {pid} killed.')
-            os._exit(MakimError.SH_KEYBOARD_INTERRUPT.value)
+            ExceptionNotification.raise_error(
+                f'Process {pid} killed.',
+                MakimError.SH_KEYBOARD_INTERRUPT,
+            )
         os.close(fd)
 
-    def _check_makim_file(self):
-        return Path(self.file).exists()
+    def _check_makim_file(self, file_path: str = '') -> bool:
+        return Path(file_path or self.file).exists()
 
-    def _verify_target_conditional(self, conditional):
+    def _verify_target_conditional(self, conditional) -> bool:
         # todo: implement verification
         print(f'condition {conditional} not verified')
         return False
 
-    def _verify_args(self):
+    def _verify_args(self) -> None:
         if not self._check_makim_file():
-            self._print_error(
-                '[EE] CONFIG: Config file .makim.yaml not found.'
+            ExceptionNotification.raise_error(
+                'CONFIG: Config file .makim.yaml not found.',
+                MakimError.MAKIM_CONFIG_FILE_NOT_FOUND,
             )
-            os._exit(MakimError.MAKIM_CONFIG_FILE_NOT_FOUND.value)
 
-    def _verify_config(self):
+    def _verify_config(self) -> None:
         if not len(self.global_data['groups']):
-            self._print_error('[EE] No target groups found.')
-            os._exit(MakimError.MAKIM_NO_TARGET_GROUPS_FOUND.value)
+            ExceptionNotification.raise_error(
+                'No target groups found.',
+                MakimError.MAKIM_NO_TARGET_GROUPS_FOUND,
+            )
 
-    def _change_target(self, target_name: str):
+    def _change_target(self, target_name: str) -> None:
         group_name = 'default'
         if '.' in target_name:
             group_name, target_name = target_name.split('.')
@@ -165,13 +173,13 @@ class Makim(PrintPlugin):
                     self._load_shell_app(shell_app)
                 return
 
-        self._print_error(
-            f'[EE] The given target "{self.target_name}" was not found in the '
-            f'configuration file for the group {self.group_name}.'
+        ExceptionNotification.raise_error(
+            f'The given target "{self.target_name}" was not found in the '
+            f'configuration file for the group {self.group_name}.',
+            MakimError.MAKIM_TARGET_NOT_FOUND,
         )
-        os._exit(MakimError.MAKIM_TARGET_NOT_FOUND.value)
 
-    def _change_group_data(self, group_name=None):
+    def _change_group_data(self, group_name=None) -> None:
         groups = self.global_data['groups']
 
         if group_name is not None:
@@ -192,13 +200,19 @@ class Makim(PrintPlugin):
                 self._load_shell_app(shell_app)
                 return
 
-        self._print_error(
-            f'[EE] The given group target "{self.group_name}" '
-            'was not found in the configuration file.'
+        ExceptionNotification.raise_error(
+            f'The given group target "{self.group_name}" '
+            'was not found in the configuration file.',
+            MakimError.MAKIM_GROUP_NOT_FOUND,
         )
-        os._exit(MakimError.MAKIM_GROUP_NOT_FOUND.value)
 
-    def _load_config_data(self):
+    def _load_config_data(self) -> None:
+        if not self._check_makim_file():
+            ExceptionNotification.raise_error(
+                f'Makim file {self.file} not found',
+                MakimError.MAKIM_CONFIG_FILE_NOT_FOUND,
+            )
+
         with open(self.file, 'r') as f:
             # escape template tags
             content = escape_template_tag(f.read())
@@ -250,7 +264,7 @@ class Makim(PrintPlugin):
         args: list[str] = KNOWN_SHELL_APP_ARGS.get(cmd_name, [])
         self.shell_args = args + cmd[1:]
 
-    def _load_dotenv(self, data_scope: dict) -> dict:
+    def _load_dotenv(self, data_scope: dict) -> dict[str, str]:
         env_file = data_scope.get('env-file')
         if not env_file:
             return {}
@@ -261,10 +275,13 @@ class Makim(PrintPlugin):
             env_file = str(Path(self.file).parent / env_file)
 
         if not Path(env_file).exists():
-            self._print_error('[EE] The given env-file was not found.')
-            os._exit(MakimError.MAKIM_ENV_FILE_NOT_FOUND.value)
+            ExceptionNotification.raise_error(
+                'The given env-file was not found.',
+                MakimError.MAKIM_ENV_FILE_NOT_FOUND,
+            )
 
-        return dotenv.dotenv_values(env_file)
+        env_vars = dotenv.dotenv_values(env_file)
+        return {k: (v or '') for k, v in env_vars.items()}
 
     def _load_scoped_data(
         self, scope: str
@@ -421,11 +438,11 @@ class Makim(PrintPlugin):
             self.group_data['vars'] = {}
 
         if not isinstance(self.group_data['vars'], dict):
-            self._print_error(
-                '[EE] `vars` attribute inside the group '
-                f'{self.group_name} is not a dictionary.'
+            ExceptionNotification.raise_error(
+                '`vars` attribute inside the group '
+                f'{self.group_name} is not a dictionary.',
+                MakimError.MAKIM_VARS_ATTRIBUTE_INVALID,
             )
-            os._exit(MakimError.MAKIM_VARS_ATTRIBUTE_INVALID.value)
 
         env, variables = self._load_scoped_data('target')
         for k, v in env.items():
@@ -458,16 +475,18 @@ class Makim(PrintPlugin):
                     else args[input_flag]
                 )
             elif v.get('required'):
-                self._print_error(
-                    f'[EE] The argument `{k}` is set as required. '
-                    'Please, provide that argument to proceed.'
+                ExceptionNotification.raise_error(
+                    f'The argument `{k}` is set as required. '
+                    'Please, provide that argument to proceed.',
+                    MakimError.MAKIM_ARGUMENT_REQUIRED,
                 )
-                os._exit(MakimError.MAKIM_ARGUMENT_REQUIRED.value)
 
         cmd = unescape_template_tag(str(cmd))
         cmd = Template(cmd).render(args=args_input, env=env, vars=variables)
+        width, _ = get_terminal_size()
+
         if self.verbose:
-            self._print_info('=' * 80)
+            self._print_info('=' * width)
             self._print_info(
                 'TARGET: ' + f'{self.group_name}.{self.target_name}'
             )
@@ -477,9 +496,9 @@ class Makim(PrintPlugin):
             self._print_info(pprint.pformat(variables))
             self._print_info('ENV:')
             self._print_info(str(env))
-            self._print_info('-' * 80)
+            self._print_info('-' * width)
             self._print_info('>>> ' + cmd.replace('\n', '\n>>> '))
-            self._print_info('=' * 80)
+            self._print_info('=' * width)
 
         if not self.dry_run and cmd:
             self._call_shell_app(cmd)
