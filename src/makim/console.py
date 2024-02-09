@@ -2,18 +2,10 @@
 import os
 
 
-def get_terminal_size():
+def get_terminal_size(default_size=(80, 24)):
     """Return the height (number of lines) of the terminal using os module."""
-    size = os.get_terminal_size()
     try:
-        height = size.lines
+        size = os.get_terminal_size()
+        return (size.columns, size.lines)
     except OSError:
-        # Default to 24 lines if the terminal size cannot be determined.
-        height = 24
-
-    try:
-        width = size.columns
-    except OSError:
-        # Default to 24 lines if the terminal size cannot be determined.
-        height = 80
-    return width, height
+        return default_size
