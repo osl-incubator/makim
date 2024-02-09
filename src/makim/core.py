@@ -146,7 +146,7 @@ class Makim(PrintPlugin):
     def _verify_args(self) -> None:
         if not self._check_makim_file():
             ExceptionNotification.raise_error(
-                'CONFIG: Config file .makim.yaml not found.',
+                f'Makim file {self.file} not found.',
                 MakimError.MAKIM_CONFIG_FILE_NOT_FOUND,
             )
 
