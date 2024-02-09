@@ -7,13 +7,13 @@ from pathlib import Path
 import makim
 import pytest
 
-from makim.errors import MakimError
+from makim.exceptions import MakimError
 
 
 @pytest.mark.parametrize(
     'target,args,error_code',
     [
-        ('tests.test-7', {}, MakimError.MAKIM_ARGUMENT_REQUIRED.value),
+        ('tests.test-7', {}, 1),
         ('tests.test-8', {}, MakimError.SH_ERROR_RETURN_CODE.value),
         ('tests.test-9', {}, MakimError.SH_ERROR_RETURN_CODE.value),
     ],
