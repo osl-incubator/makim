@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.12.1](https://github.com/osl-incubator/makim/compare/1.12.0...1.12.1) (2024-02-09)
+
+
+### Bug Fixes
+
+* Improve smoke test organization ([#93](https://github.com/osl-incubator/makim/issues/93)) ([5da1064](https://github.com/osl-incubator/makim/commit/5da10642141969549787a479cf8d0c3a77f04c74))
+
 # [1.12.0](https://github.com/osl-incubator/makim/compare/1.11.0...1.12.0) (2024-01-30)
 
 
