@@ -1,6 +1,7 @@
 """Cli functions to define the arguments and to call Makim."""
 from __future__ import annotations
 
+import os
 import sys
 
 from typing import Any, Callable, Dict, Optional, Type, Union, cast
@@ -11,6 +12,14 @@ import typer
 from fuzzywuzzy import process
 
 from makim import Makim, __version__
+
+CLI_ROOT_FLAGS_VALUES_COUNT = {
+    '--dry-run': 0,
+    '--file': 1,
+    '--help': 0,  # not necessary to store this value
+    '--verbose': 0,
+    '--version': 0,  # not necessary to store this value
+}
 
 app = typer.Typer(
     help=(
@@ -285,17 +294,11 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
         dynamic_command = apply_click_options(dynamic_command, options_data)
 
 
-def extract_root_config() -> Dict[str, str | bool]:
+def extract_root_config(
+    cli_list: list[str] = sys.argv,
+) -> Dict[str, str | bool]:
     """Extract the root configuration from the CLI."""
-    params = sys.argv[1:]
-
-    root_args_values_count = {
-        '--dry-run': 0,
-        '--file': 1,
-        '--help': 0,  # not necessary to store this value
-        '--verbose': 0,
-        '--version': 0,  # not necessary to store this value
-    }
+    params = cli_list[1:]
 
     # default values
     makim_file = '.makim.yaml'
@@ -306,17 +309,20 @@ def extract_root_config() -> Dict[str, str | bool]:
         idx = 0
         while idx < len(params):
             arg = params[idx]
-            if arg not in root_args_values_count:
+            if arg not in CLI_ROOT_FLAGS_VALUES_COUNT:
                 break
 
             if arg == '--file':
-                makim_file = params[idx + 1]
+                try:
+                    makim_file = params[idx + 1]
+                except IndexError:
+                    pass
             elif arg == '--dry-run':
                 dry_run = True
             elif arg == '--verbose':
                 verbose = True
 
-            idx += 1 + root_args_values_count[arg]
+            idx += 1 + CLI_ROOT_FLAGS_VALUES_COUNT[arg]
     except Exception:
         red_text = typer.style(
             'The makim config file was not correctly detected. '
@@ -337,27 +343,20 @@ def _get_command_from_cli() -> str:
     """
     Get the group and target from CLI.
 
-    This function is based on `root_args_values_count`.
+    This function is based on `CLI_ROOT_FLAGS_VALUES_COUNT`.
     """
     params = sys.argv[1:]
     command = ''
-    root_args_values_count = {
-        '--dry-run': 0,
-        '--file': 1,
-        '--help': 0,
-        '--verbose': 0,
-        '--version': 0,
-    }
 
     try:
         idx = 0
         while idx < len(params):
             arg = params[idx]
-            if arg not in root_args_values_count:
+            if arg not in CLI_ROOT_FLAGS_VALUES_COUNT:
                 command = f'flag `{arg}`' if arg.startswith('--') else arg
                 break
 
-            idx += 1 + root_args_values_count[arg]
+            idx += 1 + CLI_ROOT_FLAGS_VALUES_COUNT[arg]
     except Exception as e:
         print(e)
 
@@ -368,8 +367,21 @@ def run_app() -> None:
     """Run the typer app."""
     root_config = extract_root_config()
 
+    config_file_path = cast(str, root_config.get('file', '.makim.yaml'))
+
+    cli_completion_words = [
+        w for w in os.getenv('COMP_WORDS', '').split('\n') if w
+    ]
+
+    if not makim._check_makim_file(config_file_path) and cli_completion_words:
+        # autocomplete call
+        root_config = extract_root_config(cli_completion_words)
+        config_file_path = cast(str, root_config.get('file', '.makim.yaml'))
+        if not makim._check_makim_file(config_file_path):
+            return
+
     makim.load(
-        file=cast(str, root_config.get('file', '.makim.yaml')),
+        file=config_file_path,
         dry_run=cast(bool, root_config.get('dry_run', False)),
         verbose=cast(bool, root_config.get('verbose', False)),
     )

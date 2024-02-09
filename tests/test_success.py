@@ -21,7 +21,7 @@ import pytest
 )
 def test_success(target, args):
     """Test makim when expects success."""
-    makim_file = Path(__file__).parent / '.makim-unittest.yaml'
+    makim_file = Path(__file__).parent / 'smoke' / '.makim-unittest.yaml'
 
     m = makim.Makim()
     m.load(file=makim_file)

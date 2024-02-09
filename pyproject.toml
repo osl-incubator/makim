@@ -29,13 +29,14 @@ pyyaml = ">=5.0"
 jinja2 = ">=2.0"
 xonsh = ">=0.14.0"
 python-dotenv = ">=0.21.1"
-colorama = ">=0.4.6"
 typer = ">=0.9.0"
 fuzzywuzzy = ">=0.18.0"
 python-levenshtein = ">=0.23.0"
+rich = ">=13.7.0"
+shellingham = ">=1.5.4"
 
 [tool.poetry.group.dev.dependencies]
-containers-sugar = "1.9.0"
+containers-sugar = "1.11.1"
 pytest = ">=7"
 pre-commit = ">=3"
 mypy = ">=1"
@@ -69,7 +70,6 @@ ignore_missing_imports = true
 line-length = 79
 force-exclude = true
 src = ["./src/makim", "./tests"]
-ignore = ["RUF012"]
 exclude = [
   "docs",
 ]
@@ -86,6 +86,7 @@ select = [
   "I001", # isort
   "I002", # isort
 ]
+ignore = ["RUF012"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"

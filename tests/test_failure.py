@@ -7,20 +7,20 @@ from pathlib import Path
 import makim
 import pytest
 
-from makim.errors import MakimError
+from makim.exceptions import MakimError
 
 
 @pytest.mark.parametrize(
     'target,args,error_code',
     [
-        ('tests.test-7', {}, MakimError.MAKIM_ARGUMENT_REQUIRED.value),
+        ('tests.test-7', {}, 1),
         ('tests.test-8', {}, MakimError.SH_ERROR_RETURN_CODE.value),
         ('tests.test-9', {}, MakimError.SH_ERROR_RETURN_CODE.value),
     ],
 )
 def test_failure(target, args, error_code):
     """Test makim with expected failures."""
-    makim_file = Path(__file__).parent / '.makim-unittest.yaml'
+    makim_file = Path(__file__).parent / 'smoke' / '.makim-unittest.yaml'
 
     m = makim.Makim()
     m.load(file=makim_file)

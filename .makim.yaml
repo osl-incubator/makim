@@ -99,7 +99,7 @@ groups:
             type: bool
             action: store_true
         env:
-          MAKIM_FILE: ./tests/.makim-simple.yaml
+          MAKIM_FILE: ./tests/smoke/.makim-simple.yaml
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
@@ -111,7 +111,7 @@ groups:
       complex:
         help: Test makim using a complex makimfile
         env:
-          MAKIM_FILE: ./tests/.makim-complex.yaml
+          MAKIM_FILE: ./tests/smoke/.makim-complex.yaml
         args:
           verbose-mode:
             help: Run the all the tests in verbose mode
@@ -155,7 +155,8 @@ groups:
       containers:
         help: Test makim with containers-sugar
         env:
-          MAKIM_FILE: .makim-complex.yaml
+          # it change the directory first to tests/smoke
+          MAKIM_FILE: .makim-sugar.yaml
         args:
           verbose-mode:
             help: Run the all the tests in verbose mode
@@ -164,18 +165,20 @@ groups:
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
-          cd ./tests/
+          cd ./tests/smoke
           makim $VERBOSE_FLAG --file $MAKIM_FILE containers.run
 
       shell-app:
-        help: Test makim with working-directory for global no-path and its various combinations with group and target working-directory
+        help: |
+          Test makim with working-directory for global no-path and its various
+          combinations with group and target working-directory
         args:
           verbose-mode:
             help: Run the all the tests in verbose mode
             type: bool
             action: store_true
         env:
-          MAKIM_FILE: tests/.makim-interpreters.yaml
+          MAKIM_FILE: tests/smoke/.makim-interpreters.yaml
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
@@ -190,7 +193,7 @@ groups:
             type: bool
             action: store_true
         env:
-          MAKIM_FILE: ./tests/.makim-unittest.yaml
+          MAKIM_FILE: ./tests/smoke/.makim-unittest.yaml
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
@@ -213,7 +216,7 @@ groups:
             type: bool
             action: store_true
         env:
-          MAKIM_FILE: ./tests/.makim-env.yaml
+          MAKIM_FILE: ./tests/smoke/.makim-env.yaml
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
@@ -239,20 +242,21 @@ groups:
             action: store_true
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
-          makim $VERBOSE_FLAG --file tests/.makim-bash-main-scope.yaml main-scope.test
-          makim $VERBOSE_FLAG --file tests/.makim-bash-group-scope.yaml group-scope.test
-          makim $VERBOSE_FLAG --file tests/.makim-bash-target-scope.yaml target-scope.test
+          makim $VERBOSE_FLAG --file tests/smoke/.makim-bash-main-scope.yaml main-scope.test
+          makim $VERBOSE_FLAG --file tests/smoke/.makim-bash-group-scope.yaml group-scope.test
+          makim $VERBOSE_FLAG --file tests/smoke/.makim-bash-target-scope.yaml target-scope.test
 
       working-directory-absolute-path:
         help: |
-          Test makim with working-directory absolute for global path and its various combinations with group and target working-directory
+          Test makim with working-directory absolute for global path and its various
+          combinations with group and target working-directory
         args:
           verbose-mode:
             help: Run the all the tests in verbose mode
             type: bool
             action: store_true
         env:
-          MAKIM_FILE: tests/.makim-working-directory-absolute-path.yaml
+          MAKIM_FILE: tests/smoke/.makim-working-directory-absolute-path.yaml
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
@@ -269,14 +273,16 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-relative
 
       working-directory-no-path:
-        help: Test makim with working-directory for global no-path and its various combinations with group and target working-directory
+        help: |
+          Test makim with working-directory for global no-path and its
+          various combinations with group and target working-directory
         args:
           verbose-mode:
             help: Run the all the tests in verbose mode
             type: bool
             action: store_true
         env:
-          MAKIM_FILE: tests/.makim-working-directory-no-path.yaml
+          MAKIM_FILE: tests/smoke/.makim-working-directory-no-path.yaml
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
@@ -295,14 +301,16 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-relative
 
       working-directory-relative-path:
-        help: Test makim with working-directory for global no-path and its various combinations with group and target working-directory
+        help: |
+          Test makim with working-directory for global no-path and its various
+          combinations with group and target working-directory
         args:
           verbose-mode:
             help: Run the all the tests in verbose mode
             type: bool
             action: store_true
         env:
-          MAKIM_FILE: tests/.makim-working-directory-relative-path.yaml
+          MAKIM_FILE: tests/smoke/.makim-working-directory-relative-path.yaml
         shell: bash
         run: |
           export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
@@ -320,3 +328,15 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-no-path
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-absolute
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-relative
+
+  error:
+    help: This group helps tests failure targets
+    targets:
+      python-assert:
+        help: Raise an system error
+        shell: python
+        run: assert False, "Failed"
+      code-3:
+        help: Raise an system error
+        shell: bash
+        run: exit 3

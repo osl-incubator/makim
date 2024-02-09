@@ -188,21 +188,3 @@ groups:
         help: Print using nested commands
         run: |
           bash -c "python -c \"print(\"1\")\""
-
-  containers:
-    targets:
-      setup:
-        help: build necessary docker image
-        run: |
-          pwd
-          sugar pull --all
-          sugar build --all
-          sugar ext restart --all --options -d
-      run:
-        help: test running a docker service using containers-sugar
-        dependencies:
-          - target: containers.setup
-        shell: bash
-        run: |
-          sugar exec --service service1 --options -T --cmd python -c "print(1)"
-          sugar stop --all
