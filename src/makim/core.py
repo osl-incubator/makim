@@ -25,7 +25,7 @@ import yaml  # type: ignore
 from jinja2 import Template
 
 from makim.console import get_terminal_size
-from makim.logs import LogsNotification, MakimError
+from makim.logs import MakimError, MakimLogs
 
 SCOPE_GLOBAL = 0
 SCOPE_GROUP = 1
@@ -106,7 +106,7 @@ class Makim:
             p.wait()
         except sh.ErrorReturnCode as e:
             os.close(fd)
-            LogsNotification.raise_error(
+            MakimLogs.raise_error(
                 str(e.full_cmd),
                 MakimError.SH_ERROR_RETURN_CODE,
                 e.exit_code or 1,
@@ -115,7 +115,7 @@ class Makim:
             os.close(fd)
             pid = p.pid
             p.kill_group()
-            LogsNotification.raise_error(
+            MakimLogs.raise_error(
                 f'Process {pid} killed.',
                 MakimError.SH_KEYBOARD_INTERRUPT,
             )
@@ -131,14 +131,14 @@ class Makim:
 
     def _verify_args(self) -> None:
         if not self._check_makim_file():
-            LogsNotification.raise_error(
+            MakimLogs.raise_error(
                 f'Makim file {self.file} not found.',
                 MakimError.MAKIM_CONFIG_FILE_NOT_FOUND,
             )
 
     def _verify_config(self) -> None:
         if not len(self.global_data['groups']):
-            LogsNotification.raise_error(
+            MakimLogs.raise_error(
                 'No target groups found.',
                 MakimError.MAKIM_NO_TARGET_GROUPS_FOUND,
             )
@@ -159,7 +159,7 @@ class Makim:
                     self._load_shell_app(shell_app)
                 return
 
-        LogsNotification.raise_error(
+        MakimLogs.raise_error(
             f'The given target "{self.target_name}" was not found in the '
             f'configuration file for the group {self.group_name}.',
             MakimError.MAKIM_TARGET_NOT_FOUND,
@@ -186,7 +186,7 @@ class Makim:
                 self._load_shell_app(shell_app)
                 return
 
-        LogsNotification.raise_error(
+        MakimLogs.raise_error(
             f'The given group target "{self.group_name}" '
             'was not found in the configuration file.',
             MakimError.MAKIM_GROUP_NOT_FOUND,
@@ -194,7 +194,7 @@ class Makim:
 
     def _load_config_data(self) -> None:
         if not self._check_makim_file():
-            LogsNotification.raise_error(
+            MakimLogs.raise_error(
                 f'Makim file {self.file} not found',
                 MakimError.MAKIM_CONFIG_FILE_NOT_FOUND,
             )
@@ -261,7 +261,7 @@ class Makim:
             env_file = str(Path(self.file).parent / env_file)
 
         if not Path(env_file).exists():
-            LogsNotification.raise_error(
+            MakimLogs.raise_error(
                 'The given env-file was not found.',
                 MakimError.MAKIM_ENV_FILE_NOT_FOUND,
             )
@@ -410,7 +410,7 @@ class Makim:
                 )
                 if not yaml.safe_load(result):
                     if self.verbose:
-                        LogsNotification.print_info(
+                        MakimLogs.print_info(
                             '[II] Skipping dependency: '
                             f'{dep_data.get("target")}'
                         )
@@ -424,7 +424,7 @@ class Makim:
             self.group_data['vars'] = {}
 
         if not isinstance(self.group_data['vars'], dict):
-            LogsNotification.raise_error(
+            MakimLogs.raise_error(
                 '`vars` attribute inside the group '
                 f'{self.group_name} is not a dictionary.',
                 MakimError.MAKIM_VARS_ATTRIBUTE_INVALID,
@@ -461,7 +461,7 @@ class Makim:
                     else args[input_flag]
                 )
             elif v.get('required'):
-                LogsNotification.raise_error(
+                MakimLogs.raise_error(
                     f'The argument `{k}` is set as required. '
                     'Please, provide that argument to proceed.',
                     MakimError.MAKIM_ARGUMENT_REQUIRED,
@@ -472,19 +472,19 @@ class Makim:
         width, _ = get_terminal_size()
 
         if self.verbose:
-            LogsNotification.print_info('=' * width)
-            LogsNotification.print_info(
+            MakimLogs.print_info('=' * width)
+            MakimLogs.print_info(
                 'TARGET: ' + f'{self.group_name}.{self.target_name}'
             )
-            LogsNotification.print_info('ARGS:')
-            LogsNotification.print_info(pprint.pformat(args_input))
-            LogsNotification.print_info('VARS:')
-            LogsNotification.print_info(pprint.pformat(variables))
-            LogsNotification.print_info('ENV:')
-            LogsNotification.print_info(str(env))
-            LogsNotification.print_info('-' * width)
-            LogsNotification.print_info('>>> ' + cmd.replace('\n', '\n>>> '))
-            LogsNotification.print_info('=' * width)
+            MakimLogs.print_info('ARGS:')
+            MakimLogs.print_info(pprint.pformat(args_input))
+            MakimLogs.print_info('VARS:')
+            MakimLogs.print_info(pprint.pformat(variables))
+            MakimLogs.print_info('ENV:')
+            MakimLogs.print_info(str(env))
+            MakimLogs.print_info('-' * width)
+            MakimLogs.print_info('>>> ' + cmd.replace('\n', '\n>>> '))
+            MakimLogs.print_info('=' * width)
 
         if not self.dry_run and cmd:
             self._call_shell_app(cmd)
