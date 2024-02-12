@@ -20,8 +20,8 @@ class MakimError(Enum):
     MAKIM_ENV_FILE_NOT_FOUND = 9
 
 
-class ExceptionNotification:
-    """ExceptionNotification is responsible for handling system messages."""
+class MakimLogs:
+    """MakimLogs is responsible for handling system messages."""
 
     @staticmethod
     def raise_error(

@@ -22,11 +22,10 @@ import dotenv
 import sh
 import yaml  # type: ignore
 
-from colorama import Fore
 from jinja2 import Template
 
 from makim.console import get_terminal_size
-from makim.exceptions import ExceptionNotification, MakimError
+from makim.logs import MakimError, MakimLogs
 
 SCOPE_GLOBAL = 0
 SCOPE_GROUP = 1
@@ -49,20 +48,7 @@ def unescape_template_tag(v: str) -> str:
     return v.replace(r'\{\{', '{{').replace(r'\}\}', '}}')
 
 
-class PrintPlugin:
-    """Logs class."""
-
-    def _print_error(self, message: str):
-        print(Fore.RED, message, Fore.RESET, file=sys.stderr)
-
-    def _print_info(self, message: str):
-        print(Fore.BLUE, message, Fore.RESET, file=sys.stdout)
-
-    def _print_warning(self, message: str):
-        print(Fore.YELLOW, message, Fore.RESET, file=sys.stdout)
-
-
-class Makim(PrintPlugin):
+class Makim:
     """Makim main class."""
 
     file: str = '.makim.yaml'
@@ -120,7 +106,7 @@ class Makim(PrintPlugin):
             p.wait()
         except sh.ErrorReturnCode as e:
             os.close(fd)
-            ExceptionNotification.raise_error(
+            MakimLogs.raise_error(
                 str(e.full_cmd),
                 MakimError.SH_ERROR_RETURN_CODE,
                 e.exit_code or 1,
@@ -129,7 +115,7 @@ class Makim(PrintPlugin):
             os.close(fd)
             pid = p.pid
             p.kill_group()
-            ExceptionNotification.raise_error(
+            MakimLogs.raise_error(
                 f'Process {pid} killed.',
                 MakimError.SH_KEYBOARD_INTERRUPT,
             )
@@ -145,14 +131,14 @@ class Makim(PrintPlugin):
 
     def _verify_args(self) -> None:
         if not self._check_makim_file():
-            ExceptionNotification.raise_error(
+            MakimLogs.raise_error(
                 f'Makim file {self.file} not found.',
                 MakimError.MAKIM_CONFIG_FILE_NOT_FOUND,
             )
 
     def _verify_config(self) -> None:
         if not len(self.global_data['groups']):
-            ExceptionNotification.raise_error(
+            MakimLogs.raise_error(
                 'No target groups found.',
                 MakimError.MAKIM_NO_TARGET_GROUPS_FOUND,
             )
@@ -173,7 +159,7 @@ class Makim(PrintPlugin):
                     self._load_shell_app(shell_app)
                 return
 
-        ExceptionNotification.raise_error(
+        MakimLogs.raise_error(
             f'The given target "{self.target_name}" was not found in the '
             f'configuration file for the group {self.group_name}.',
             MakimError.MAKIM_TARGET_NOT_FOUND,
@@ -200,7 +186,7 @@ class Makim(PrintPlugin):
                 self._load_shell_app(shell_app)
                 return
 
-        ExceptionNotification.raise_error(
+        MakimLogs.raise_error(
             f'The given group target "{self.group_name}" '
             'was not found in the configuration file.',
             MakimError.MAKIM_GROUP_NOT_FOUND,
@@ -208,7 +194,7 @@ class Makim(PrintPlugin):
 
     def _load_config_data(self) -> None:
         if not self._check_makim_file():
-            ExceptionNotification.raise_error(
+            MakimLogs.raise_error(
                 f'Makim file {self.file} not found',
                 MakimError.MAKIM_CONFIG_FILE_NOT_FOUND,
             )
@@ -275,7 +261,7 @@ class Makim(PrintPlugin):
             env_file = str(Path(self.file).parent / env_file)
 
         if not Path(env_file).exists():
-            ExceptionNotification.raise_error(
+            MakimLogs.raise_error(
                 'The given env-file was not found.',
                 MakimError.MAKIM_ENV_FILE_NOT_FOUND,
             )
@@ -424,7 +410,7 @@ class Makim(PrintPlugin):
                 )
                 if not yaml.safe_load(result):
                     if self.verbose:
-                        self._print_info(
+                        MakimLogs.print_info(
                             '[II] Skipping dependency: '
                             f'{dep_data.get("target")}'
                         )
@@ -438,7 +424,7 @@ class Makim(PrintPlugin):
             self.group_data['vars'] = {}
 
         if not isinstance(self.group_data['vars'], dict):
-            ExceptionNotification.raise_error(
+            MakimLogs.raise_error(
                 '`vars` attribute inside the group '
                 f'{self.group_name} is not a dictionary.',
                 MakimError.MAKIM_VARS_ATTRIBUTE_INVALID,
@@ -475,7 +461,7 @@ class Makim(PrintPlugin):
                     else args[input_flag]
                 )
             elif v.get('required'):
-                ExceptionNotification.raise_error(
+                MakimLogs.raise_error(
                     f'The argument `{k}` is set as required. '
                     'Please, provide that argument to proceed.',
                     MakimError.MAKIM_ARGUMENT_REQUIRED,
@@ -486,19 +472,19 @@ class Makim(PrintPlugin):
         width, _ = get_terminal_size()
 
         if self.verbose:
-            self._print_info('=' * width)
-            self._print_info(
+            MakimLogs.print_info('=' * width)
+            MakimLogs.print_info(
                 'TARGET: ' + f'{self.group_name}.{self.target_name}'
             )
-            self._print_info('ARGS:')
-            self._print_info(pprint.pformat(args_input))
-            self._print_info('VARS:')
-            self._print_info(pprint.pformat(variables))
-            self._print_info('ENV:')
-            self._print_info(str(env))
-            self._print_info('-' * width)
-            self._print_info('>>> ' + cmd.replace('\n', '\n>>> '))
-            self._print_info('=' * width)
+            MakimLogs.print_info('ARGS:')
+            MakimLogs.print_info(pprint.pformat(args_input))
+            MakimLogs.print_info('VARS:')
+            MakimLogs.print_info(pprint.pformat(variables))
+            MakimLogs.print_info('ENV:')
+            MakimLogs.print_info(str(env))
+            MakimLogs.print_info('-' * width)
+            MakimLogs.print_info('>>> ' + cmd.replace('\n', '\n>>> '))
+            MakimLogs.print_info('=' * width)
 
         if not self.dry_run and cmd:
             self._call_shell_app(cmd)
