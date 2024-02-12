@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.12.2](https://github.com/osl-incubator/makim/compare/1.12.1...1.12.2) (2024-02-12)
+
+
+### Bug Fixes
+
+* Fix remove colorama ([#94](https://github.com/osl-incubator/makim/issues/94)) ([3f49a80](https://github.com/osl-incubator/makim/commit/3f49a80b2b12913b548cedf4c59ca98c9e03f9ee))
+
 ## [1.12.1](https://github.com/osl-incubator/makim/compare/1.12.0...1.12.1) (2024-02-09)
 
 
