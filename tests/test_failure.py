@@ -7,7 +7,7 @@ from pathlib import Path
 import makim
 import pytest
 
-from makim.exceptions import MakimError
+from makim.logs import MakimError
 
 
 @pytest.mark.parametrize(
