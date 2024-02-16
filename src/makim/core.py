@@ -16,7 +16,7 @@ import warnings
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import dotenv
 import sh
@@ -46,6 +46,17 @@ def escape_template_tag(v: str) -> str:
 def unescape_template_tag(v: str) -> str:
     """Unescape template tag when processing the template config file."""
     return v.replace(r'\{\{', '{{').replace(r'\}\}', '}}')
+
+
+def recursive_strip(data: Any) -> Any:
+    """Strip strings in list and dictionaries."""
+    if isinstance(data, str):
+        return data.strip()
+    if isinstance(data, list):
+        return [recursive_strip(item) for item in data]
+    if isinstance(data, dict):
+        return {k: recursive_strip(v) for k, v in data.items()}
+    return data
 
 
 class Makim:
@@ -321,21 +332,21 @@ class Makim:
         if scope_id >= SCOPE_GLOBAL:
             variables.update(
                 {
-                    k: v.strip()
+                    k: recursive_strip(v)
                     for k, v in self.global_data.get('vars', {}).items()
                 }
             )
         if scope_id >= SCOPE_GROUP:
             variables.update(
                 {
-                    k: v.strip()
+                    k: recursive_strip(v)
                     for k, v in self.group_data.get('vars', {}).items()
                 }
             )
         if scope_id == SCOPE_TARGET:
             variables.update(
                 {
-                    k: v.strip()
+                    k: recursive_strip(v)
                     for k, v in self.target_data.get('vars', {}).items()
                 }
             )
