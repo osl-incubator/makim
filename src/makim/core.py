@@ -7,6 +7,7 @@ the way to define targets and dependencies. Instead of using the
 """
 from __future__ import annotations
 
+import copy
 import io
 import os
 import pprint
@@ -16,7 +17,7 @@ import warnings
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 import dotenv
 import sh
@@ -46,6 +47,40 @@ def escape_template_tag(v: str) -> str:
 def unescape_template_tag(v: str) -> str:
     """Unescape template tag when processing the template config file."""
     return v.replace(r'\{\{', '{{').replace(r'\}\}', '}}')
+
+
+def strip_recursively(data: Any) -> Any:
+    """Strip strings in list and dictionaries."""
+    if isinstance(data, str):
+        return data.strip()
+    if isinstance(data, list):
+        return [strip_recursively(item) for item in data]
+    if isinstance(data, dict):
+        return {k: strip_recursively(v) for k, v in data.items()}
+    return data
+
+
+def fix_dict_keys_recursively(data: Any) -> Any:
+    """Replicate dictionary key with `-` to `_` recursively."""
+    if not isinstance(data, (list, dict)):
+        return data
+
+    if isinstance(data, list):
+        for i, item in enumerate(data):
+            if isinstance(item, (list, dict)):
+                data[i] = fix_dict_keys_recursively(item)
+        return data
+
+    # data is a dictionary
+    for k, v in copy.deepcopy(data).items():
+        if not isinstance(v, (list, dict)):
+            if '-' in k:
+                data[k.replace('-', '_')] = copy.deepcopy(v)
+            continue
+        data[k] = fix_dict_keys_recursively(v)
+        if '-' in k:
+            data[k.replace('-', '_')] = copy.deepcopy(v)
+    return data
 
 
 class Makim:
@@ -321,25 +356,26 @@ class Makim:
         if scope_id >= SCOPE_GLOBAL:
             variables.update(
                 {
-                    k: v.strip()
+                    k: strip_recursively(v)
                     for k, v in self.global_data.get('vars', {}).items()
                 }
             )
         if scope_id >= SCOPE_GROUP:
             variables.update(
                 {
-                    k: v.strip()
+                    k: strip_recursively(v)
                     for k, v in self.group_data.get('vars', {}).items()
                 }
             )
         if scope_id == SCOPE_TARGET:
             variables.update(
                 {
-                    k: v.strip()
+                    k: strip_recursively(v)
                     for k, v in self.target_data.get('vars', {}).items()
                 }
             )
-        return variables
+
+        return fix_dict_keys_recursively(variables)
 
     def _load_target_args(self):
         for name, value in self.target_data.get('args', {}).items():
