@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.13.0](https://github.com/osl-incubator/makim/compare/1.12.2...1.13.0) (2024-02-16)
+
+
+### Features
+
+* Allow vars with complex types (list, dict) ([#95](https://github.com/osl-incubator/makim/issues/95)) ([907680e](https://github.com/osl-incubator/makim/commit/907680e92b0d74d57bd3924d8200b73c4e7aa1ed))
+
 ## [1.12.2](https://github.com/osl-incubator/makim/compare/1.12.1...1.12.2) (2024-02-12)
 
 
