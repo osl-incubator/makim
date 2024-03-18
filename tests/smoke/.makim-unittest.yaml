@@ -10,7 +10,7 @@ groups:
             type: bool
             action: store_true
             help: arg `all`
-        run: assert not {{ args.all }}
+        run: assert not ${{ args.all }}
 
       test-2:
         help: test-2 args `all` should be true
@@ -19,7 +19,7 @@ groups:
             type: bool
             action: store_true
             help: arg `all`
-        run: assert {{ args.all }}
+        run: assert ${{ args.all }}
 
       test-3-a:
         help: test-3-a is a dep for test-3-b
@@ -38,7 +38,7 @@ groups:
             help: arg1
             type: bool
             action: store_true
-        run: assert {{ args.arg1 }}
+        run: assert ${{ args.arg1 }}
 
       test-4:
         help: test-4
@@ -49,9 +49,9 @@ groups:
             action: store_true
         dependencies:
           - target: test-4-dep
-            if: {{ args.trigger_dep }}
+            if: ${{ args.trigger_dep }}
             args:
-              arg1: {{ args.trigger_dep }}
+              arg1: ${{ args.trigger_dep }}
         run: "true"
 
       test-5-dep:
@@ -67,7 +67,7 @@ groups:
             action: store_true
         dependencies:
           - target: test-5-dep
-            if: {{ args.trigger_dep }}
+            if: ${{ args.trigger_dep }}
         run: assert True
 
       test-6-dep-1:
@@ -91,32 +91,32 @@ groups:
             action: store_true
         dependencies:
           - target: test-6-dep-1
-            if: {{ True }}
+            if: ${{ True }}
           - target: test-6-dep-2
-            if: {{ False }}
+            if: ${{ False }}
           - target: test-6-dep-3
-            if: {{ True }}
+            if: ${{ True }}
         run: |
           cat /tmp/makim-test.txt | grep "OK"
           rm -f /tmp/makim-test.txt
 
       test-7:
-          help: test required arg
-          args:
-            arg_required:
-              help: a required argument
-              required: true
-              type: string
-          run: echo "OK" > /tmp/makim-test.txt
+        help: test required arg
+        args:
+          arg_required:
+            help: a required argument
+            required: true
+            type: string
+        run: echo "OK" > /tmp/makim-test.txt
 
       test-8:
-          help: failure test in 1 line
-          shell: bash
-          run: "false"
+        help: failure test in 1 line
+        shell: bash
+        run: "false"
 
       test-9:
-          help: failure test in the first line of 2 lines
-          shell: bash
-          run: |
-            false
-            true
+        help: failure test in the first line of 2 lines
+        shell: bash
+        run: |
+          false
+          true

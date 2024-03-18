@@ -49,12 +49,12 @@ groups:
     targets:
       ci:
         help: Run semantic release on CI
-        run: {{ vars.app }} --ci
+        run: ${{ vars.app }} --ci
 
       dry:
         help: Run semantic release in dry-run mode
         run: |
-          {{ vars.app }} --dry-run
+          ${{ vars.app }} --dry-run
           poetry build
           poetry publish --dry-run
 
@@ -103,7 +103,7 @@ groups:
           MAKIM_FILE: ./tests/smoke/.makim-simple.yaml
         shell: bash
         run: |
-          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
           makim $VERBOSE_FLAG --file $MAKIM_FILE default.clean
@@ -120,7 +120,7 @@ groups:
             action: store_true
         shell: bash
         run: |
-          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
           makim $VERBOSE_FLAG --file $MAKIM_FILE default.lint
@@ -165,7 +165,7 @@ groups:
             action: store_true
         shell: bash
         run: |
-          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           cd ./tests/smoke
           makim $VERBOSE_FLAG --file $MAKIM_FILE containers.run
 
@@ -182,7 +182,7 @@ groups:
           MAKIM_FILE: tests/smoke/.makim-interpreters.yaml
         shell: bash
         run: |
-          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           export MAKIM_FILE="$(pwd)/${MAKIM_FILE}"
           makim $VERBOSE_FLAG --file $MAKIM_FILE main.all
 
@@ -197,7 +197,7 @@ groups:
           MAKIM_FILE: ./tests/smoke/.makim-unittest.yaml
         shell: bash
         run: |
-          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
           makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-1
@@ -220,7 +220,7 @@ groups:
           MAKIM_FILE: ./tests/smoke/.makim-env.yaml
         shell: bash
         run: |
-          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
           makim $VERBOSE_FLAG --file $MAKIM_FILE global-scope.test-var-env-file
@@ -244,7 +244,7 @@ groups:
           MAKIM_FILE: ./tests/smoke/.makim-vars.yaml
         shell: bash
         run: |
-          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file $MAKIM_FILE vars-group.vars-target
 
       bash:
@@ -256,7 +256,7 @@ groups:
             type: bool
             action: store_true
         run: |
-          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file tests/smoke/.makim-bash-main-scope.yaml main-scope.test
           makim $VERBOSE_FLAG --file tests/smoke/.makim-bash-group-scope.yaml group-scope.test
           makim $VERBOSE_FLAG --file tests/smoke/.makim-bash-target-scope.yaml target-scope.test
@@ -274,7 +274,7 @@ groups:
           MAKIM_FILE: tests/smoke/.makim-working-directory-absolute-path.yaml
         shell: bash
         run: |
-          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-no-path
@@ -300,7 +300,7 @@ groups:
           MAKIM_FILE: tests/smoke/.makim-working-directory-no-path.yaml
         shell: bash
         run: |
-          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           export MAKIM_FILE="$(pwd)/${MAKIM_FILE}"
           cd /tmp
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
@@ -328,7 +328,7 @@ groups:
           MAKIM_FILE: tests/smoke/.makim-working-directory-relative-path.yaml
         shell: bash
         run: |
-          export VERBOSE_FLAG='{{ "--verbose" if args.verbose_mode else "" }}'
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           export MAKIM_FILE="$(pwd)/${MAKIM_FILE}"
           mkdir -p /tmp/global-relative
           cd /tmp

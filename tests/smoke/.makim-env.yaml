@@ -73,8 +73,7 @@ groups:
             help: my_value
             type: string
         run: |
-          assert "{{ args.my_value }}" == "{{ env.GROUP_VAR_1 }}" == "1"
-
+          assert "${{ args.my_value }}" == "${{ env.GROUP_VAR_1 }}" == "1"
 
       from-global:
         help: Test a rerender from the global scope
@@ -82,11 +81,11 @@ groups:
         dependencies:
           - target: rerender-env.dep
             args:
-              my-value: '{{ env.GROUP_VAR_1 }}'
+              my-value: "${{ env.GROUP_VAR_1 }}"
         env:
-          MYVAR_1: {{ env.GLOBAL_VAR_1 }}
-          MYVAR_2: {{ env.GLOBAL_VAR_2 }}
-          MYVAR_3: {{ env.ENV }}
+          MYVAR_1: ${{ env.GLOBAL_VAR_1 }}
+          MYVAR_2: ${{ env.GLOBAL_VAR_2 }}
+          MYVAR_3: ${{ env.ENV }}
         run: |
           import os
           assert str(os.getenv("MYVAR_1")) == "1"
@@ -97,9 +96,9 @@ groups:
         help: Test a rerender from the group scope
         env-file: .env-group
         env:
-          MYVAR_1: {{ env.GROUP_VAR_1 }}
-          MYVAR_2: {{ env.GROUP_VAR_2 }}
-          MYVAR_3: {{ env.ENV }}
+          MYVAR_1: ${{ env.GROUP_VAR_1 }}
+          MYVAR_2: ${{ env.GROUP_VAR_2 }}
+          MYVAR_3: ${{ env.ENV }}
         run: |
           import os
           assert str(os.getenv("MYVAR_1")) == "1"
@@ -110,7 +109,7 @@ groups:
         help: Test a rerender from the group scope
         env-file: .env-target
         env:
-          MYVAR_1: {{ env.ENV }}
+          MYVAR_1: ${{ env.ENV }}
         run: |
           import os
           assert str(os.getenv("MYVAR_1")) == "test"

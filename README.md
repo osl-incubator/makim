@@ -57,7 +57,7 @@ groups:
             help: if not set, the clean dependency will not be triggered.
         dependencies:
           - target: clean
-            if: {% raw %}{{ args.clean == true }}{% endraw %}
+            if: {% raw %}${{ args.clean == true }}{% endraw %}
         run: |
           echo "build file x"
           echo "build file y"

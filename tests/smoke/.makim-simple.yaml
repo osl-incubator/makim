@@ -11,7 +11,7 @@ groups:
             action: store_true
             help: Remove all files that are tracked by git
         run: |
-          if {{ args.all }} == True:
+          if ${{ args.all }} == True:
             echo "[II] Remove all files"
           else:
             echo "remove file X"
@@ -33,9 +33,9 @@ groups:
             action: store_true
         dependencies:
           - target: default.clean
-            if: {{ args.clean or args.clean_all }}
+            if: ${{ args.clean or args.clean_all }}
             args:
-              all: {{ args.clean_all }}
+              all: ${{ args.clean_all }}
         run: |
           echo "build file x"
           echo "build file y"
