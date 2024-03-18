@@ -536,7 +536,7 @@ project. This is an example of a configuration file:</p>
 <span class="w">            </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">if not set, the clean dependency will not be triggered.</span>
 <span class="w">        </span><span class="nt">dependencies</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clean</span>
-<span class="w">            </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">args.clean == true</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<span class="w">            </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ args.clean == true }}</span>
 <span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <span class="w">          </span><span class="no">echo &quot;build file x&quot;</span>
 <span class="w">          </span><span class="no">echo &quot;build file y&quot;</span>

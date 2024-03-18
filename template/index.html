@@ -504,56 +504,55 @@
 
 
 <h1 id="makim-template">Makim Template</h1>
-<p><strong>Makim</strong> config files are powered by the Jinja2 template engine, allowing
-you to use Jinja2 tags for added flexibility in your Makim config files.</p>
+<p><strong>Makim</strong> config files are powered by the Jinja2 template engine, allowing you
+to use Jinja2 tags for added flexibility in your Makim config files.</p>
 <p>This page focuses on explaining the options offered directly by <strong>Makim</strong>,
 rather than covering all the possibilities with Jinja2.</p>
 <p><strong>Makim</strong> provides three different variable options that can be combined:
 <code>vars</code>, <code>env</code>, and <code>args</code>.</p>
 <p>Additionally, the <code>env</code> and <code>vars</code> option has three different scopes:
-<strong>global</strong>, <strong>group</strong>, and <strong>target</strong>.
-We will discuss each of them in the following sections.</p>
+<strong>global</strong>, <strong>group</strong>, and <strong>target</strong>. We will discuss each of them in the
+following sections.</p>
 <h2 id="variables-scopes">Variables Scopes</h2>
-<p>Before delving into the different variable options, let's discuss <code>env</code>
-and <code>vars</code> scope, as it is essential for the subsequent sections.
-The <code>args</code> attribute just works in the <em>target</em> scope.</p>
-<p>As mentioned earlier, <strong>Makim</strong> <code>env</code> and <code>vars</code> has three scopes:
-<strong>global</strong>, <strong>group</strong>, and <strong>target</strong>.</p>
+<p>Before delving into the different variable options, let's discuss <code>env</code> and
+<code>vars</code> scope, as it is essential for the subsequent sections. The <code>args</code>
+attribute just works in the <em>target</em> scope.</p>
+<p>As mentioned earlier, <strong>Makim</strong> <code>env</code> and <code>vars</code> has three scopes: <strong>global</strong>,
+<strong>group</strong>, and <strong>target</strong>.</p>
 <p>The order of their rendering is crucial. First, the <em>global</em> scope is processed.
 In the <em>group</em> scope, any variable defined globally is accessible via the <code>env</code>
-variable (e.g., <code>{{ env.my_global_env }}</code>).
-However, any variable defined in the <em>global</em> scope will be overridden by a
-variable with the same name in the <em>group</em> scope. The same applies to the
-<em>target</em> scope, where any variable defined in the <em>global</em> or <em>group</em> scope
-will be overridden by a variable defined in the <em>target</em> scope.</p>
+variable (e.g., <code>${{ env.my_global_env }}</code>). However, any
+variable defined in the <em>global</em> scope will be overridden by a variable with the
+same name in the <em>group</em> scope. The same applies to the <em>target</em> scope, where
+any variable defined in the <em>global</em> or <em>group</em> scope will be overridden by a
+variable defined in the <em>target</em> scope.</p>
 <p>Moreover, <code>env</code> is a bit more complex, as its value can be defined in two
-different ways: either through the <code>env</code> attribute in the <code>.makim.yaml</code>
-file or from an environment file specified in the <code>env-file</code> attribute.
-First, the <code>env-file</code> is loaded into memory, and then the variables
-defined in the <code>env</code> attribute are loaded. In other words, any variable
-defined in the file for the given <code>env-file</code> will be overridden by a
-variable of the same name defined in the <code>env</code> attribute. This process
-also respects the order of scopes.</p>
-<p>PS: <strong>Makim</strong> utilizes system environment variables as the initial scope for
-the variables.</p>
+different ways: either through the <code>env</code> attribute in the <code>.makim.yaml</code> file or
+from an environment file specified in the <code>env-file</code> attribute. First, the
+<code>env-file</code> is loaded into memory, and then the variables defined in the <code>env</code>
+attribute are loaded. In other words, any variable defined in the file for the
+given <code>env-file</code> will be overridden by a variable of the same name defined in
+the <code>env</code> attribute. This process also respects the order of scopes.</p>
+<p>PS: <strong>Makim</strong> utilizes system environment variables as the initial scope for the
+variables.</p>
 <h2 id="different-variable-options">Different Variable Options</h2>
-<p><strong>Makim</strong> offers three variable options within the <code>makim</code> config file:
-<code>env</code>, <code>vars</code>, and <code>args</code>.</p>
+<p><strong>Makim</strong> offers three variable options within the <code>makim</code> config file: <code>env</code>,
+<code>vars</code>, and <code>args</code>.</p>
 <ul>
 <li><code>args</code> allows users to pass parameters via the CLI (command line interface).
-It can also be used for target dependencies when parameters need to be passed
-to the dependency. However, this option is not available in the system context
-(the commands executed defined by <code>run</code> attribute), it is only accessible
-within the Makim config file.</li>
+  It can also be used for target dependencies when parameters need to be passed
+  to the dependency. However, this option is not available in the system context
+  (the commands executed defined by <code>run</code> attribute), it is only accessible
+  within the Makim config file.</li>
 <li><code>vars</code> is a convenient way to define reusable variables in the code. For
-example, if you frequently use a command in the <code>run</code> section, you can define
-a variable inside <code>vars</code> to make the Makim file more readable. Like <code>args</code>,
-this option is not available in the system context; it is only accessible
-within the Makim config file.</li>
-<li><code>env</code> is used to define environment variables. Any environment variable can
-be accessed via the <code>env</code> variable in the template (e.g.,
-<code>{{ env.myenvvar }}</code>) or directly as an environment
-variable within the <code>run</code> section, as shown in the example below:</li>
+  example, if you frequently use a command in the <code>run</code> section, you can define
+  a variable inside <code>vars</code> to make the Makim file more readable. Like <code>args</code>,
+  this option is not available in the system context; it is only accessible
+  within the Makim config file.</li>
+<li><code>env</code> is used to define environment variables. Any environment variable can be
+  accessed via the <code>env</code> variable in the template (e.g.,
+  <code>${{ env.myenvvar }}</code>) or directly as an environment
+  variable within the <code>run</code> section, as shown in the example below:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="nn">...</span>
 <span class="nt">groups</span><span class="p">:</span>
@@ -567,23 +566,24 @@ variable within the <code>run</code> section, as shown in the example below:</li
 <span class="w">          </span><span class="no">echo $MYENV</span>
 </code></pre></div>
 <h2 id="order-of-variable-rendering">Order of Variable Rendering</h2>
-<p>One crucial point to keep in mind is the order of variable rendering
-within the Makim config file.</p>
-<p><code>vars</code> is primarily used for <code>run</code> section,  so they have the lowest
-precedence. In another word, you can use <code>env</code> or <code>arg</code> to create
-<code>vars</code>, but not the opposite way.</p>
-<p><code>env</code> however, can be defined also in the system scope, so it has the
-highest rank in the precedence. So, you shouldn't define a <code>env</code> that
-depends on a variable defined by <code>vars</code> or <code>args</code>. If you need to set
-your environment variable with a value from a <code>vars</code> or <code>args</code>, you
-should do it in the <code>run</code> section.</p>
-<p>In the following example, it shows a correct way to use all the
-different options of variables, respecting the scopes and rendering order:</p>
-<div class="highlight"><pre><span></span><code><span class="nn">...</span>
+<p>One crucial point to keep in mind is the order of variable rendering within the
+Makim config file.</p>
+<p><code>vars</code> is primarily used for <code>run</code> section, so they have the lowest precedence.
+In another word, you can use <code>env</code> or <code>arg</code> to create <code>vars</code>, but not the
+opposite way.</p>
+<p><code>env</code> however, can be defined also in the system scope, so it has the highest
+rank in the precedence. So, you shouldn't define a <code>env</code> that depends on a
+variable defined by <code>vars</code> or <code>args</code>. If you need to set your environment
+variable with a value from a <code>vars</code> or <code>args</code>, you should do it in the <code>run</code>
+section.</p>
+<p>In the following example, it shows a correct way to use all the different
+options of variables, respecting the scopes and rendering order:</p>
+<div class="highlight"><pre><span></span><code><span class="nn">---</span>
 <span class="nt">env</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">MY_GLOBAL_ENV</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
 <span class="nt">vars</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">MY_GLOBAL_VAR</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my</span><span class="nv"> </span><span class="s">global</span><span class="nv"> </span><span class="s">env</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">env.MY_GLOBAL_ENV</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="nt">MY_GLOBAL_VAR</span><span class="p">:</span>
+<span class="w">    </span><span class="s">&quot;my</span><span class="nv"> </span><span class="s">global</span><span class="nv"> </span><span class="s">env</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">${{</span><span class="nv"> </span><span class="s">env.MY_GLOBAL_ENV</span><span class="nv"> </span><span class="s">}}&quot;</span>
 
 <span class="nt">groups</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">group1</span><span class="p">:</span>
@@ -591,7 +591,8 @@ different options of variables, respecting the scopes and rendering order:</p>
 <span class="w">    </span><span class="nt">env</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">MY_GROUP_ENV</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
 <span class="w">    </span><span class="nt">vars</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">MY_GROUP_VAR</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my</span><span class="nv"> </span><span class="s">group</span><span class="nv"> </span><span class="s">env</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">env.MY_GROUP_ENV</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">      </span><span class="nt">MY_GROUP_VAR</span><span class="p">:</span>
+<span class="w">        </span><span class="s">&quot;my</span><span class="nv"> </span><span class="s">group</span><span class="nv"> </span><span class="s">env</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">${{</span><span class="nv"> </span><span class="s">env.MY_GROUP_ENV</span><span class="nv"> </span><span class="s">}}&quot;</span>
 <span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">target1</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;target</span><span class="nv"> </span><span class="s">1&quot;</span>
@@ -601,17 +602,18 @@ different options of variables, respecting the scopes and rendering order:</p>
 <span class="w">          </span><span class="nt">my-target-arg</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;target</span><span class="nv"> </span><span class="s">arg&quot;</span>
 <span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
-<span class="w">            </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">env.MY_TARGET_ENV</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">            </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${{</span><span class="nv"> </span><span class="s">env.MY_TARGET_ENV</span><span class="nv"> </span><span class="s">}}&quot;</span>
 <span class="w">        </span><span class="nt">vars</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">MY_TARGET_VAR</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;my</span><span class="nv"> </span><span class="s">group</span><span class="nv"> </span><span class="s">env</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">{{</span><span class="nv"> </span><span class="s">env.MY_GROUP_ENV</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">          </span><span class="nt">MY_TARGET_VAR</span><span class="p">:</span>
+<span class="w">            </span><span class="s">&quot;my</span><span class="nv"> </span><span class="s">group</span><span class="nv"> </span><span class="s">env</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">${{</span><span class="nv"> </span><span class="s">env.MY_GROUP_ENV</span><span class="nv"> </span><span class="s">}}&quot;</span>
 <span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">          </span><span class="no">echo &quot;{{ env.MY_GLOBAL_ENV}}&quot;</span>
-<span class="w">          </span><span class="no">echo &quot;{{ env.MY_GLOBAL_VAR}}&quot;</span>
-<span class="w">          </span><span class="no">echo &quot;{{ env.MY_GROUP_ENV}}&quot;</span>
-<span class="w">          </span><span class="no">echo &quot;{{ env.MY_GROUP_VAR}}&quot;</span>
-<span class="w">          </span><span class="no">echo &quot;{{ env.MY_TARGET_ENV}}&quot;</span>
-<span class="w">          </span><span class="no">echo &quot;{{ env.MY_TARGET_VAR}}&quot;</span>
-<span class="w">          </span><span class="no">echo &quot;{{ env.my_target_arg}}&quot;</span>
+<span class="w">          </span><span class="no">echo &quot;${{ env.MY_GLOBAL_ENV}}&quot;</span>
+<span class="w">          </span><span class="no">echo &quot;${{ env.MY_GLOBAL_VAR}}&quot;</span>
+<span class="w">          </span><span class="no">echo &quot;${{ env.MY_GROUP_ENV}}&quot;</span>
+<span class="w">          </span><span class="no">echo &quot;${{ env.MY_GROUP_VAR}}&quot;</span>
+<span class="w">          </span><span class="no">echo &quot;${{ env.MY_TARGET_ENV}}&quot;</span>
+<span class="w">          </span><span class="no">echo &quot;${{ env.MY_TARGET_VAR}}&quot;</span>
+<span class="w">          </span><span class="no">echo &quot;${{ env.my_target_arg}}&quot;</span>
 </code></pre></div>
 
 

@@ -583,57 +583,60 @@
 
 <h1 id="features">Features</h1>
 <h2 id="attribute-working-directory">Attribute: working-directory</h2>
-<p>The working-directory feature in Makim allows users to define the directory
-from which commands associated with specific targets or groups are executed.
-This provides greater flexibility and control over the execution environment.</p>
-<p>The <code>working-directory</code> attribute can be specified at three different
-scopes: global, group, and target. It allows users to set the working
-directory for a specific target, a group of targets, or globally.</p>
+<p>The working-directory feature in Makim allows users to define the directory from
+which commands associated with specific targets or groups are executed. This
+provides greater flexibility and control over the execution environment.</p>
+<p>The <code>working-directory</code> attribute can be specified at three different scopes:
+global, group, and target. It allows users to set the working directory for a
+specific target, a group of targets, or globally.</p>
 <h3 id="syntax-and-scopes">Syntax and Scopes</h3>
 <p>The working-directory attribute can be applied to three different scopes:</p>
 <ul>
 <li>
 <h4 id="global-scope"><strong>Global Scope</strong></h4>
-<p>Setting the global working directory impacts all targets and groups in
-the Makim configuration.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
-<span class="nt">working-directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/global/directory</span>
-
-<span class="c1"># ... other configuration ...</span>
-</code></pre></div>
-</li>
-<li>
-<h4 id="group-scope">Group Scope</h4>
-<p>Setting the working directory at the group scope affects all targets within
-that group.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
-
-<span class="nt">groups</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">my-group</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">working-directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/group/directory</span>
-<span class="w">        </span><span class="nt">targets</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">target-1</span><span class="p">:</span>
-<span class="w">                </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">                </span><span class="c1"># This target will run with the working directory set to</span>
-<span class="w">                </span><span class="c1"># /path/to/group/directory</span>
-</code></pre></div>
-</li>
-<li>
-<h4 id="target-scope">Target Scope</h4>
-<p>Setting the working directory at the target scope allows for fine grained
-control over individual targets.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
-<span class="nt">groups</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">my-group</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">targets</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">my-target</span><span class="p">:</span>
-<span class="w">                </span><span class="nt">working-directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/target/directory</span>
-<span class="w">                </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">                </span><span class="c1"># This target will run with the working directory set to</span>
-<span class="w">                </span><span class="c1"># /path/to/target/directory</span>
-</code></pre></div>
 </li>
 </ul>
+<p>Setting the global working directory impacts all targets and groups in the
+  Makim configuration.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="nt">working-directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/global/directory</span>
+<span class="c1"># ... other configuration ...</span>
+</code></pre></div>
+<ul>
+<li>
+<h4 id="group-scope">Group Scope</h4>
+</li>
+</ul>
+<p>Setting the working directory at the group scope affects all targets within
+  that group.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+
+<span class="nt">groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my-group</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">working-directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/group/directory</span>
+<span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">target-1</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="c1"># This target will run with the working directory set to</span>
+<span class="w">        </span><span class="c1"># /path/to/group/directory</span>
+</code></pre></div>
+<ul>
+<li>
+<h4 id="target-scope">Target Scope</h4>
+</li>
+</ul>
+<p>Setting the working directory at the target scope allows for fine grained
+  control over individual targets.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
+<span class="nt">groups</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my-group</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">my-target</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">working-directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/path/to/target/directory</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="c1"># This target will run with the working directory set to</span>
+<span class="w">        </span><span class="c1"># /path/to/target/directory</span>
+</code></pre></div>
 <h2 id="example">Example</h2>
 <div class="highlight"><pre><span></span><code><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.0</span>
 <span class="nt">working-directory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/project-root</span>
