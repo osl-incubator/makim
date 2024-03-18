@@ -39,7 +39,7 @@ KNOWN_SHELL_APP_ARGS = {
 }
 
 TEMPLATE = Environment(
-    autoescape=True,
+    autoescape=False,
     variable_start_string='${{',
     variable_end_string='}}',
 )
