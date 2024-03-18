@@ -45,16 +45,6 @@ TEMPLATE = Environment(
 )
 
 
-def escape_template_tag(v: str) -> str:
-    """Escape template tag when processing the template config file."""
-    return v.replace('${{', r'\{\{').replace('}}', r'\}\}')
-
-
-def unescape_template_tag(v: str) -> str:
-    """Unescape template tag when processing the template config file."""
-    return v.replace(r'\{\{', '${{').replace(r'\}\}', '}}')
-
-
 def strip_recursively(data: Any) -> Any:
     """Strip strings in list and dictionaries."""
     if isinstance(data, str):
@@ -242,7 +232,7 @@ class Makim:
 
         with open(self.file, 'r') as f:
             # escape template tags
-            content = escape_template_tag(f.read())
+            content = f.read()
             content_io = io.StringIO(content)
             self.global_data = yaml.safe_load(content_io)
 
@@ -322,9 +312,9 @@ class Makim:
         ):
             env.update(env_file)
             for k, v in env_user.items():
-                env[k] = TEMPLATE.from_string(
-                    unescape_template_tag(str(v))
-                ).render(env=env, vars=variables)
+                env[k] = TEMPLATE.from_string(str(v)).render(
+                    env=env, vars=variables
+                )
 
         scope_id = scope_options.index(scope)
 
@@ -430,7 +420,7 @@ class Makim:
             # update the arguments
             for arg_name, arg_value in dep_data.get('args', {}).items():
                 unescaped_value = (
-                    unescape_template_tag(str(arg_value))
+                    str(arg_value)
                     if isinstance(arg_value, str)
                     else str(arg_value)
                 )
@@ -447,9 +437,9 @@ class Makim:
             # checking for the conditional statement
             if_stmt = dep_data.get('if')
             if if_stmt:
-                result = TEMPLATE.from_string(
-                    unescape_template_tag(str(if_stmt))
-                ).render(args=original_args_clean, env=self.env_scoped)
+                result = TEMPLATE.from_string(str(if_stmt)).render(
+                    args=original_args_clean, env=self.env_scoped
+                )
                 if not yaml.safe_load(result):
                     if self.verbose:
                         MakimLogs.print_info(
@@ -509,7 +499,7 @@ class Makim:
                     MakimError.MAKIM_ARGUMENT_REQUIRED,
                 )
 
-        cmd = unescape_template_tag(str(cmd))
+        cmd = str(cmd)
         cmd = TEMPLATE.from_string(cmd).render(
             args=args_input, env=env, vars=variables
         )
