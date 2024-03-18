@@ -17,7 +17,7 @@ groups:
     targets:
       target-no-path:
         help: Test global absolute path, group no path, target no path
-        dependencies: 
+        dependencies:
           - target: setup.folders
         run: |
           import os
@@ -28,7 +28,7 @@ groups:
       target-absolute:
         working-directory: "/tmp"
         help: Test global absolute path, group no path, target absolute path
-        dependencies: 
+        dependencies:
           - target: setup.folders
         run: |
           import os
@@ -38,19 +38,19 @@ groups:
       target-relative:
         working-directory: "/tmp/group1/target4"
         help: est global absolute path, group no path, target relative path
-        dependencies: 
+        dependencies:
           - target: setup.folders
         run: |
           import os
           assert os.getcwd() == "/tmp/group1/target4"
           echo "working-directory-absolute-path [III] Done!"
-          
+
   group-relative:
     working-directory: "group1"
     targets:
       target-no-path:
         help: Test global absolute path, group relative path, target no path
-        dependencies: 
+        dependencies:
           - target: setup.folders
         run: |
           import os
@@ -60,7 +60,7 @@ groups:
       target-absolute:
         working-directory: "/tmp"
         help: Test global absolute path, group relative path, target absolute path
-        dependencies: 
+        dependencies:
           - target: setup.folders
         run: |
           import os
@@ -70,7 +70,7 @@ groups:
       target-relative:
         working-directory: "target3"
         help: Test global absolute path, group relative path, target relative path
-        dependencies: 
+        dependencies:
           - target: setup.folders
         run: |
           import os
@@ -82,7 +82,7 @@ groups:
     targets:
       target-no-path:
         help: Test global absolute path, group absolute path, target no path
-        dependencies: 
+        dependencies:
           - target: setup.folders
         run: |
           import os 
@@ -92,7 +92,7 @@ groups:
       target-absolute:
         working-directory: "/tmp"
         help: Test global absolute path, group absolute path, target absolute path
-        dependencies: 
+        dependencies:
           - target: setup.folders
         run: |
           import os
@@ -103,7 +103,7 @@ groups:
         working-directory: "target-relative"
         help: |
           Test global absolute path, group absolute path, target relative  path
-        dependencies: 
+        dependencies:
           - target: setup.folders
         run: |
           import os

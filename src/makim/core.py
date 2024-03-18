@@ -23,7 +23,7 @@ import dotenv
 import sh
 import yaml  # type: ignore
 
-from jinja2 import Template
+from jinja2 import Environment
 
 from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
@@ -38,15 +38,21 @@ KNOWN_SHELL_APP_ARGS = {
     'php': ['-f'],
 }
 
+TEMPLATE = Environment(
+    autoescape=True,
+    variable_start_string='${{',
+    variable_end_string='}}',
+)
+
 
 def escape_template_tag(v: str) -> str:
     """Escape template tag when processing the template config file."""
-    return v.replace('{{', r'\{\{').replace('}}', r'\}\}')
+    return v.replace('${{', r'\{\{').replace('}}', r'\}\}')
 
 
 def unescape_template_tag(v: str) -> str:
     """Unescape template tag when processing the template config file."""
-    return v.replace(r'\{\{', '{{').replace(r'\}\}', '}}')
+    return v.replace(r'\{\{', '${{').replace(r'\}\}', '}}')
 
 
 def strip_recursively(data: Any) -> Any:
@@ -316,9 +322,9 @@ class Makim:
         ):
             env.update(env_file)
             for k, v in env_user.items():
-                env[k] = Template(unescape_template_tag(str(v))).render(
-                    env=env, vars=variables
-                )
+                env[k] = TEMPLATE.from_string(
+                    unescape_template_tag(str(v))
+                ).render(env=env, vars=variables)
 
         scope_id = scope_options.index(scope)
 
@@ -430,7 +436,7 @@ class Makim:
                 )
 
                 args_dep[f'--{arg_name}'] = yaml.safe_load(
-                    Template(unescaped_value).render(
+                    TEMPLATE.from_string(unescaped_value).render(
                         args=original_args_clean, env=makim_dep.env_scoped
                     )
                 )
@@ -441,9 +447,9 @@ class Makim:
             # checking for the conditional statement
             if_stmt = dep_data.get('if')
             if if_stmt:
-                result = Template(unescape_template_tag(str(if_stmt))).render(
-                    args=original_args_clean, env=self.env_scoped
-                )
+                result = TEMPLATE.from_string(
+                    unescape_template_tag(str(if_stmt))
+                ).render(args=original_args_clean, env=self.env_scoped)
                 if not yaml.safe_load(result):
                     if self.verbose:
                         MakimLogs.print_info(
@@ -504,7 +510,9 @@ class Makim:
                 )
 
         cmd = unescape_template_tag(str(cmd))
-        cmd = Template(cmd).render(args=args_input, env=env, vars=variables)
+        cmd = TEMPLATE.from_string(cmd).render(
+            args=args_input, env=env, vars=variables
+        )
         width, _ = get_terminal_size()
 
         if self.verbose:

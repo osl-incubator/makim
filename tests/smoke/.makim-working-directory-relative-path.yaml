@@ -4,7 +4,7 @@ working-directory: "global-relative"
 groups:
   setup:
     targets:
-       create-folders:
+      create-folders:
         run: |
           mkdir -p /tmp/global-relative
           mkdir -p /tmp/global-relative/target1

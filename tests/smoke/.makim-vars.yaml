@@ -17,8 +17,8 @@ vars:
     kglobal2:
       kglobal2-nested:
         - kglobal2-nested-2:
-          - 1
-          - 2
+            - 1
+            - 2
 groups:
   vars-group:
     vars:
@@ -46,32 +46,32 @@ groups:
             - vtarget3
         run: |
           # global
-          assert "{{ vars.get("global-var-str") }}" == "global"
-          assert "{{ vars.global_var_str }}" == "global"
-          assert "{{ vars.global_var_dict["kglobal1"] }}" == "vglobal1"
-          assert "{{ vars.global_var_dict["kglobal2"] }}" == "vglobal2"
-          assert "{{ vars.global_var_dict["kglobal3"] }}" == "vglobal3"
-          assert "{{ vars.global_var_list[0] }}" == "vglobal1"
-          assert "{{ vars.global_var_list[1] }}" == "vglobal2"
-          assert "{{ vars.global_var_list[2] }}" == "vglobal3"
-          assert "{{ vars.global_var_complex_type["kglobal1"][0] }}" == "vglobal1"
+          assert "${{ vars.get("global-var-str") }}" == "global"
+          assert "${{ vars.global_var_str }}" == "global"
+          assert "${{ vars.global_var_dict["kglobal1"] }}" == "vglobal1"
+          assert "${{ vars.global_var_dict["kglobal2"] }}" == "vglobal2"
+          assert "${{ vars.global_var_dict["kglobal3"] }}" == "vglobal3"
+          assert "${{ vars.global_var_list[0] }}" == "vglobal1"
+          assert "${{ vars.global_var_list[1] }}" == "vglobal2"
+          assert "${{ vars.global_var_list[2] }}" == "vglobal3"
+          assert "${{ vars.global_var_complex_type["kglobal1"][0] }}" == "vglobal1"
 
           # group
-          assert "{{ vars.get("group-var-str") }}" == "group"
-          assert "{{ vars.group_var_str }}" == "group"
-          assert "{{ vars.group_var_dict["kgroup1"] }}" == "vgroup1"
-          assert "{{ vars.group_var_dict["kgroup2"] }}" == "vgroup2"
-          assert "{{ vars.group_var_dict["kgroup3"] }}" == "vgroup3"
-          assert "{{ vars.group_var_list[0] }}" == "vgroup1"
-          assert "{{ vars.group_var_list[1] }}" == "vgroup2"
-          assert "{{ vars.group_var_list[2] }}" == "vgroup3"
+          assert "${{ vars.get("group-var-str") }}" == "group"
+          assert "${{ vars.group_var_str }}" == "group"
+          assert "${{ vars.group_var_dict["kgroup1"] }}" == "vgroup1"
+          assert "${{ vars.group_var_dict["kgroup2"] }}" == "vgroup2"
+          assert "${{ vars.group_var_dict["kgroup3"] }}" == "vgroup3"
+          assert "${{ vars.group_var_list[0] }}" == "vgroup1"
+          assert "${{ vars.group_var_list[1] }}" == "vgroup2"
+          assert "${{ vars.group_var_list[2] }}" == "vgroup3"
 
           # target
-          assert "{{ vars.get("target-var-str") }}" == "target"
-          assert "{{ vars.target_var_str }}" == "target"
-          assert "{{ vars.target_var_dict["ktarget1"] }}" == "vtarget1"
-          assert "{{ vars.target_var_dict["ktarget2"] }}" == "vtarget2"
-          assert "{{ vars.target_var_dict["ktarget3"] }}" == "vtarget3"
-          assert "{{ vars.target_var_list[0] }}" == "vtarget1"
-          assert "{{ vars.target_var_list[1] }}" == "vtarget2"
-          assert "{{ vars.target_var_list[2] }}" == "vtarget3"
+          assert "${{ vars.get("target-var-str") }}" == "target"
+          assert "${{ vars.target_var_str }}" == "target"
+          assert "${{ vars.target_var_dict["ktarget1"] }}" == "vtarget1"
+          assert "${{ vars.target_var_dict["ktarget2"] }}" == "vtarget2"
+          assert "${{ vars.target_var_dict["ktarget3"] }}" == "vtarget3"
+          assert "${{ vars.target_var_list[0] }}" == "vtarget1"
+          assert "${{ vars.target_var_list[1] }}" == "vtarget2"
+          assert "${{ vars.target_var_list[2] }}" == "vtarget3"

@@ -3,7 +3,7 @@ version: 1.0
 groups:
   setup:
     targets:
-       create-folders:
+      create-folders:
         run: |
           mkdir -p /tmp/target1
           mkdir -p /tmp/target2
@@ -11,20 +11,20 @@ groups:
           mkdir -p /tmp/group-relative/target1
 
   group-no-path:
-    targets: 
+    targets:
       target-no-path:
         help: Test global no-path, group no-path, target no-path
-        dependencies: 
+        dependencies:
           - target: setup.create-folders
         run: |
           import os
           echo f"{os.getcwd()}"
           echo "working-directory-no-path [I] Done!"
-      
+
       target-absolute:
         working-directory: "/tmp/target1"
         help: Test global no-path, group no-path, target absolute
-        dependencies: 
+        dependencies:
           - target: setup.create-folders
         run: |
           import os
@@ -34,7 +34,7 @@ groups:
       target-relative:
         working-directory: "target2"
         help: Test global no-path, group no-path, target relative
-        dependencies: 
+        dependencies:
           - target: setup.create-folders
         run: |
           import os
@@ -46,8 +46,8 @@ groups:
     targets:
       target-no-path:
         help: Test global no-path, group absolute path, target no-path
-        dependencies: 
-        - target: setup.create-folders
+        dependencies:
+          - target: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/group-absolute"
@@ -56,18 +56,18 @@ groups:
       target-absolute:
         working-directory: /tmp/target1
         help: Test global no-path, group absolute path, target absolute path
-        dependencies: 
-        - target: setup.create-folders
+        dependencies:
+          - target: setup.create-folders
         run: |
-            import os
-            assert os.getcwd() == "/tmp/target1"
-            echo "working-directory-no-path [V] Done!"
+          import os
+          assert os.getcwd() == "/tmp/target1"
+          echo "working-directory-no-path [V] Done!"
 
       target-relative:
         working-directory: "target1"
         help: Test global no-path, group absolute path, target relative path
-        dependencies: 
-        - target: setup.create-folders
+        dependencies:
+          - target: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/group-absolute/target1"
@@ -75,11 +75,11 @@ groups:
 
   group-relative:
     working-directory: "group-relative"
-    targets: 
+    targets:
       target-no-path:
         help: Test global no-path, group relative path, target no-path
-        dependencies: 
-        - target: setup.create-folders
+        dependencies:
+          - target: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/group-relative"
@@ -88,18 +88,18 @@ groups:
       target-absolute:
         working-directory: "/tmp/target2"
         help: Test global no-path, group relative path, target absolute path
-        dependencies: 
-        - target: setup.create-folders
+        dependencies:
+          - target: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/target2"
           echo "working-directory-no-path [VIII] Done!"
-          
+
       target-relative:
         working-directory: "target1"
         help: Test global no-path, group relative path, target relative path
-        dependencies: 
-        - target: setup.create-folders
+        dependencies:
+          - target: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/group-relative/target1"

@@ -2,9 +2,9 @@ name: build
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   check-branch:
@@ -33,14 +33,14 @@ jobs:
     strategy:
       matrix:
         python_version:
-          - '3.8.1'
-          - '3.9'
-          - '3.10'
-          - '3.11'
-          - '3.12'
+          - "3.8.1"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "3.12"
         os:
-          - 'ubuntu'
-          - 'macos'
+          - "ubuntu"
+          - "macos"
           # poetry is failing on windows: https://github.com/python-poetry/poetry/issues/1031
           # - 'windows'
 
@@ -56,97 +56,97 @@ jobs:
       cancel-in-progress: true
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Install MacOS extra tools and add extra setup
-      if: ${{ matrix.os == 'macos' }}
-      run: |
-        sudo mkdir -p /tmp
-        sudo chmod 777 /tmp
+      - name: Install MacOS extra tools and add extra setup
+        if: ${{ matrix.os == 'macos' }}
+        run: |
+          sudo mkdir -p /tmp
+          sudo chmod 777 /tmp
 
-        brew install gnu-sed
-        echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bashrc
-        echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bash_profile
-        gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-working-directory-absolute-path.yaml
-        gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-working-directory-no-path.yaml
-        gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-working-directory-relative-path.yaml
+          brew install gnu-sed
+          echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bashrc
+          echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bash_profile
+          gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-working-directory-absolute-path.yaml
+          gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-working-directory-no-path.yaml
+          gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-working-directory-relative-path.yaml
 
-    - name: Prepare conda environment (windows)
-      if: ${{ matrix.os == 'windows' }}
-      run: |
-        $env:Path += ";C:\Program Files\Git\usr\bin"
-        sed -i s/python\ 3\.8/python\ ${{ matrix.python_version }}/ conda/dev.yaml
-        cat conda/dev.yaml
+      - name: Prepare conda environment (windows)
+        if: ${{ matrix.os == 'windows' }}
+        run: |
+          $env:Path += ";C:\Program Files\Git\usr\bin"
+          sed -i s/python\ 3\.8/python\ ${{ matrix.python_version }}/ conda/dev.yaml
+          cat conda/dev.yaml
 
-    - name: Prepare conda environment
-      if: ${{ matrix.os != 'windows' }}
-      run: |
-        sed -i s/python\ 3\.8\.1/python\ ${{ matrix.python_version }}/ conda/dev.yaml
-        cat conda/dev.yaml
+      - name: Prepare conda environment
+        if: ${{ matrix.os != 'windows' }}
+        run: |
+          sed -i s/python\ 3\.8\.1/python\ ${{ matrix.python_version }}/ conda/dev.yaml
+          cat conda/dev.yaml
 
-    - uses: conda-incubator/setup-miniconda@v3
-      with:
-        miniforge-version: latest
-        environment-file: conda/dev.yaml
-        channels: conda-forge,nodefaults
-        activate-environment: makim
-        auto-update-conda: true
-        conda-solver: libmamba
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          environment-file: conda/dev.yaml
+          channels: conda-forge,nodefaults
+          activate-environment: makim
+          auto-update-conda: true
+          conda-solver: libmamba
 
-    - name: Check Poetry lock
-      run: poetry check
+      - name: Check Poetry lock
+        run: poetry check
 
-    - name: Install dependencies
-      run: |
-        poetry config virtualenvs.create false
-        poetry install
+      - name: Install dependencies
+        run: |
+          poetry config virtualenvs.create false
+          poetry install
 
-    - name: Run smoke tests using simple makim file
-      run: makim smoke-tests.simple
+      - name: Run smoke tests using simple makim file
+        run: makim smoke-tests.simple
 
-    - name: Run smoke tests using complex makim file
-      run: makim smoke-tests.complex
+      - name: Run smoke tests using complex makim file
+        run: makim smoke-tests.complex
 
-    - name: Run smoke tests using makim and containers-sugar
-      if: ${{ matrix.os != 'macos' }}
-      run: makim smoke-tests.containers
+      - name: Run smoke tests using makim and containers-sugar
+        if: ${{ matrix.os != 'macos' }}
+        run: makim smoke-tests.containers
 
-    - name: Run smoke tests using different interpreters
-      run: makim smoke-tests.shell-app
+      - name: Run smoke tests using different interpreters
+        run: makim smoke-tests.shell-app
 
-    - name: Run smoke tests using unittest makim file
-      run: makim smoke-tests.unittest
+      - name: Run smoke tests using unittest makim file
+        run: makim smoke-tests.unittest
 
-    - name: Run smoke test using bash
-      run: makim smoke-tests.bash
+      - name: Run smoke test using bash
+        run: makim smoke-tests.bash
 
-    - name: Run smoke test for variable envs
-      run: makim smoke-tests.vars-env
+      - name: Run smoke test for variable envs
+        run: makim smoke-tests.vars-env
 
-    - name: Run smoke test for variables
-      run: makim smoke-tests.test-vars
+      - name: Run smoke test for variables
+        run: makim smoke-tests.test-vars
 
-    - name: Run smoke test for working-directory-absolute-path
-      run:  makim smoke-tests.working-directory-absolute-path
+      - name: Run smoke test for working-directory-absolute-path
+        run: makim smoke-tests.working-directory-absolute-path
 
-    - name: Run smoke test for working-directory-no-path
-      run:  makim smoke-tests.working-directory-no-path
+      - name: Run smoke test for working-directory-no-path
+        run: makim smoke-tests.working-directory-no-path
 
-    - name: Run smoke test for working-directory-relative-path
-      run: makim smoke-tests.working-directory-relative-path
+      - name: Run smoke test for working-directory-relative-path
+        run: makim smoke-tests.working-directory-relative-path
 
-    - name: Run unit tests
-      run: makim tests.unittest
+      - name: Run unit tests
+        run: makim tests.unittest
 
-    - name: Semantic Release PR Title Check
-      uses: osl-incubator/semantic-release-pr-title-check@v1.4.1
-      if: success() || failure()
-      with:
-        convention-name: conventionalcommits
+      - name: Semantic Release PR Title Check
+        uses: osl-incubator/semantic-release-pr-title-check@v1.4.1
+        if: success() || failure()
+        with:
+          convention-name: conventionalcommits
 
-    - name: Setup tmate session
-      if: "${{ failure() && (contains(github.event.pull_request.labels.*.name, 'ci:enable-debugging')) }}"
-      uses: mxschmitt/action-tmate@v3
+      - name: Setup tmate session
+        if: "${{ failure() && (contains(github.event.pull_request.labels.*.name, 'ci:enable-debugging')) }}"
+        uses: mxschmitt/action-tmate@v3
 
   linter-and-docs:
     needs: check-branch
@@ -162,31 +162,31 @@ jobs:
       cancel-in-progress: true
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - uses: conda-incubator/setup-miniconda@v3
-      with:
-        miniforge-version: latest
-        environment-file: conda/dev.yaml
-        channels: conda-forge,nodefaults
-        activate-environment: makim
-        auto-update-conda: true
-        conda-solver: libmamba
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          environment-file: conda/dev.yaml
+          channels: conda-forge,nodefaults
+          activate-environment: makim
+          auto-update-conda: true
+          conda-solver: libmamba
 
-    - name: Install dependencies
-      run: |
-        poetry config virtualenvs.create false
-        poetry install
+      - name: Install dependencies
+        run: |
+          poetry config virtualenvs.create false
+          poetry install
 
-    - name: Test documentation generation
-      run: makim docs.build
+      - name: Test documentation generation
+        run: makim docs.build
 
-    - name: Run style checks
-      if: success() || failure()
-      run: |
-        pre-commit install
-        makim tests.linter
+      - name: Run style checks
+        if: success() || failure()
+        run: |
+          pre-commit install
+          makim tests.linter
 
-    - name: Setup tmate session
-      if: "${{ failure() && (contains(github.event.pull_request.labels.*.name, 'ci:enable-debugging')) }}"
-      uses: mxschmitt/action-tmate@v3
+      - name: Setup tmate session
+        if: "${{ failure() && (contains(github.event.pull_request.labels.*.name, 'ci:enable-debugging')) }}"
+        uses: mxschmitt/action-tmate@v3

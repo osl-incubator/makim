@@ -4,7 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - bash
-  - python 3.8.1  # min version supported
+  - python 3.8.1 # min version supported
   - poetry >=1.5
   - nodejs
   - perl
@@ -12,8 +12,8 @@ dependencies:
   - sh
   - pip
   - pip:
-    # note: workaround ci issue for macos
-    - setuptools >= 40.8.0
-    - wheel >=0.42.0
-    # fix the distlib issue
-    - paginate >=0.5
+      # note: workaround ci issue for macos
+      - setuptools >= 40.8.0
+      - wheel >=0.42.0
+      # fix the distlib issue
+      - paginate >=0.5

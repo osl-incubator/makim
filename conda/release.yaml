@@ -3,10 +3,10 @@ channels:
   - nodefaults
   - conda-forge
 dependencies:
-  - python >=3.8.1,<3.12  # min version supported
+  - python >=3.8.1,<3.12 # min version supported
   - poetry >=1.5
-  - nodejs >=18.17  # used by semantic-release
+  - nodejs >=18.17 # used by semantic-release
   - pip
   - pip:
-    # fix the distlib issue
-    - paginate >=0.5
+      # fix the distlib issue
+      - paginate >=0.5
