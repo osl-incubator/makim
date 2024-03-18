@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.14.0](https://github.com/osl-incubator/makim/compare/1.13.0...1.14.0) (2024-03-18)
+
+
+### Features
+
+* Change the default template tag delimiter ([#97](https://github.com/osl-incubator/makim/issues/97)) ([7037195](https://github.com/osl-incubator/makim/commit/703719594d93bbc19d440b17785d917220e02b4c))
+
 # [1.13.0](https://github.com/osl-incubator/makim/compare/1.12.2...1.13.0) (2024-02-16)
 
 
