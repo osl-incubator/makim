@@ -49,10 +49,10 @@ groups:
 
       all:
         dependencies:
-          - target: node
-          - target: perl
+          - target: main.node
+          - target: main.perl
           # note: php from conda-forge has conflicts with r-base
-          # - target: php
-          - target: python
-          - target: r
-          - target: sh
+          # - target: main.php
+          - target: main.python
+          - target: main.r
+          - target: main.sh

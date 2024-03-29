@@ -327,7 +327,7 @@ class Makim:
                 shell_config = tmp_config
 
         cmd_name = str(shell_config.get('app', ''))
-        cmd_args: list[str] = cast(list[str], shell_config.get('args', []))
+        cmd_args: list[str] = cast(List[str], shell_config.get('args', []))
         cmd_tmp_suffix: str = str(
             shell_config.get('suffix', tmp_suffix_default)
         )
