@@ -338,9 +338,6 @@ class Makim:
                 MakimError.MAKIM_CONFIG_FILE_INVALID,
             )
 
-        print('=' * 80)
-        print(cmd_name, cmd_args, cmd_tmp_suffix)
-
         self.shell_app = getattr(sh, cmd_name)
         self.shell_args = cmd_args
         self.tmp_suffix = cmd_tmp_suffix
@@ -601,7 +598,6 @@ class Makim:
 
         self._load_config_data()
         self._verify_config()
-        # self._load_shell_app()
         self.env = self._load_dotenv(self.global_data)
 
     def run(self, args: dict):
