@@ -7,6 +7,21 @@ groups:
         help: Test using nodejs
         shell: node
         run: console.log("Hello, World!");
+
+      nox:
+        help: Test using nox
+        shell:
+          app: nox
+          args: ["--noxfile"]
+          suffix: .nox.py
+
+        run: |
+          import nox
+
+          @nox.session
+          def test(session):
+              print("Hello, World!")
+
       perl:
         help: Test using perl
         shell: perl

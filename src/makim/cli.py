@@ -1,4 +1,5 @@
 """Cli functions to define the arguments and to call Makim."""
+
 from __future__ import annotations
 
 import os

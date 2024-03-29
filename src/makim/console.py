@@ -1,4 +1,5 @@
 """Functions about console."""
+
 import os
 
 
