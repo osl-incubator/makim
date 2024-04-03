@@ -1,4 +1,5 @@
 """Classes and function for handling logs."""
+
 import os
 
 from enum import Enum
@@ -18,6 +19,7 @@ class MakimError(Enum):
     MAKIM_VARS_ATTRIBUTE_INVALID = 7
     MAKIM_ARGUMENT_REQUIRED = 8
     MAKIM_ENV_FILE_NOT_FOUND = 9
+    MAKIM_CONFIG_FILE_INVALID = 10
 
 
 class MakimLogs:

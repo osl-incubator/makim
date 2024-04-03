@@ -21,6 +21,25 @@ groups:
 
   docs:
     targets:
+      pre-build:
+        help: pre-build step
+        shell: bash
+        run: |
+          mkdir -p build
+          # Directory to search for .ipynb files
+          export SEARCH_DIR="docs/tutorials"
+
+          # Find all .ipynb files, excluding .ipynb_checkpoints,
+          # and convert them to Markdown named 'index.md'
+          find "$SEARCH_DIR" -path "*/.ipynb_checkpoints/*" -prune -o -name \
+            "*.ipynb" -exec sh -c \
+            'jupyter nbconvert --to markdown --output-dir "$(dirname "$0")" "$0"' {} \;
+
+          # remove console colors from md files
+          find "$SEARCH_DIR" -name \
+            "*.md" -exec sh -c \
+            'cat "$0" | python docs/scripts/clean-output.py > "$(dirname "$0")/temp_index.md" && mv "$(dirname "$0")/temp_index.md" "$0"' {} \;
+
       build:
         help: Build documentation
         run: |

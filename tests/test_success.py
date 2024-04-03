@@ -1,4 +1,5 @@
 """Tests for `makim` package."""
+
 from pathlib import Path
 
 import makim

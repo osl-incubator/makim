@@ -5,6 +5,7 @@ Makim main class.
 the way to define targets and dependencies. Instead of using the
 `Makefile` format, it uses `yaml` format.
 """
+
 from __future__ import annotations
 
 import copy
@@ -17,16 +18,19 @@ import warnings
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Dict, List, Optional, Union, cast
 
 import dotenv
 import sh
 import yaml  # type: ignore
 
 from jinja2 import Environment
+from typing_extensions import TypeAlias
 
 from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
+
+AppConfigType: TypeAlias = Dict[str, Union[str, List[str]]]
 
 SCOPE_GLOBAL = 0
 SCOPE_GROUP = 1
@@ -36,6 +40,12 @@ SCOPE_TARGET = 2
 KNOWN_SHELL_APP_ARGS = {
     'bash': ['-e'],
     'php': ['-f'],
+    'nox': ['-f'],
+}
+
+# useful when the program just read specific file extension
+KNOWN_SHELL_APP_FILE_SUFFIX = {
+    'nox': '.makim.py',
 }
 
 TEMPLATE = Environment(
@@ -88,6 +98,7 @@ class Makim:
     global_data: dict = {}
     shell_app: sh.Command = sh.xonsh
     shell_args: list[str] = []
+    tmp_suffix: str = '.makim'
 
     # temporary variables
     env: dict = {}  # initial env
@@ -111,10 +122,14 @@ class Makim:
         self.file = '.makim.yaml'
         self.dry_run = False
         self.verbose = False
+        self.shell_app = sh.xonsh
         self.shell_args: list[str] = []
+        self.tmp_suffix: str = '.makim'
 
     def _call_shell_app(self, cmd):
-        fd, filepath = tempfile.mkstemp(suffix='.makim', text=True)
+        self._load_shell_app()
+
+        fd, filepath = tempfile.mkstemp(suffix=self.tmp_suffix, text=True)
 
         with open(filepath, 'w') as f:
             f.write(cmd)
@@ -185,9 +200,6 @@ class Makim:
         for target_name, target_data in self.group_data['targets'].items():
             if target_name == self.target_name:
                 self.target_data = target_data
-                shell_app = target_data.get('shell')
-                if shell_app:
-                    self._load_shell_app(shell_app)
                 return
 
         MakimLogs.raise_error(
@@ -201,20 +213,10 @@ class Makim:
 
         if group_name is not None:
             self.group_name = group_name
-        shell_app_default = self.global_data.get('shell', 'xonsh')
-        if self.group_name == 'default' and len(groups) == 1:
-            group = next(iter(groups))
-            self.group_data = groups[group]
-
-            shell_app = self.group_data.get('shell', shell_app_default)
-            self._load_shell_app(shell_app)
-            return
 
         for group in groups:
             if group == self.group_name:
                 self.group_data = groups[group]
-                shell_app = groups[group].get('shell', shell_app_default)
-                self._load_shell_app(shell_app)
                 return
 
         MakimLogs.raise_error(
@@ -269,17 +271,76 @@ class Makim:
 
         return working_dir
 
-    def _load_shell_app(self, shell_app: str = '') -> None:
-        if not shell_app:
-            shell_app = self.global_data.get('shell', 'xonsh')
-            return
+    def _extract_shell_app_config(
+        self, scoped_config: dict[str, Any]
+    ) -> AppConfigType:
+        """Extract the shell app configuration from the scoped config data."""
+        shell_app_data: AppConfigType = scoped_config.get('shell', {})
 
-        cmd = shell_app.split(' ')
-        cmd_name = cmd[0]
+        if not shell_app_data:
+            return {}
+
+        shell_app_default = 'xonsh'
+        tmp_suffix_default = '.makim'
+
+        shell_config: AppConfigType = {}
+
+        if isinstance(shell_app_data, str):
+            cmd = shell_app_data.split(' ')
+            app_name = cmd[0]
+            args: list[str] = KNOWN_SHELL_APP_ARGS.get(app_name, [])
+            shell_config['app'] = cmd[0]
+            shell_config['suffix'] = KNOWN_SHELL_APP_FILE_SUFFIX.get(
+                app_name, tmp_suffix_default
+            )
+            shell_config['args'] = args + cmd[1:]
+        elif isinstance(shell_app_data, dict):
+            app_name = str(shell_app_data.get('app', shell_app_default))
+            shell_config['app'] = app_name
+            shell_tmp_suffix_default = KNOWN_SHELL_APP_FILE_SUFFIX.get(
+                app_name, tmp_suffix_default
+            )
+            shell_config['suffix'] = shell_app_data.get(
+                'suffix', shell_tmp_suffix_default
+            )
+            shell_config['args'] = shell_app_data.get('args', [])
+        return shell_config
+
+    def _load_shell_app(self) -> None:
+        """Load the shell app."""
+        shell_config: AppConfigType = {
+            'app': 'xonsh',
+            'args': [],
+            'suffix': '.makim',
+        }
+        tmp_suffix_default = '.makim'
+
+        for scoped_data in [
+            self.global_data,
+            self.group_data,
+            self.target_data,
+        ]:
+            tmp_config: AppConfigType = self._extract_shell_app_config(
+                scoped_data
+            )
+            if tmp_config:
+                shell_config = tmp_config
+
+        cmd_name = str(shell_config.get('app', ''))
+        cmd_args: list[str] = cast(List[str], shell_config.get('args', []))
+        cmd_tmp_suffix: str = str(
+            shell_config.get('suffix', tmp_suffix_default)
+        )
+
+        if not cmd_name:
+            MakimLogs.raise_error(
+                'The shell command is invalid',
+                MakimError.MAKIM_CONFIG_FILE_INVALID,
+            )
+
         self.shell_app = getattr(sh, cmd_name)
-
-        args: list[str] = KNOWN_SHELL_APP_ARGS.get(cmd_name, [])
-        self.shell_args = args + cmd[1:]
+        self.shell_args = cmd_args
+        self.tmp_suffix = cmd_tmp_suffix
 
     def _load_dotenv(self, data_scope: dict) -> dict[str, str]:
         env_file = data_scope.get('env-file')
@@ -537,7 +598,6 @@ class Makim:
 
         self._load_config_data()
         self._verify_config()
-        self._load_shell_app()
         self.env = self._load_dotenv(self.global_data)
 
     def run(self, args: dict):

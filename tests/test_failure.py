@@ -1,4 +1,5 @@
 """Tests for `makim` package."""
+
 import os
 import sys
 
