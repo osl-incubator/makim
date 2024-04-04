@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.15.0](https://github.com/osl-incubator/makim/compare/1.14.0...1.15.0) (2024-04-04)
+
+
+### Features
+
+* Improve the configuration for the shell app. ([#100](https://github.com/osl-incubator/makim/issues/100)) ([1647914](https://github.com/osl-incubator/makim/commit/16479142b9b42460b65e508ab4b9280ab90ef83e))
+
 # [1.14.0](https://github.com/osl-incubator/makim/compare/1.13.0...1.14.0) (2024-03-18)
 
 

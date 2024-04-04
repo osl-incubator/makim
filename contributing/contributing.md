@@ -144,6 +144,7 @@ environment:
 
    ```bash
    $ mamba env create --file conda/dev.yaml --force
+   $ conda activate makim
    $ poetry config virtualenvs.create false
    $ poetry install
    ```
