@@ -62,10 +62,12 @@
   
     
     
+      
     
     
     
-    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="white" data-md-color-accent="lime">
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="lime">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -117,7 +119,33 @@
     </div>
     
       
+        <form class="md-header__option" data-md-component="palette">
+  
     
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="white" data-md-color-accent="lime"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="white" data-md-color-accent="lime"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
     
     
     
@@ -549,6 +577,162 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            Tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_1" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../tutorials/introduction/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Introduction
+  </span>
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_1">
+            <span class="md-nav__icon md-icon"></span>
+            Introduction
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8_2" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../tutorials/makim-for-nox-users/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Makim for nox users
+  </span>
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8_2">
+            <span class="md-nav__icon md-icon"></span>
+            Makim for nox users
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -737,13 +921,13 @@
   
 
 
-<h1 id="contributing">Contributing</h1>
+<h1 id="contributing">Contributing<a class="headerlink" href="#contributing" title="Permanent link">&para;</a></h1>
 <p>Your contributions are valued and play a significant role in the continuous
 improvement of <strong>Makim</strong>. We welcome contributions of all forms and acknowledge
 all efforts.</p>
-<h2 id="how-you-can-contribute">How You Can Contribute</h2>
+<h2 id="how-you-can-contribute">How You Can Contribute<a class="headerlink" href="#how-you-can-contribute" title="Permanent link">&para;</a></h2>
 <p>Contributions can be made in various ways, outlined below:</p>
-<h3 id="report-bugs">Report Bugs</h3>
+<h3 id="report-bugs">Report Bugs<a class="headerlink" href="#report-bugs" title="Permanent link">&para;</a></h3>
 <p>If you encounter a bug in <strong>Makim</strong>, please report it via our GitHub issues page
 at:
 <a href="https://github.com/osl-incubator/makim/issues">https://github.com/osl-incubator/makim/issues</a>.</p>
@@ -755,18 +939,18 @@ issue's resolution:</p>
   issue.</li>
 <li>A step-by-step guide to reproduce the bug.</li>
 </ul>
-<h3 id="fix-bugs">Fix Bugs</h3>
+<h3 id="fix-bugs">Fix Bugs<a class="headerlink" href="#fix-bugs" title="Permanent link">&para;</a></h3>
 <p>You can contribute by fixing bugs identified in the GitHub issues. Issues tagged
 with both "bug" and "help wanted" are available for anyone to work on.</p>
-<h3 id="implement-features">Implement Features</h3>
+<h3 id="implement-features">Implement Features<a class="headerlink" href="#implement-features" title="Permanent link">&para;</a></h3>
 <p>Feature development is another way to contribute. Review the GitHub issues for
 requested features. Issues labeled with "enhancement" and "help wanted" are open
 for implementation.</p>
-<h3 id="write-documentation">Write Documentation</h3>
+<h3 id="write-documentation">Write Documentation<a class="headerlink" href="#write-documentation" title="Permanent link">&para;</a></h3>
 <p>There's always a need for more documentation for <strong>Makim</strong>. This could be
 through enhancing the official documentation, contributing to docstrings, or
 sharing knowledge via blog posts, articles, and other media.</p>
-<h3 id="submit-feedback">Submit Feedback</h3>
+<h3 id="submit-feedback">Submit Feedback<a class="headerlink" href="#submit-feedback" title="Permanent link">&para;</a></h3>
 <p>Feedback is crucial for project improvement. To submit feedback or propose a
 feature:</p>
 <ul>
@@ -777,12 +961,12 @@ feature:</p>
   implementation, and remember, <strong>Makim</strong> is a volunteer-driven project, and we
   welcome contributions.</li>
 </ul>
-<h2 id="requirements">Requirements</h2>
+<h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
 <p>Before you begin contributing to the Makim project, there are several technical
 prerequisites and best practices you should be familiar with. This section
 outlines the key requirements to ensure a smooth and productive contribution
 process.</p>
-<h3 id="conda-environment">Conda Environment</h3>
+<h3 id="conda-environment">Conda Environment<a class="headerlink" href="#conda-environment" title="Permanent link">&para;</a></h3>
 <p>Conda is a versatile tool that provides package, dependency, and environment
 management for various programming languages. In the Makim project, we leverage
 Conda to manage virtual environments and package dependencies effectively.</p>
@@ -796,7 +980,7 @@ Conda to manage virtual environments and package dependencies effectively.</p>
   Always create and activate a new environment for each project to prevent
   dependency conflicts and ensure a clean workspace.</li>
 </ul>
-<h3 id="git">Git</h3>
+<h3 id="git">Git<a class="headerlink" href="#git" title="Permanent link">&para;</a></h3>
 <p>Our collaborative efforts are facilitated through Git and GitHub. Understanding
 the fundamentals of Git is crucial for effective participation.</p>
 <ul>
@@ -819,7 +1003,7 @@ the fundamentals of Git is crucial for effective participation.</p>
   the original repository. Detailed instructions can be found in
   <a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/configuring-a-remote-repository-for-a-fork">GitHub's guide to configuring a remote for a fork</a>.</li>
 </ul>
-<h3 id="python">Python</h3>
+<h3 id="python">Python<a class="headerlink" href="#python" title="Permanent link">&para;</a></h3>
 <p>Familiarity with Python and adherence to best practices is important for
 contributing to Makim.</p>
 <ul>
@@ -835,14 +1019,14 @@ contributing to Makim.</p>
   valuable insights into advanced Python usage and computer programming
   principles.</li>
 </ul>
-<h3 id="how-to-get-support">How to Get Support</h3>
+<h3 id="how-to-get-support">How to Get Support<a class="headerlink" href="#how-to-get-support" title="Permanent link">&para;</a></h3>
 <p>Should you require assistance, please join our community on the Open Science
 Labs Discord server at
 <a href="https://opensciencelabs.org/discord">https://opensciencelabs.org/discord</a>.
 Here, you can participate in the incubator program and ask questions about Makim
 in its dedicated channel. You are also welcome to explore and join other groups
 that align with your interests.</p>
-<h2 id="setting-up-for-local-development">Setting Up for Local Development</h2>
+<h2 id="setting-up-for-local-development">Setting Up for Local Development<a class="headerlink" href="#setting-up-for-local-development" title="Permanent link">&para;</a></h2>
 <p>To contribute to <code>makim</code>, follow these steps to set up your development
 environment:</p>
 <ol>
@@ -855,23 +1039,23 @@ environment:</p>
    machine and navigate into the project directory.</p>
 </li>
 </ol>
-<div class="highlight"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:your_username/makim.git
-$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>makim
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:your_username/makim.git
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>makim
 </code></pre></div>
 <ol>
 <li><strong>Install Dependencies</strong>: Use <code>mamba</code> to create a Conda environment and
    <code>poetry</code> for managing Python dependencies.</li>
 </ol>
-<div class="highlight"><pre><span></span><code>$<span class="w"> </span>mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>--file<span class="w"> </span>conda/dev.yaml<span class="w"> </span>--force
-$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>makim
-$<span class="w"> </span>poetry<span class="w"> </span>config<span class="w"> </span>virtualenvs.create<span class="w"> </span><span class="nb">false</span>
-$<span class="w"> </span>poetry<span class="w"> </span>install
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$<span class="w"> </span>mamba<span class="w"> </span>env<span class="w"> </span>create<span class="w"> </span>--file<span class="w"> </span>conda/dev.yaml<span class="w"> </span>--force
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>$<span class="w"> </span>conda<span class="w"> </span>activate<span class="w"> </span>makim
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>$<span class="w"> </span>poetry<span class="w"> </span>config<span class="w"> </span>virtualenvs.create<span class="w"> </span><span class="nb">false</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>$<span class="w"> </span>poetry<span class="w"> </span>install
 </code></pre></div>
 <ol>
 <li><strong>Create a Development Branch</strong>: Make a dedicated branch for your bugfix or
    feature.</li>
 </ol>
-<div class="highlight"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>name-of-your-bugfix-or-feature
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>$<span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>name-of-your-bugfix-or-feature
 </code></pre></div>
 <ol>
 <li>
@@ -884,15 +1068,15 @@ $<span class="w"> </span>poetry<span class="w"> </span>install
    each commit.</p>
 </li>
 </ol>
-<div class="highlight"><pre><span></span><code>$<span class="w"> </span>pre-commit<span class="w"> </span>install
-$<span class="w"> </span>pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>$<span class="w"> </span>pre-commit<span class="w"> </span>install
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>$<span class="w"> </span>pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files
 </code></pre></div>
 <p>To bypass the hooks temporarily, use <code>git commit</code> with <code>--no-verify</code>.</p>
 <ol>
 <li><strong>Run Smoke Tests</strong>: Quickly validate the functionality of your changes with
    smoke tests.</li>
 </ol>
-<div class="highlight"><pre><span></span><code>$<span class="w"> </span>makim<span class="w"> </span>tests.smoke
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>$<span class="w"> </span>makim<span class="w"> </span>tests.smoke
 </code></pre></div>
 <p>Always complement smoke tests with thorough unit testing to ensure code
    integrity.</p>
@@ -900,28 +1084,28 @@ $<span class="w"> </span>pre-commit<span class="w"> </span>run<span class="w"> <
 <li><strong>Unit Testing with <code>pytest</code></strong>: <code>makim</code> leverages <code>pytest</code> for unit testing,
    along with <code>pytest-cov</code> for coverage analysis. Run unit tests using:</li>
 </ol>
-<div class="highlight"><pre><span></span><code>$<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>pytest
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>$<span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>pytest
 </code></pre></div>
 <p>or</p>
-<div class="highlight"><pre><span></span><code>$<span class="w"> </span>makim<span class="w"> </span>tests.unittest
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>$<span class="w"> </span>makim<span class="w"> </span>tests.unittest
 </code></pre></div>
 <ol>
 <li><strong>Commit and Push Changes</strong>: Stage, commit, and push your changes to GitHub.
    After setting the upstream branch once, subsequent pushes only require
    <code>git push</code>.</li>
 </ol>
-<div class="highlight"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>.
-$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Detailed description of your changes.&quot;</span>
-$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>--set-upstream<span class="w"> </span>origin<span class="w"> </span>&lt;branch<span class="w"> </span>name&gt;
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>.
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Detailed description of your changes.&quot;</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>$<span class="w"> </span>git<span class="w"> </span>push<span class="w"> </span>--set-upstream<span class="w"> </span>origin<span class="w"> </span>&lt;branch<span class="w"> </span>name&gt;
 </code></pre></div>
 <ol>
 <li><strong>Submit a Pull Request</strong>: Once your changes are pushed, go to the GitHub
     website to submit a pull request for review.</li>
 </ol>
-<h2 id="release-process">Release Process</h2>
+<h2 id="release-process">Release Process<a class="headerlink" href="#release-process" title="Permanent link">&para;</a></h2>
 <p>The <strong>Makim</strong> project utilizes <code>semantic-release</code> to automate the release
 process, basing new releases on the content of commit messages.</p>
-<h3 id="commit-message-format">Commit Message Format</h3>
+<h3 id="commit-message-format">Commit Message Format<a class="headerlink" href="#commit-message-format" title="Permanent link">&para;</a></h3>
 <p><code>semantic-release</code> analyzes commit messages to assess the impact of changes made
 to the codebase. Adhering to a standardized commit message format allows
 <code>semantic-release</code> to automatically determine the next semantic version number,
@@ -1052,7 +1236,7 @@ the
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "content.tabs.link", "header.autohide", "navigation.indexes", "navigation.instant", "search.highlight", "search.share", "search.suggest"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "content.code.copy", "content.tabs.link", "header.autohide", "navigation.indexes", "navigation.instant", "search.highlight", "search.share", "search.suggest"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="../assets/javascripts/bundle.bd41221c.min.js"></script>

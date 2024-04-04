@@ -35,4 +35,14 @@
          <lastmod>2024-04-04</lastmod>
          <changefreq>daily</changefreq>
     </url>
+    <url>
+         <loc>https://osl-incubator.github.io/makim/tutorials/introduction/</loc>
+         <lastmod>2024-04-04</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://osl-incubator.github.io/makim/tutorials/makim-for-nox-users/</loc>
+         <lastmod>2024-04-04</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
 </urlset>
