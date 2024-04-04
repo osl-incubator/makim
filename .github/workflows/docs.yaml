@@ -1,0 +1,42 @@
+name: Documentation
+
+on:
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          environment-file: conda/dev.yaml
+          channels: conda-forge,nodefaults
+          activate-environment: makim
+          auto-update-conda: true
+          conda-solver: libmamba
+
+      - name: Install deps
+        run: |
+          poetry config virtualenvs.create false
+          poetry install
+
+      - name: Generate documentation with changes from semantic-release
+        run: makim --verbose docs.build
+
+      - name: GitHub Pages action
+        uses: peaceiris/actions-gh-pages@v3.5.9
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/

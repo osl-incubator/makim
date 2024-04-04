@@ -9,6 +9,7 @@ theme:
   name: material
   features:
     - content.code.annotate
+    - content.code.copy
     - content.tabs.link
     - header.autohide
     - navigation.indexes
@@ -21,10 +22,21 @@ theme:
   logo: ./images/logo.png
   favicon: ./images/favicon.ico
   palette:
-    scheme: slate
-    primary: white
-    accent: lime
-  # custom_dir: docs/overrides
+    # Palette toggle for light mode
+    - scheme: default
+      primary: white
+      accent: lime
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: white
+      accent: lime
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
 plugins:
   - search
   - macros
@@ -78,12 +90,14 @@ plugins:
             show_root_toc_entry: true
             show_source: false
   - mkdocs-jupyter:
-      execute: true
+      execute: false
+      include: ["*.ipynb"]
       ignore:
         - "*.py"
+        - ".ipynb_checkpoints/*"
       # execute_ignore: "tutorial/*Geospatial*.ipynb"
       include_source: true
-      theme: dark
+      include_requirejs: true
   - literate-nav
 markdown_extensions:
   - admonition
@@ -100,18 +114,20 @@ markdown_extensions:
         custom_icons:
           - docs/static/icons
   - pymdownx.details
-  - pymdownx.highlight
+  - pymdownx.highlight:
+      anchor_linenums: true
   - pymdownx.inlinehilite
   - pymdownx.magiclink:
       provider: github
       repo_url_shortener: true
   - pymdownx.saneheaders
-  - pymdownx.snippets
+  - pymdownx.snippets:
+      check_paths: true
   - pymdownx.superfences
-  - pymdownx.tabbed:
-      alternate_style: true
+  - pymdownx.tabbed
   - tables
-  - toc
+  - toc:
+      permalink: true
 extra:
   project_name: "Makim"
   team:
