@@ -1,5 +1,5 @@
 version: 1.0
-working-directory: "/tmp"
+dir: "/tmp"
 
 groups:
   check-wd:

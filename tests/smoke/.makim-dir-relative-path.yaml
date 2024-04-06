@@ -1,5 +1,5 @@
 version: 1.0
-working-directory: "global-relative"
+dir: "global-relative"
 
 groups:
   setup:
@@ -22,30 +22,30 @@ groups:
           import os
           print(os.getcwd())
           assert os.getcwd() == "/tmp/global-relative"
-          echo "working-directory-relative-path [I] Done!"
+          echo "dir-relative-path [I] Done!"
 
       task-absolute:
-        working-directory: "/tmp/global-relative/task1"
+        dir: "/tmp/global-relative/task1"
         help: Test global relative path, group no-path, task absolute path
         dependencies:
           - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/task1"
-          echo "working-directory-relative-path [II] Done!"
+          echo "dir-relative-path [II] Done!"
 
       task-relative:
-        working-directory: "task2"
+        dir: "task2"
         help: Test global relative path, group no-path, task relative path
         dependencies:
           - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/task2"
-          echo "working-directory-relative-path [III] Done!"
+          echo "dir-relative-path [III] Done!"
 
   group-absolute:
-    working-directory: "/tmp/global-relative/group-absolute"
+    dir: "/tmp/global-relative/group-absolute"
     tasks:
       task-no-path:
         help: Test global relative path, group absolute path, task no-path
@@ -54,10 +54,10 @@ groups:
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/group-absolute"
-          echo "working-directory-relative-path [IV] Done!"
+          echo "dir-relative-path [IV] Done!"
 
       task-absolute:
-        working-directory: "/tmp/global-relative/task2"
+        dir: "/tmp/global-relative/task2"
         help: |
           Test global relative path, group absolute path, task absolute path
         dependencies:
@@ -65,10 +65,10 @@ groups:
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/task2"
-          echo "working-directory-relative-path [V] Done!"
+          echo "dir-relative-path [V] Done!"
 
       task-relative:
-        working-directory: "task1"
+        dir: "task1"
         help: |
           Test global relative path, group absolute path, task relative path
         dependencies:
@@ -76,10 +76,10 @@ groups:
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/group-absolute/task1"
-          echo "working-directory-relative-path [VI] Done!"
+          echo "dir-relative-path [VI] Done!"
 
   group-relative:
-    working-directory: "group-relative"
+    dir: "group-relative"
     tasks:
       task-no-path:
         help: Test global relative path, group relative path, task no-path
@@ -88,10 +88,10 @@ groups:
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/group-relative"
-          echo "working-directory-relative-path [VII] Done!"
+          echo "dir-relative-path [VII] Done!"
 
       task-absolute:
-        working-directory: "/tmp/global-relative/task2"
+        dir: "/tmp/global-relative/task2"
         help: |
           Test global relative path, group absolute path, task absolute path
         dependencies:
@@ -99,10 +99,10 @@ groups:
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/task2"
-          echo "working-directory-relative-path [VIII] Done!"
+          echo "dir-relative-path [VIII] Done!"
 
       task-relative:
-        working-directory: "task1"
+        dir: "task1"
         help: |
           Test global relative path, group absolute path, task relative path
         dependencies:
@@ -110,4 +110,4 @@ groups:
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/group-relative/task1"
-          echo "working-directory-relative-path [IX] Done!"
+          echo "dir-relative-path [IX] Done!"

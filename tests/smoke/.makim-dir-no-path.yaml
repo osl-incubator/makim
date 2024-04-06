@@ -19,30 +19,30 @@ groups:
         run: |
           import os
           echo f"{os.getcwd()}"
-          echo "working-directory-no-path [I] Done!"
+          echo "dir-no-path [I] Done!"
 
       task-absolute:
-        working-directory: "/tmp/task1"
+        dir: "/tmp/task1"
         help: Test global no-path, group no-path, task absolute
         dependencies:
           - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/task1"
-          echo "working-directory-no-path [II] Done!"
+          echo "dir-no-path [II] Done!"
 
       task-relative:
-        working-directory: "task2"
+        dir: "task2"
         help: Test global no-path, group no-path, task relative
         dependencies:
           - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/task2"
-          echo "working-directory-no-path [III] Done!"
+          echo "dir-no-path [III] Done!"
 
   group-absolute:
-    working-directory: "/tmp/group-absolute"
+    dir: "/tmp/group-absolute"
     tasks:
       task-no-path:
         help: Test global no-path, group absolute path, task no-path
@@ -51,30 +51,30 @@ groups:
         run: |
           import os
           assert os.getcwd() == "/tmp/group-absolute"
-          echo "working-directory-no-path [IV] Done!"
+          echo "dir-no-path [IV] Done!"
 
       task-absolute:
-        working-directory: /tmp/task1
+        dir: /tmp/task1
         help: Test global no-path, group absolute path, task absolute path
         dependencies:
           - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/task1"
-          echo "working-directory-no-path [V] Done!"
+          echo "dir-no-path [V] Done!"
 
       task-relative:
-        working-directory: "task1"
+        dir: "task1"
         help: Test global no-path, group absolute path, task relative path
         dependencies:
           - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/group-absolute/task1"
-          echo "working-directory-no-path [VI] Done!"
+          echo "dir-no-path [VI] Done!"
 
   group-relative:
-    working-directory: "group-relative"
+    dir: "group-relative"
     tasks:
       task-no-path:
         help: Test global no-path, group relative path, task no-path
@@ -83,24 +83,24 @@ groups:
         run: |
           import os
           assert os.getcwd() == "/tmp/group-relative"
-          echo "working-directory-no-path [VII] Done!"
+          echo "dir-no-path [VII] Done!"
 
       task-absolute:
-        working-directory: "/tmp/task2"
+        dir: "/tmp/task2"
         help: Test global no-path, group relative path, task absolute path
         dependencies:
           - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/task2"
-          echo "working-directory-no-path [VIII] Done!"
+          echo "dir-no-path [VIII] Done!"
 
       task-relative:
-        working-directory: "task1"
+        dir: "task1"
         help: Test global no-path, group relative path, task relative path
         dependencies:
           - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/group-relative/task1"
-          echo "working-directory-no-path [IX] Done!"
+          echo "dir-no-path [IX] Done!"
