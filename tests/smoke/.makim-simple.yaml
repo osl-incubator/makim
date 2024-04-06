@@ -2,9 +2,9 @@ version: 1.0
 env-file: .env
 groups:
   default:
-    targets:
+    tasks:
       clean:
-        help: Use this target to clean up temporary files
+        help: Use this task to clean up temporary files
         args:
           all:
             type: bool
@@ -32,7 +32,7 @@ groups:
             type: bool
             action: store_true
         dependencies:
-          - target: default.clean
+          - task: default.clean
             if: ${{ args.clean or args.clean_all }}
             args:
               all: ${{ args.clean_all }}
@@ -42,9 +42,9 @@ groups:
           echo "build file z"
 
   print:
-    targets:
+    tasks:
       force-error:
-        help: This target should print until item 3
+        help: This task should print until item 3
         run: |
           echo 1
           wrongecho
@@ -53,7 +53,7 @@ groups:
           echo 3
 
       skip-error:
-        help: This target should print until item 3
+        help: This task should print until item 3
         env:
           RAISE_SUBPROC_ERROR: 0
         run: |

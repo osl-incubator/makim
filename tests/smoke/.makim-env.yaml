@@ -5,7 +5,7 @@ env:
   GLOBAL_VAR_2: 2
 groups:
   global-scope:
-    targets:
+    tasks:
       test-var-env-file:
         help: Test env variable defined in the global scope from env-file
         run: |
@@ -23,7 +23,7 @@ groups:
     env:
       GROUP_VAR_1: 1
       GROUP_VAR_2: 2
-    targets:
+    tasks:
       test-var-env-file:
         help: Test env variable defined in the global scope from env-file
         run: |
@@ -37,18 +37,18 @@ groups:
           assert str(os.getenv("GROUP_VAR_1")) == "1"
           assert str(os.getenv("GROUP_VAR_2")) == "2"
 
-  target-scope:
-    targets:
+  task-scope:
+    tasks:
       test-var-env-file:
         help: Test env variable defined in the global scope from env-file
-        env-file: .env-target
+        env-file: .env-task
         run: |
           import os
           assert str(os.getenv("ENV")) == "test"
 
       test-var-env:
         help: Test env variable defined in the global scope in `env` section
-        env-file: .env-target
+        env-file: .env-task
         env:
           TARGET_VAR_1: 1
           TARGET_VAR_2: 2
@@ -65,7 +65,7 @@ groups:
       GROUP_VAR_1: 1
       GROUP_VAR_2: 2
 
-    targets:
+    tasks:
       dep:
         help: dummy dep
         args:
@@ -79,7 +79,7 @@ groups:
         help: Test a rerender from the global scope
         env-file: .env
         dependencies:
-          - target: rerender-env.dep
+          - task: rerender-env.dep
             args:
               my-value: "${{ env.GROUP_VAR_1 }}"
         env:
@@ -105,9 +105,9 @@ groups:
           assert str(os.getenv("MYVAR_2")) == "2"
           assert str(os.getenv("MYVAR_3")) == "prod"
 
-      from-target:
+      from-task:
         help: Test a rerender from the group scope
-        env-file: .env-target
+        env-file: .env-task
         env:
           MYVAR_1: ${{ env.ENV }}
         run: |

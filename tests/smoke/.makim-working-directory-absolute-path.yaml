@@ -3,109 +3,109 @@ working-directory: "/tmp"
 
 groups:
   setup:
-    targets:
+    tasks:
       folders:
         help: Create necessary folders
         run: |
           mkdir -p /tmp/group1
-          mkdir -p /tmp/group1/target3
+          mkdir -p /tmp/group1/task3
           mkdir -p /tmp/group2
-          mkdir -p /tmp/group2/target-relative
-          mkdir -p /tmp/group1/target4
+          mkdir -p /tmp/group2/task-relative
+          mkdir -p /tmp/group1/task4
 
   group-no-path:
-    targets:
-      target-no-path:
-        help: Test global absolute path, group no path, target no path
+    tasks:
+      task-no-path:
+        help: Test global absolute path, group no path, task no path
         dependencies:
-          - target: setup.folders
+          - task: setup.folders
         run: |
           import os
           print(os.getcwd())
           assert os.getcwd() == "/tmp"
           echo "working-directory-absolute-path [I] Done!"
 
-      target-absolute:
+      task-absolute:
         working-directory: "/tmp"
-        help: Test global absolute path, group no path, target absolute path
+        help: Test global absolute path, group no path, task absolute path
         dependencies:
-          - target: setup.folders
+          - task: setup.folders
         run: |
           import os
           assert os.getcwd() == "/tmp"
           echo "working-directory-absolute-path [II] Done!"
 
-      target-relative:
-        working-directory: "/tmp/group1/target4"
-        help: est global absolute path, group no path, target relative path
+      task-relative:
+        working-directory: "/tmp/group1/task4"
+        help: est global absolute path, group no path, task relative path
         dependencies:
-          - target: setup.folders
+          - task: setup.folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group1/target4"
+          assert os.getcwd() == "/tmp/group1/task4"
           echo "working-directory-absolute-path [III] Done!"
 
   group-relative:
     working-directory: "group1"
-    targets:
-      target-no-path:
-        help: Test global absolute path, group relative path, target no path
+    tasks:
+      task-no-path:
+        help: Test global absolute path, group relative path, task no path
         dependencies:
-          - target: setup.folders
+          - task: setup.folders
         run: |
           import os
           assert os.getcwd() == "/tmp/group1"
           echo "working-directory-absolute-path [IV] Done!"
 
-      target-absolute:
+      task-absolute:
         working-directory: "/tmp"
-        help: Test global absolute path, group relative path, target absolute path
+        help: Test global absolute path, group relative path, task absolute path
         dependencies:
-          - target: setup.folders
+          - task: setup.folders
         run: |
           import os
           assert os.getcwd() == "/tmp"
           echo "working-directory-absolute-path [V] Done!"
 
-      target-relative:
-        working-directory: "target3"
-        help: Test global absolute path, group relative path, target relative path
+      task-relative:
+        working-directory: "task3"
+        help: Test global absolute path, group relative path, task relative path
         dependencies:
-          - target: setup.folders
+          - task: setup.folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group1/target3"
+          assert os.getcwd() == "/tmp/group1/task3"
           echo "working-directory-absolute-path [VI] Done!"
 
   group-absolute:
     working-directory: "/tmp/group2"
-    targets:
-      target-no-path:
-        help: Test global absolute path, group absolute path, target no path
+    tasks:
+      task-no-path:
+        help: Test global absolute path, group absolute path, task no path
         dependencies:
-          - target: setup.folders
+          - task: setup.folders
         run: |
-          import os 
+          import os
           assert os.getcwd() == "/tmp/group2"
           echo "working-directory-absolute-path [VII] Done!"
 
-      target-absolute:
+      task-absolute:
         working-directory: "/tmp"
-        help: Test global absolute path, group absolute path, target absolute path
+        help: Test global absolute path, group absolute path, task absolute path
         dependencies:
-          - target: setup.folders
+          - task: setup.folders
         run: |
           import os
           assert os.getcwd() == "/tmp"
           echo "working-directory-absolute-path [VIII] Done!"
 
-      target-relative:
-        working-directory: "target-relative"
+      task-relative:
+        working-directory: "task-relative"
         help: |
-          Test global absolute path, group absolute path, target relative  path
+          Test global absolute path, group absolute path, task relative  path
         dependencies:
-          - target: setup.folders
+          - task: setup.folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group2/target-relative"
+          assert os.getcwd() == "/tmp/group2/task-relative"
           echo "working-directory-absolute-path [IX] Done!"

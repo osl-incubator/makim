@@ -2,7 +2,7 @@
 Makim main class.
 
 `Makim` or just `makim` is based on `make` and focus on improve
-the way to define targets and dependencies. Instead of using the
+the way to define tasks and dependencies. Instead of using the
 `Makefile` format, it uses `yaml` format.
 """
 
@@ -110,8 +110,8 @@ class Makim:
     args: Optional[object] = None
     group_name: str = 'default'
     group_data: dict = {}
-    target_name: str = ''
-    target_data: dict = {}
+    task_name: str = ''
+    task_data: dict = {}
 
     def __init__(self):
         """Prepare the Makim class with the default configuration."""
@@ -145,7 +145,7 @@ class Makim:
             _no_err=True,
             _env=os.environ,
             _new_session=True,
-            _cwd=str(self._resolve_working_directory('target')),
+            _cwd=str(self._resolve_working_directory('task')),
         )
 
         try:
@@ -170,7 +170,7 @@ class Makim:
     def _check_makim_file(self, file_path: str = '') -> bool:
         return Path(file_path or self.file).exists()
 
-    def _verify_target_conditional(self, conditional) -> bool:
+    def _verify_task_conditional(self, conditional) -> bool:
         # todo: implement verification
         print(f'condition {conditional} not verified')
         return False
@@ -185,25 +185,25 @@ class Makim:
     def _verify_config(self) -> None:
         if not len(self.global_data['groups']):
             MakimLogs.raise_error(
-                'No target groups found.',
+                'No task groups found.',
                 MakimError.MAKIM_NO_TARGET_GROUPS_FOUND,
             )
 
-    def _change_target(self, target_name: str) -> None:
+    def _change_task(self, task_name: str) -> None:
         group_name = 'default'
-        if '.' in target_name:
-            group_name, target_name = target_name.split('.')
+        if '.' in task_name:
+            group_name, task_name = task_name.split('.')
 
-        self.target_name = target_name
+        self.task_name = task_name
         self._change_group_data(group_name)
 
-        for target_name, target_data in self.group_data['targets'].items():
-            if target_name == self.target_name:
-                self.target_data = target_data
+        for task_name, task_data in self.group_data['tasks'].items():
+            if task_name == self.task_name:
+                self.task_data = task_data
                 return
 
         MakimLogs.raise_error(
-            f'The given target "{self.target_name}" was not found in the '
+            f'The given task "{self.task_name}" was not found in the '
             f'configuration file for the group {self.group_name}.',
             MakimError.MAKIM_TARGET_NOT_FOUND,
         )
@@ -220,7 +220,7 @@ class Makim:
                 return
 
         MakimLogs.raise_error(
-            f'The given group target "{self.group_name}" '
+            f'The given group task "{self.group_name}" '
             'was not found in the configuration file.',
             MakimError.MAKIM_GROUP_NOT_FOUND,
         )
@@ -239,7 +239,7 @@ class Makim:
             self.global_data = yaml.safe_load(content_io)
 
     def _resolve_working_directory(self, scope: str) -> Optional[Path]:
-        scope_options = ('global', 'group', 'target')
+        scope_options = ('global', 'group', 'task')
         if scope not in scope_options:
             raise Exception(f'The given scope `{scope}` is not valid.')
 
@@ -266,7 +266,7 @@ class Makim:
 
         if scope_id == SCOPE_TARGET:
             working_dir = update_working_directory(
-                working_dir, self.target_data.get('working-directory', '')
+                working_dir, self.task_data.get('working-directory', '')
             )
 
         return working_dir
@@ -318,7 +318,7 @@ class Makim:
         for scoped_data in [
             self.global_data,
             self.group_data,
-            self.target_data,
+            self.task_data,
         ]:
             tmp_config: AppConfigType = self._extract_shell_app_config(
                 scoped_data
@@ -364,7 +364,7 @@ class Makim:
     def _load_scoped_data(
         self, scope: str
     ) -> tuple[dict[str, str], dict[str, str]]:
-        scope_options = ('global', 'group', 'target')
+        scope_options = ('global', 'group', 'task')
         if scope not in scope_options:
             raise Exception(f'The given scope `{scope}` is not valid.')
 
@@ -395,15 +395,15 @@ class Makim:
             variables.update(self._load_scoped_vars('group', env=env))
 
         if scope_id == SCOPE_TARGET:
-            env_user = self.target_data.get('env', {})
-            env_file = self._load_dotenv(self.target_data)
+            env_user = self.task_data.get('env', {})
+            env_file = self._load_dotenv(self.task_data)
             _render_env_inplace(env_user, env_file, variables, env)
-            variables.update(self._load_scoped_vars('target', env=env))
+            variables.update(self._load_scoped_vars('task', env=env))
 
         return env, variables
 
     def _load_scoped_vars(self, scope: str, env) -> dict:
-        scope_options = ('global', 'group', 'target')
+        scope_options = ('global', 'group', 'task')
         if scope not in scope_options:
             raise Exception(f'The given scope `{scope}` is not valid.')
         scope_id = scope_options.index(scope)
@@ -428,14 +428,14 @@ class Makim:
             variables.update(
                 {
                     k: strip_recursively(v)
-                    for k, v in self.target_data.get('vars', {}).items()
+                    for k, v in self.task_data.get('vars', {}).items()
                 }
             )
 
         return fix_dict_keys_recursively(variables)
 
-    def _load_target_args(self):
-        for name, value in self.target_data.get('args', {}).items():
+    def _load_task_args(self):
+        for name, value in self.task_data.get('args', {}).items():
             qualified_name = f'--{name}'
             if self.args.get(qualified_name):
                 continue
@@ -448,7 +448,7 @@ class Makim:
     # run commands
 
     def _run_dependencies(self, args: dict):
-        if not self.target_data.get('dependencies'):
+        if not self.task_data.get('dependencies'):
             return
         makim_dep = deepcopy(self)
         args_dep_original = {
@@ -470,8 +470,8 @@ class Makim:
                 else arg_value
             )
 
-        for dep_data in self.target_data['dependencies']:
-            env, variables = makim_dep._load_scoped_data('target')
+        for dep_data in self.task_data['dependencies']:
+            env, variables = makim_dep._load_scoped_data('task')
             for k, v in env.items():
                 os.environ[k] = v
 
@@ -492,7 +492,7 @@ class Makim:
                     )
                 )
 
-            args_dep['target'] = dep_data['target']
+            args_dep['task'] = dep_data['task']
             args_dep.update(args_dep_original)
 
             # checking for the conditional statement
@@ -505,14 +505,14 @@ class Makim:
                     if self.verbose:
                         MakimLogs.print_info(
                             '[II] Skipping dependency: '
-                            f'{dep_data.get("target")}'
+                            f'{dep_data.get("task")}'
                         )
                     continue
 
             makim_dep.run(deepcopy(args_dep))
 
     def _run_command(self, args: dict):
-        cmd = self.target_data.get('run', '').strip()
+        cmd = self.task_data.get('run', '').strip()
         if 'vars' not in self.group_data:
             self.group_data['vars'] = {}
 
@@ -523,14 +523,14 @@ class Makim:
                 MakimError.MAKIM_VARS_ATTRIBUTE_INVALID,
             )
 
-        env, variables = self._load_scoped_data('target')
+        env, variables = self._load_scoped_data('task')
         for k, v in env.items():
             os.environ[k] = v
 
         self.env_scoped = deepcopy(env)
 
         args_input = {'file': self.file}
-        for k, v in self.target_data.get('args', {}).items():
+        for k, v in self.task_data.get('args', {}).items():
             if not isinstance(v, dict):
                 raise Exception('`args` attribute should be a dictionary.')
             k_clean = k.replace('-', '_')
@@ -569,7 +569,7 @@ class Makim:
         if self.verbose:
             MakimLogs.print_info('=' * width)
             MakimLogs.print_info(
-                'TARGET: ' + f'{self.group_name}.{self.target_name}'
+                'TARGET: ' + f'{self.group_name}.{self.task_name}'
             )
             MakimLogs.print_info('ARGS:')
             MakimLogs.print_info(pprint.pformat(args_input))
@@ -601,20 +601,20 @@ class Makim:
         self.env = self._load_dotenv(self.global_data)
 
     def run(self, args: dict):
-        """Run makim target code."""
+        """Run makim task code."""
         self.args = args
 
         # setup
         self._verify_args()
-        self._change_target(args['target'])
-        self._load_target_args()
+        self._change_task(args['task'])
+        self._load_task_args()
 
         # commands
-        if self.target_data.get('if') and not self._verify_target_conditional(
-            self.target_data['if']
+        if self.task_data.get('if') and not self._verify_task_conditional(
+            self.task_data['if']
         ):
             return warnings.warn(
-                f'{args["target"]} not executed. '
+                f'{args["task"]} not executed. '
                 'Condition (if) not satisfied.'
             )
 

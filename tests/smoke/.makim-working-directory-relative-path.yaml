@@ -3,111 +3,111 @@ working-directory: "global-relative"
 
 groups:
   setup:
-    targets:
+    tasks:
       create-folders:
         run: |
           mkdir -p /tmp/global-relative
-          mkdir -p /tmp/global-relative/target1
-          mkdir -p /tmp/global-relative/target2
-          mkdir -p /tmp/global-relative/group-absolute/target1
-          mkdir -p /tmp/global-relative/group-relative/target1
+          mkdir -p /tmp/global-relative/task1
+          mkdir -p /tmp/global-relative/task2
+          mkdir -p /tmp/global-relative/group-absolute/task1
+          mkdir -p /tmp/global-relative/group-relative/task1
 
   group-no-path:
-    targets:
-      target-no-path:
-        help: Test global relative path, group no-path, target no-path
+    tasks:
+      task-no-path:
+        help: Test global relative path, group no-path, task no-path
         dependencies:
-          - target: setup.create-folders
+          - task: setup.create-folders
         run: |
           import os
           print(os.getcwd())
           assert os.getcwd() == "/tmp/global-relative"
           echo "working-directory-relative-path [I] Done!"
 
-      target-absolute:
-        working-directory: "/tmp/global-relative/target1"
-        help: Test global relative path, group no-path, target absolute path
+      task-absolute:
+        working-directory: "/tmp/global-relative/task1"
+        help: Test global relative path, group no-path, task absolute path
         dependencies:
-          - target: setup.create-folders
+          - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/global-relative/target1"
+          assert os.getcwd() == "/tmp/global-relative/task1"
           echo "working-directory-relative-path [II] Done!"
 
-      target-relative:
-        working-directory: "target2"
-        help: Test global relative path, group no-path, target relative path
+      task-relative:
+        working-directory: "task2"
+        help: Test global relative path, group no-path, task relative path
         dependencies:
-          - target: setup.create-folders
+          - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/global-relative/target2"
+          assert os.getcwd() == "/tmp/global-relative/task2"
           echo "working-directory-relative-path [III] Done!"
 
   group-absolute:
     working-directory: "/tmp/global-relative/group-absolute"
-    targets:
-      target-no-path:
-        help: Test global relative path, group absolute path, target no-path
+    tasks:
+      task-no-path:
+        help: Test global relative path, group absolute path, task no-path
         dependencies:
-          - target: setup.create-folders
+          - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/group-absolute"
           echo "working-directory-relative-path [IV] Done!"
 
-      target-absolute:
-        working-directory: "/tmp/global-relative/target2"
+      task-absolute:
+        working-directory: "/tmp/global-relative/task2"
         help: |
-          Test global relative path, group absolute path, target absolute path
+          Test global relative path, group absolute path, task absolute path
         dependencies:
-          - target: setup.create-folders
+          - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/global-relative/target2"
+          assert os.getcwd() == "/tmp/global-relative/task2"
           echo "working-directory-relative-path [V] Done!"
 
-      target-relative:
-        working-directory: "target1"
+      task-relative:
+        working-directory: "task1"
         help: |
-          Test global relative path, group absolute path, target relative path
+          Test global relative path, group absolute path, task relative path
         dependencies:
-          - target: setup.create-folders
+          - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/global-relative/group-absolute/target1"
+          assert os.getcwd() == "/tmp/global-relative/group-absolute/task1"
           echo "working-directory-relative-path [VI] Done!"
 
   group-relative:
     working-directory: "group-relative"
-    targets:
-      target-no-path:
-        help: Test global relative path, group relative path, target no-path
+    tasks:
+      task-no-path:
+        help: Test global relative path, group relative path, task no-path
         dependencies:
-          - target: setup.create-folders
+          - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/group-relative"
           echo "working-directory-relative-path [VII] Done!"
 
-      target-absolute:
-        working-directory: "/tmp/global-relative/target2"
+      task-absolute:
+        working-directory: "/tmp/global-relative/task2"
         help: |
-          Test global relative path, group absolute path, target absolute path
+          Test global relative path, group absolute path, task absolute path
         dependencies:
-          - target: setup.create-folders
+          - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/global-relative/target2"
+          assert os.getcwd() == "/tmp/global-relative/task2"
           echo "working-directory-relative-path [VIII] Done!"
 
-      target-relative:
-        working-directory: "target1"
+      task-relative:
+        working-directory: "task1"
         help: |
-          Test global relative path, group absolute path, target relative path
+          Test global relative path, group absolute path, task relative path
         dependencies:
-          - target: setup.create-folders
+          - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/global-relative/group-relative/target1"
+          assert os.getcwd() == "/tmp/global-relative/group-relative/task1"
           echo "working-directory-relative-path [IX] Done!"

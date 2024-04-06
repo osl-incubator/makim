@@ -10,25 +10,25 @@ rather than covering all the possibilities with Jinja2.
 `vars`, `env`, and `args`.
 
 Additionally, the `env` and `vars` option has three different scopes:
-**global**, **group**, and **target**. We will discuss each of them in the
+**global**, **group**, and **task**. We will discuss each of them in the
 following sections.
 
 ## Variables Scopes
 
 Before delving into the different variable options, let's discuss `env` and
 `vars` scope, as it is essential for the subsequent sections. The `args`
-attribute just works in the _target_ scope.
+attribute just works in the _task_ scope.
 
 As mentioned earlier, **Makim** `env` and `vars` has three scopes: **global**,
-**group**, and **target**.
+**group**, and **task**.
 
 The order of their rendering is crucial. First, the _global_ scope is processed.
 In the _group_ scope, any variable defined globally is accessible via the `env`
 variable (e.g., `{% raw %}${{ env.my_global_env }}{% endraw %}`). However, any
 variable defined in the _global_ scope will be overridden by a variable with the
-same name in the _group_ scope. The same applies to the _target_ scope, where
-any variable defined in the _global_ or _group_ scope will be overridden by a
-variable defined in the _target_ scope.
+same name in the _group_ scope. The same applies to the _task_ scope, where any
+variable defined in the _global_ or _group_ scope will be overridden by a
+variable defined in the _task_ scope.
 
 Moreover, `env` is a bit more complex, as its value can be defined in two
 different ways: either through the `env` attribute in the `.makim.yaml` file or
@@ -47,8 +47,8 @@ variables.
 `vars`, and `args`.
 
 - `args` allows users to pass parameters via the CLI (command line interface).
-  It can also be used for target dependencies when parameters need to be passed
-  to the dependency. However, this option is not available in the system context
+  It can also be used for task dependencies when parameters need to be passed to
+  the dependency. However, this option is not available in the system context
   (the commands executed defined by `run` attribute), it is only accessible
   within the Makim config file.
 - `vars` is a convenient way to define reusable variables in the code. For
@@ -65,8 +65,8 @@ variables.
 ...
 groups:
   group1:
-    targets:
-      target1:
+    tasks:
+      task1:
         ...
         env:
           MYVAR: 1
@@ -108,14 +108,14 @@ groups:
     vars:
       MY_GROUP_VAR:
         "my group env is {% raw %}${{ env.MY_GROUP_ENV }}{% endraw %}"
-    targets:
-      target1:
-        help: "target 1"
+    tasks:
+      task1:
+        help: "task 1"
         env:
           MY_TARGET_ENV: 3
         args:
-          my-target-arg:
-            help: "target arg"
+          my-task-arg:
+            help: "task arg"
             type: string
             default: "{% raw %}${{ env.MY_TARGET_ENV }}{% endraw %}"
         vars:
@@ -128,5 +128,5 @@ groups:
           echo "{% raw %}${{ env.MY_GROUP_VAR}}{% endraw %}"
           echo "{% raw %}${{ env.MY_TARGET_ENV}}{% endraw %}"
           echo "{% raw %}${{ env.MY_TARGET_VAR}}{% endraw %}"
-          echo "{% raw %}${{ env.my_target_arg}}{% endraw %}"
+          echo "{% raw %}${{ env.my_task_arg}}{% endraw %}"
 ```

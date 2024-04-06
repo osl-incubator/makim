@@ -7,7 +7,7 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    'target,args',
+    'task,args',
     [
         ('tests.test-1', {}),
         ('tests.test-1', {'--all': False}),
@@ -20,7 +20,7 @@ import pytest
         ('tests.test-6', {}),
     ],
 )
-def test_success(target, args):
+def test_success(task, args):
     """Test makim when expects success."""
     makim_file = Path(__file__).parent / 'smoke' / '.makim-unittest.yaml'
 
@@ -29,7 +29,7 @@ def test_success(target, args):
 
     args.update(
         {
-            'target': target,
+            'task': task,
             'file': makim_file,
         }
     )

@@ -3,7 +3,7 @@ env-file: .env
 shell: bash
 groups:
   main-scope:
-    targets:
+    tasks:
       test:
         help: Test bash defined in the main scope
         args:
