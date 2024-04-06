@@ -2,9 +2,9 @@ version: 1.0
 env-file: .env
 groups:
   main:
-    targets:
+    tasks:
       virtual-environment:
-        help: Use this target to clean up temporary files
+        help: Use this task to clean up temporary files
         virtual-environment:
           application: conda
           name: jlab

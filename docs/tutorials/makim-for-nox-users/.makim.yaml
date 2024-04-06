@@ -2,7 +2,7 @@ version: 1.0
 groups:
   nox:
     help: A set of functionality ported from noxfile.py
-    targets:
+    tasks:
       tests:
         help: Run nox tests
         shell: nox
@@ -29,5 +29,5 @@ groups:
       all:
         help: Run nox tests
         dependencies:
-          - target: nox.tests
-          - target: nox.lint
+          - task: nox.tests
+          - task: nox.lint

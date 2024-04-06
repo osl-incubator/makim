@@ -2,7 +2,7 @@ version: 1.0
 env-file: .env
 groups:
   main:
-    targets:
+    tasks:
       node:
         help: Test using nodejs
         shell: node
@@ -49,10 +49,10 @@ groups:
 
       all:
         dependencies:
-          - target: main.node
-          - target: main.perl
+          - task: main.node
+          - task: main.perl
           # note: php from conda-forge has conflicts with r-base
-          # - target: main.php
-          - target: main.python
-          - target: main.r
-          - target: main.sh
+          # - task: main.php
+          - task: main.python
+          - task: main.r
+          - task: main.sh

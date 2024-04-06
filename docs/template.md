@@ -10,7 +10,7 @@ rather than covering all the possibilities with Jinja2.
 `vars`, `env`, and `args`.
 
 Additionally, the `env` and `vars` option has three different scopes:
-**global**, **group**, and **target**. We will discuss each of them in the
+**global**, **group**, and **task**. We will discuss each of them in the
 following sections.
 
 ## Variables Scopes
@@ -20,7 +20,7 @@ Before delving into the different variable options, let's discuss `env` and
 attribute just works in the _target_ scope.
 
 As mentioned earlier, **Makim** `env` and `vars` has three scopes: **global**,
-**group**, and **target**.
+**group**, and **task**.
 
 The order of their rendering is crucial. First, the _global_ scope is processed.
 In the _group_ scope, any variable defined globally is accessible via the `env`
@@ -47,8 +47,8 @@ variables.
 `vars`, and `args`.
 
 - `args` allows users to pass parameters via the CLI (command line interface).
-  It can also be used for target dependencies when parameters need to be passed
-  to the dependency. However, this option is not available in the system context
+  It can also be used for task dependencies when parameters need to be passed to
+  the dependency. However, this option is not available in the system context
   (the commands executed defined by `run` attribute), it is only accessible
   within the Makim config file.
 - `vars` is a convenient way to define reusable variables in the code. For
@@ -65,7 +65,7 @@ variables.
 ...
 groups:
   group1:
-    targets:
+    tasks:
       target1:
         ...
         env:
@@ -108,14 +108,14 @@ groups:
     vars:
       MY_GROUP_VAR:
         "my group env is {% raw %}${{ env.MY_GROUP_ENV }}{% endraw %}"
-    targets:
+    tasks:
       target1:
-        help: "target 1"
+        help: "task 1"
         env:
           MY_TARGET_ENV: 3
         args:
-          my-target-arg:
-            help: "target arg"
+          my-task-arg:
+            help: "task arg"
             type: string
             default: "{% raw %}${{ env.MY_TARGET_ENV }}{% endraw %}"
         vars:

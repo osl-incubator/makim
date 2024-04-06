@@ -1,8 +1,8 @@
 version: 1.0
 env-file: .env
 groups:
-  target-scope:
-    targets:
+  task-scope:
+    tasks:
       dep:
         help: dependency using xonsh
         run: |
@@ -11,9 +11,9 @@ groups:
 
       test:
         shell: bash
-        help: Test bash defined in the target scope
+        help: Test bash defined in the task scope
         dependencies:
-          - target: target-scope.dep
+          - task: task-scope.dep
         run: |
           export MAKIM_TEST=$(pwd)
           echo ${MAKIM_TEST}

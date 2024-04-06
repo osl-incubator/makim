@@ -3,7 +3,7 @@ working-directory: "/tmp"
 
 groups:
   check-wd:
-    targets:
+    tasks:
       is-tmp:
         help: Test if working directory is `tmp`
         run: |

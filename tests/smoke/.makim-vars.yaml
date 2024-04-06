@@ -31,16 +31,16 @@ groups:
         - vgroup1
         - vgroup2
         - vgroup3
-    targets:
-      vars-target:
+    tasks:
+      vars-task:
         help: Run semantic-release on CI
         vars:
-          target-var-str: "target"
-          target-var-dict:
+          task-var-str: "task"
+          task-var-dict:
             ktarget1: vtarget1
             ktarget2: vtarget2
             ktarget3: vtarget3
-          target-var-list:
+          task-var-list:
             - vtarget1
             - vtarget2
             - vtarget3
@@ -66,9 +66,9 @@ groups:
           assert "${{ vars.group_var_list[1] }}" == "vgroup2"
           assert "${{ vars.group_var_list[2] }}" == "vgroup3"
 
-          # target
-          assert "${{ vars.get("target-var-str") }}" == "target"
-          assert "${{ vars.target_var_str }}" == "target"
+          # task
+          assert "${{ vars.get("task-var-str") }}" == "task"
+          assert "${{ vars.target_var_str }}" == "task"
           assert "${{ vars.target_var_dict["ktarget1"] }}" == "vtarget1"
           assert "${{ vars.target_var_dict["ktarget2"] }}" == "vtarget2"
           assert "${{ vars.target_var_dict["ktarget3"] }}" == "vtarget3"

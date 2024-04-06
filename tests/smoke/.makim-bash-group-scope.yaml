@@ -3,7 +3,7 @@ env-file: .env
 groups:
   group-scope:
     shell: bash
-    targets:
+    tasks:
       test:
         help: Test bash defined in the group scope
         args:
@@ -12,13 +12,13 @@ groups:
             action: store_true
             help: Remove all files that are tracked by git
         dependencies:
-          - target: group-deps.dep
+          - task: group-deps.dep
         run: |
           export MAKIM_TEST=$(pwd)
           echo ${MAKIM_TEST}
 
   group-deps:
-    targets:
+    tasks:
       dep:
         help: dependency using xonsh
         run: |

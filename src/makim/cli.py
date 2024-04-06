@@ -263,7 +263,7 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
         The command arguments and options.
     """
     args_str = create_args_string(args)
-    args_param_list = [f'"target": "{name}"']
+    args_param_list = [f'"task": "{name}"']
 
     args_data = cast(Dict[str, str], args.get('args', {}))
 
@@ -342,7 +342,7 @@ def extract_root_config(
 
 def _get_command_from_cli() -> str:
     """
-    Get the group and target from CLI.
+    Get the group and task from CLI.
 
     This function is based on `CLI_ROOT_FLAGS_VALUES_COUNT`.
     """
@@ -387,15 +387,15 @@ def run_app() -> None:
         verbose=cast(bool, root_config.get('verbose', False)),
     )
 
-    # create targets data
+    # create tasks data
     # group_names = list(makim.global_data.get('groups', {}).keys())
-    targets: Dict[str, Any] = {}
+    tasks: Dict[str, Any] = {}
     for group_name, group_data in makim.global_data.get('groups', {}).items():
-        for target_name, target_data in group_data.get('targets', {}).items():
-            targets[f'{group_name}.{target_name}'] = target_data
+        for target_name, target_data in group_data.get('tasks', {}).items():
+            tasks[f'{group_name}.{target_name}'] = target_data
 
     # Add dynamically created commands to Typer app
-    for name, args in targets.items():
+    for name, args in tasks.items():
         create_dynamic_command(name, args)
     try:
         app()

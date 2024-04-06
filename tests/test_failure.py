@@ -12,14 +12,14 @@ from makim.logs import MakimError
 
 
 @pytest.mark.parametrize(
-    'target,args,error_code',
+    'task,args,error_code',
     [
         ('tests.test-7', {}, 1),
         ('tests.test-8', {}, MakimError.SH_ERROR_RETURN_CODE.value),
         ('tests.test-9', {}, MakimError.SH_ERROR_RETURN_CODE.value),
     ],
 )
-def test_failure(target, args, error_code):
+def test_failure(task, args, error_code):
     """Test makim with expected failures."""
     makim_file = Path(__file__).parent / 'smoke' / '.makim-unittest.yaml'
 
@@ -28,7 +28,7 @@ def test_failure(target, args, error_code):
 
     args.update(
         {
-            'target': target,
+            'task': task,
             'file': makim_file,
         }
     )

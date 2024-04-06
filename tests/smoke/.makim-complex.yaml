@@ -2,13 +2,13 @@ version: 1.0
 env-file: .env
 groups:
   default:
-    targets:
+    tasks:
       lint:
         help: Run linter tools
         run: echo "[II] Run linter"
 
   build:
-    targets:
+    tasks:
       clean-gcda:
         help: Remove temporary gcda files
         run: echo "[II] Remove gcda files"
@@ -16,7 +16,7 @@ groups:
       clean:
         help: Remove all unnecessary temporary files
         dependencies:
-          - target: build.clean-gcda
+          - task: build.clean-gcda
         run: echo "[II] Remove unnecessary files"
 
       install:
@@ -47,7 +47,7 @@ groups:
             type: string
             default: ""
         dependencies:
-          - target: build.clean
+          - task: build.clean
             if: ${{ args.clean }}
         run: |
           $ASAN_OPTIONS = '${{ args.asan_options }}'
@@ -63,7 +63,7 @@ groups:
             type: bool
             action: store_true
         dependencies:
-          - target: build.release
+          - task: build.release
             args:
               build-type: "debug"
               extra: "-Ddev=enabled -Db_coverage=true -Doptimization=0"
@@ -71,13 +71,13 @@ groups:
               asan-options: "fast_unwind_on_malloc=0"
 
   env:
-    targets:
+    tasks:
       create-file:
         help: Create a dot env file
         run: echo "[II] Create a dot env file"
 
   conda:
-    targets:
+    tasks:
       build:
         help: Create the conda package
         run: echo "[II] Create the conda package"
@@ -85,7 +85,7 @@ groups:
   release:
     vars:
       app: echo
-    targets:
+    tasks:
       ci:
         help: Run semantic-release on CI
         run: ${{ vars.app }} --ci
@@ -95,7 +95,7 @@ groups:
         run: ${{ vars.app }} --dry-run
 
   docs:
-    targets:
+    tasks:
       api:
         help: Build API docs
         run: echo "[II] Build API docs"
@@ -103,8 +103,8 @@ groups:
       build:
         help: Build the general docs pages
         dependencies:
-          - target: docs.clean
-          - target: docs.api
+          - task: docs.clean
+          - task: docs.api
         run: echo "[II] Build general docs"
 
       clean:
@@ -114,12 +114,12 @@ groups:
       preview:
         help: Preview documentation result locally
         dependencies:
-          - target: docs.clean
-          - target: docs.api
+          - task: docs.clean
+          - task: docs.api
         run: echo "[II] Preview documentation result locally"
 
   tests:
-    targets:
+    tasks:
       sanitizer:
         help: Run sanitizer tests
         run: echo "[II] Run sanitizer test"
@@ -143,24 +143,24 @@ groups:
       examples:
         help: Test all code generation for the example package files
         dependencies:
-          - target: tests.gen-object
-          - target: tests.gen-ast
-          - target: tests.gen-llvm-ir
+          - task: tests.gen-object
+          - task: tests.gen-ast
+          - task: tests.gen-llvm-ir
 
       all:
         help: Run sanitizer tests and code generation for examples
         dependencies:
-          - target: tests.sanitizer
-          - target: tests.examples
+          - task: tests.sanitizer
+          - task: tests.examples
 
   debug:
-    targets:
+    tasks:
       fibonacci:
         help: Debug package via an example file (fibonacci)
         run: echo "[II] Debug package via an example file"
 
   print:
-    targets:
+    tasks:
       local-env-vars:
         help: Print environment variables
         run: echo "[II] $CONDA_PREFIX"

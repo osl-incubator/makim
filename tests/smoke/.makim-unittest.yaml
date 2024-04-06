@@ -2,7 +2,7 @@ version: 1.0
 env-file: .env
 groups:
   tests:
-    targets:
+    tasks:
       test-1:
         help: test-1 args `all` should be false
         args:
@@ -28,7 +28,7 @@ groups:
       test-3-b:
         help: test-3-b
         dependencies:
-          - target: tests.test-3-a
+          - task: tests.test-3-a
         run: assert True
 
       test-4-dep:
@@ -48,7 +48,7 @@ groups:
             type: bool
             action: store_true
         dependencies:
-          - target: tests.test-4-dep
+          - task: tests.test-4-dep
             if: ${{ args.trigger_dep }}
             args:
               arg1: ${{ args.trigger_dep }}
@@ -66,7 +66,7 @@ groups:
             type: bool
             action: store_true
         dependencies:
-          - target: tests.test-5-dep
+          - task: tests.test-5-dep
             if: ${{ args.trigger_dep }}
         run: assert True
 
@@ -90,11 +90,11 @@ groups:
             type: bool
             action: store_true
         dependencies:
-          - target: tests.test-6-dep-1
+          - task: tests.test-6-dep-1
             if: ${{ True }}
-          - target: tests.test-6-dep-2
+          - task: tests.test-6-dep-2
             if: ${{ False }}
-          - target: tests.test-6-dep-3
+          - task: tests.test-6-dep-3
             if: ${{ True }}
         run: |
           cat /tmp/makim-test.txt | grep "OK"

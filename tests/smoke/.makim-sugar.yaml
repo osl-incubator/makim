@@ -2,7 +2,7 @@ version: 1.0
 env-file: .env
 groups:
   containers:
-    targets:
+    tasks:
       setup:
         help: build necessary docker image
         run: |
@@ -13,7 +13,7 @@ groups:
       run:
         help: test running a docker service using containers-sugar
         dependencies:
-          - target: containers.setup
+          - task: containers.setup
         shell: bash
         run: |
           sugar exec --service service1 --options -T --cmd python -c "print(1)"
