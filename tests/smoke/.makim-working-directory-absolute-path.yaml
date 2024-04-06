@@ -8,10 +8,10 @@ groups:
         help: Create necessary folders
         run: |
           mkdir -p /tmp/group1
-          mkdir -p /tmp/group1/target3
+          mkdir -p /tmp/group1/task3
           mkdir -p /tmp/group2
           mkdir -p /tmp/group2/task-relative
-          mkdir -p /tmp/group1/target4
+          mkdir -p /tmp/group1/task4
 
   group-no-path:
     tasks:
@@ -36,13 +36,13 @@ groups:
           echo "working-directory-absolute-path [II] Done!"
 
       task-relative:
-        working-directory: "/tmp/group1/target4"
+        working-directory: "/tmp/group1/task4"
         help: est global absolute path, group no path, task relative path
         dependencies:
           - task: setup.folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group1/target4"
+          assert os.getcwd() == "/tmp/group1/task4"
           echo "working-directory-absolute-path [III] Done!"
 
   group-relative:
@@ -68,13 +68,13 @@ groups:
           echo "working-directory-absolute-path [V] Done!"
 
       task-relative:
-        working-directory: "target3"
+        working-directory: "task3"
         help: Test global absolute path, group relative path, task relative path
         dependencies:
           - task: setup.folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group1/target3"
+          assert os.getcwd() == "/tmp/group1/task3"
           echo "working-directory-absolute-path [VI] Done!"
 
   group-absolute:

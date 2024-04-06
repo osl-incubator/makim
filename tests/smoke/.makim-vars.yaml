@@ -37,13 +37,13 @@ groups:
         vars:
           task-var-str: "task"
           task-var-dict:
-            ktarget1: vtarget1
-            ktarget2: vtarget2
-            ktarget3: vtarget3
+            ktask1: vtask1
+            ktask2: vtask2
+            ktask3: vtask3
           task-var-list:
-            - vtarget1
-            - vtarget2
-            - vtarget3
+            - vtask1
+            - vtask2
+            - vtask3
         run: |
           # global
           assert "${{ vars.get("global-var-str") }}" == "global"
@@ -68,10 +68,10 @@ groups:
 
           # task
           assert "${{ vars.get("task-var-str") }}" == "task"
-          assert "${{ vars.target_var_str }}" == "task"
-          assert "${{ vars.target_var_dict["ktarget1"] }}" == "vtarget1"
-          assert "${{ vars.target_var_dict["ktarget2"] }}" == "vtarget2"
-          assert "${{ vars.target_var_dict["ktarget3"] }}" == "vtarget3"
-          assert "${{ vars.target_var_list[0] }}" == "vtarget1"
-          assert "${{ vars.target_var_list[1] }}" == "vtarget2"
-          assert "${{ vars.target_var_list[2] }}" == "vtarget3"
+          assert "${{ vars.task_var_str }}" == "task"
+          assert "${{ vars.task_var_dict["ktask1"] }}" == "vtask1"
+          assert "${{ vars.task_var_dict["ktask2"] }}" == "vtask2"
+          assert "${{ vars.task_var_dict["ktask3"] }}" == "vtask3"
+          assert "${{ vars.task_var_list[0] }}" == "vtask1"
+          assert "${{ vars.task_var_list[1] }}" == "vtask2"
+          assert "${{ vars.task_var_list[2] }}" == "vtask3"

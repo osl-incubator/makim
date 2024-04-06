@@ -172,7 +172,7 @@ groups:
       shell-app:
         help: |
           Test makim with working-directory for global no-path and its various
-          combinations with group and target working-directory
+          combinations with group and task working-directory
         args:
           verbose-mode:
             help: Run the all the tests in verbose mode
@@ -227,11 +227,11 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE global-scope.test-var-env
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-scope.test-var-env-file
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-scope.test-var-env
-          makim $VERBOSE_FLAG --file $MAKIM_FILE target-scope.test-var-env-file
-          makim $VERBOSE_FLAG --file $MAKIM_FILE target-scope.test-var-env
+          makim $VERBOSE_FLAG --file $MAKIM_FILE task-scope.test-var-env-file
+          makim $VERBOSE_FLAG --file $MAKIM_FILE task-scope.test-var-env
           makim $VERBOSE_FLAG --file $MAKIM_FILE rerender-env.from-global
           makim $VERBOSE_FLAG --file $MAKIM_FILE rerender-env.from-group
-          makim $VERBOSE_FLAG --file $MAKIM_FILE rerender-env.from-target
+          makim $VERBOSE_FLAG --file $MAKIM_FILE rerender-env.from-task
 
       test-vars:
         help: Test makim using a vars makim file
@@ -245,7 +245,7 @@ groups:
         shell: bash
         run: |
           export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
-          makim $VERBOSE_FLAG --file $MAKIM_FILE vars-group.vars-target
+          makim $VERBOSE_FLAG --file $MAKIM_FILE vars-group.vars-task
 
       bash:
         help: Test makim shell attribute with bash
@@ -259,12 +259,12 @@ groups:
           export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file tests/smoke/.makim-bash-main-scope.yaml main-scope.test
           makim $VERBOSE_FLAG --file tests/smoke/.makim-bash-group-scope.yaml group-scope.test
-          makim $VERBOSE_FLAG --file tests/smoke/.makim-bash-target-scope.yaml target-scope.test
+          makim $VERBOSE_FLAG --file tests/smoke/.makim-bash-task-scope.yaml task-scope.test
 
       working-directory-absolute-path:
         help: |
           Test makim with working-directory absolute for global path and its various
-          combinations with group and target working-directory
+          combinations with group and task working-directory
         args:
           verbose-mode:
             help: Run the all the tests in verbose mode
@@ -277,20 +277,20 @@ groups:
           export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-no-path
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-absolute
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-relative
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-no-path
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-absolute
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-relative
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-no-path
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-absolute
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-relative
 
       working-directory-no-path:
         help: |
           Test makim with working-directory for global no-path and its
-          various combinations with group and target working-directory
+          various combinations with group and task working-directory
         args:
           verbose-mode:
             help: Run the all the tests in verbose mode
@@ -305,20 +305,20 @@ groups:
           cd /tmp
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-no-path
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-absolute
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-relative
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-no-path
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-absolute
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-relative
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-no-path
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-absolute
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-relative
 
       working-directory-relative-path:
         help: |
           Test makim with working-directory for global no-path and its various
-          combinations with group and target working-directory
+          combinations with group and task working-directory
         args:
           verbose-mode:
             help: Run the all the tests in verbose mode
@@ -334,15 +334,15 @@ groups:
           cd /tmp
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-no-path
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-absolute
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.target-relative
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-no-path
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-absolute
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.target-relative
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-no-path
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-absolute
-          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.target-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-relative
 
   error:
     help: This group helps tests failure tasks

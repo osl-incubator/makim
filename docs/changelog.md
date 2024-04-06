@@ -74,7 +74,7 @@
 
 ### Features
 
-* Add working-directory to the target, group and global scope ([#65](https://github.com/osl-incubator/makim/issues/65)) ([3fbd61e](https://github.com/osl-incubator/makim/commit/3fbd61efdefe22e29a53c8f0d46b6ef91bc55073))
+* Add working-directory to the task, group and global scope ([#65](https://github.com/osl-incubator/makim/issues/65)) ([3fbd61e](https://github.com/osl-incubator/makim/commit/3fbd61efdefe22e29a53c8f0d46b6ef91bc55073))
 
 ## [1.8.3](https://github.com/osl-incubator/makim/compare/1.8.2...1.8.3) (2023-08-15)
 
@@ -102,7 +102,7 @@
 
 ### Features
 
-* by default, for Xonsh shell, stop the target process if any command line fails ([#19](https://github.com/osl-incubator/makim/issues/19)) ([8fa4c1d](https://github.com/osl-incubator/makim/commit/8fa4c1ddb19af2ef215509feff2dd4055ca47561))
+* by default, for Xonsh shell, stop the task process if any command line fails ([#19](https://github.com/osl-incubator/makim/issues/19)) ([8fa4c1d](https://github.com/osl-incubator/makim/commit/8fa4c1ddb19af2ef215509feff2dd4055ca47561))
 
 ## [1.7.1](https://github.com/osl-incubator/makim/compare/1.7.0...1.7.1) (2023-05-19)
 
@@ -116,14 +116,14 @@
 
 ### Features
 
-* Increase coverage of the env and env-file options for global, group and target scope ([#39](https://github.com/osl-incubator/makim/issues/39)) ([2481221](https://github.com/osl-incubator/makim/commit/24812213cc91a25e9da1ae0afaebdef36bac896b))
+* Increase coverage of the env and env-file options for global, group and task scope ([#39](https://github.com/osl-incubator/makim/issues/39)) ([2481221](https://github.com/osl-incubator/makim/commit/24812213cc91a25e9da1ae0afaebdef36bac896b))
 
 ## [1.6.7](https://github.com/osl-incubator/makim/compare/1.6.6...1.6.7) (2023-04-22)
 
 
 ### Bug Fixes
 
-* Break bash target when any line fails ([#37](https://github.com/osl-incubator/makim/issues/37)) ([9dab0f4](https://github.com/osl-incubator/makim/commit/9dab0f497bb8f99051e924d8e0decf160f00972c))
+* Break bash task when any line fails ([#37](https://github.com/osl-incubator/makim/issues/37)) ([9dab0f4](https://github.com/osl-incubator/makim/commit/9dab0f497bb8f99051e924d8e0decf160f00972c))
 
 ## [1.6.6](https://github.com/osl-incubator/makim/compare/1.6.5...1.6.6) (2023-04-07)
 
@@ -214,7 +214,7 @@
 
 ### Features
 
-* Add support for variables for the target group ([#9](https://github.com/osl-incubator/makim/issues/9)) ([e3aa389](https://github.com/osl-incubator/makim/commit/e3aa389a07b7f5677328420f1389e84ed71bc7b3))
+* Add support for variables for the task group ([#9](https://github.com/osl-incubator/makim/issues/9)) ([e3aa389](https://github.com/osl-incubator/makim/commit/e3aa389a07b7f5677328420f1389e84ed71bc7b3))
 
 ## [1.0.2](https://github.com/osl-incubator/makim/compare/1.0.1...1.0.2) (2023-01-26)
 

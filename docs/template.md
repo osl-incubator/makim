@@ -17,7 +17,7 @@ following sections.
 
 Before delving into the different variable options, let's discuss `env` and
 `vars` scope, as it is essential for the subsequent sections. The `args`
-attribute just works in the _target_ scope.
+attribute just works in the _task_ scope.
 
 As mentioned earlier, **Makim** `env` and `vars` has three scopes: **global**,
 **group**, and **task**.
@@ -26,9 +26,9 @@ The order of their rendering is crucial. First, the _global_ scope is processed.
 In the _group_ scope, any variable defined globally is accessible via the `env`
 variable (e.g., `{% raw %}${{ env.my_global_env }}{% endraw %}`). However, any
 variable defined in the _global_ scope will be overridden by a variable with the
-same name in the _group_ scope. The same applies to the _target_ scope, where
-any variable defined in the _global_ or _group_ scope will be overridden by a
-variable defined in the _target_ scope.
+same name in the _group_ scope. The same applies to the _task_ scope, where any
+variable defined in the _global_ or _group_ scope will be overridden by a
+variable defined in the _task_ scope.
 
 Moreover, `env` is a bit more complex, as its value can be defined in two
 different ways: either through the `env` attribute in the `.makim.yaml` file or
@@ -66,7 +66,7 @@ variables.
 groups:
   group1:
     tasks:
-      target1:
+      task1:
         ...
         env:
           MYVAR: 1
@@ -109,7 +109,7 @@ groups:
       MY_GROUP_VAR:
         "my group env is {% raw %}${{ env.MY_GROUP_ENV }}{% endraw %}"
     tasks:
-      target1:
+      task1:
         help: "task 1"
         env:
           MY_TARGET_ENV: 3
@@ -128,5 +128,5 @@ groups:
           echo "{% raw %}${{ env.MY_GROUP_VAR}}{% endraw %}"
           echo "{% raw %}${{ env.MY_TARGET_ENV}}{% endraw %}"
           echo "{% raw %}${{ env.MY_TARGET_VAR}}{% endraw %}"
-          echo "{% raw %}${{ env.my_target_arg}}{% endraw %}"
+          echo "{% raw %}${{ env.my_task_arg}}{% endraw %}"
 ```

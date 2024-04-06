@@ -391,8 +391,8 @@ def run_app() -> None:
     # group_names = list(makim.global_data.get('groups', {}).keys())
     tasks: Dict[str, Any] = {}
     for group_name, group_data in makim.global_data.get('groups', {}).items():
-        for target_name, target_data in group_data.get('tasks', {}).items():
-            tasks[f'{group_name}.{target_name}'] = target_data
+        for task_name, task_data in group_data.get('tasks', {}).items():
+            tasks[f'{group_name}.{task_name}'] = task_data
 
     # Add dynamically created commands to Typer app
     for name, args in tasks.items():

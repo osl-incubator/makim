@@ -1,8 +1,8 @@
 # Get Started
 
-`MakIm` or just `makim` is based on `make` and focus on improve the way to
-define tasks and dependencies. Instead of using the `Makefile` format, it uses
-`yaml` format.
+`Makim` (or `makim`) is based on `make` and focus on improve the way to define
+tasks and dependencies. Instead of using the `Makefile` format, it uses `yaml`
+format.
 
 The idea of this project is to offer a way to define tasks and dependencies with
 some control options, like conditionals `if`.
