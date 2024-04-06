@@ -67,9 +67,9 @@ jobs:
           brew install gnu-sed
           echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bashrc
           echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bash_profile
-          gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-working-directory-absolute-path.yaml
-          gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-working-directory-no-path.yaml
-          gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-working-directory-relative-path.yaml
+          gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-dir-absolute-path.yaml
+          gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-dir-no-path.yaml
+          gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-dir-relative-path.yaml
 
       - name: Prepare conda environment (windows)
         if: ${{ matrix.os == 'windows' }}
@@ -126,14 +126,14 @@ jobs:
       - name: Run smoke test for variables
         run: makim smoke-tests.test-vars
 
-      - name: Run smoke test for working-directory-absolute-path
-        run: makim smoke-tests.working-directory-absolute-path
+      - name: Run smoke test for dir-absolute-path
+        run: makim smoke-tests.dir-absolute-path
 
-      - name: Run smoke test for working-directory-no-path
-        run: makim smoke-tests.working-directory-no-path
+      - name: Run smoke test for dir-no-path
+        run: makim smoke-tests.dir-no-path
 
-      - name: Run smoke test for working-directory-relative-path
-        run: makim smoke-tests.working-directory-relative-path
+      - name: Run smoke test for dir-relative-path
+        run: makim smoke-tests.dir-relative-path
 
       - name: Run unit tests
         run: makim tests.unittest

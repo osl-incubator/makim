@@ -256,17 +256,17 @@ class Makim:
 
         if scope_id >= SCOPE_GLOBAL:
             working_dir = update_working_directory(
-                working_dir, self.global_data.get('working-directory', '')
+                working_dir, self.global_data.get('dir', '')
             )
 
         if scope_id >= SCOPE_GROUP:
             working_dir = update_working_directory(
-                working_dir, self.group_data.get('working-directory', '')
+                working_dir, self.group_data.get('dir', '')
             )
 
         if scope_id == SCOPE_TARGET:
             working_dir = update_working_directory(
-                working_dir, self.task_data.get('working-directory', '')
+                working_dir, self.task_data.get('dir', '')
             )
 
         return working_dir
