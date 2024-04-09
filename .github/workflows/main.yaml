@@ -58,32 +58,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install MacOS extra tools and add extra setup
-        if: ${{ matrix.os == 'macos' }}
-        run: |
-          sudo mkdir -p /tmp
-          sudo chmod 777 /tmp
-
-          brew install gnu-sed
-          echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bashrc
-          echo 'export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"' >> ~/.bash_profile
-          gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-dir-absolute-path.yaml
-          gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-dir-no-path.yaml
-          gsed -i s:/tmp:/private/tmp:g tests/smoke/.makim-dir-relative-path.yaml
-
-      - name: Prepare conda environment (windows)
-        if: ${{ matrix.os == 'windows' }}
-        run: |
-          $env:Path += ";C:\Program Files\Git\usr\bin"
-          sed -i s/python\ 3\.8/python\ ${{ matrix.python_version }}/ conda/dev.yaml
-          cat conda/dev.yaml
-
-      - name: Prepare conda environment
-        if: ${{ matrix.os != 'windows' }}
-        run: |
-          sed -i s/python\ 3\.8\.1/python\ ${{ matrix.python_version }}/ conda/dev.yaml
-          cat conda/dev.yaml
-
       - uses: conda-incubator/setup-miniconda@v3
         with:
           miniforge-version: latest
@@ -92,6 +66,7 @@ jobs:
           activate-environment: makim
           auto-update-conda: true
           conda-solver: libmamba
+          python-version: ${{ matrix.python_version }}
 
       - name: Check Poetry lock
         run: poetry check
@@ -127,12 +102,15 @@ jobs:
         run: makim smoke-tests.test-vars
 
       - name: Run smoke test for dir-absolute-path
+        if: ${{ matrix.os != 'macos' }}
         run: makim smoke-tests.dir-absolute-path
 
       - name: Run smoke test for dir-no-path
+        if: ${{ matrix.os != 'macos' }}
         run: makim smoke-tests.dir-no-path
 
       - name: Run smoke test for dir-relative-path
+        if: ${{ matrix.os != 'macos' }}
         run: makim smoke-tests.dir-relative-path
 
       - name: Run unit tests

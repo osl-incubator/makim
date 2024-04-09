@@ -4,7 +4,7 @@ channels:
   - conda-forge
 dependencies:
   - bash
-  - python 3.8.1 # min version supported
+  - python
   - poetry >=1.5
   - nodejs
   - perl
