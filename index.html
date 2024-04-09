@@ -668,13 +668,13 @@
 
 
 <h1 id="get-started">Get Started<a class="headerlink" href="#get-started" title="Permanent link">&para;</a></h1>
-<p><code>MakIm</code> or just <code>makim</code> is based on <code>make</code> and focus on improve the way to
-define targets and dependencies. Instead of using the <code>Makefile</code> format, it uses
-<code>yaml</code> format.</p>
-<p>The idea of this project is to offer a way to define targets and dependencies
-with some control options, like conditionals <code>if</code>.</p>
+<p><code>Makim</code> (or <code>makim</code>) is based on <code>make</code> and focus on improve the way to define
+tasks and dependencies. Instead of using the <code>Makefile</code> format, it uses <code>yaml</code>
+format.</p>
+<p>The idea of this project is to offer a way to define tasks and dependencies with
+some control options, like conditionals <code>if</code>.</p>
 <p>It allows a very easy way to define texts for documentation and extra parameters
-for each target.</p>
+for each task.</p>
 <ul>
 <li>License: BSD 3 Clause</li>
 <li>Documentation: <a href="https://osl-incubator.github.io/makim">https://osl-incubator.github.io/makim</a></li>
@@ -682,14 +682,14 @@ for each target.</p>
 <h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Help text as first-class in the <code>.makim.yaml</code> specification. It can be used by
-  targets and arguments.</li>
-<li>Targets have an option for arguments.</li>
-<li>Targets have an option for dependencies.</li>
-<li>Dependencies can call a target with specific arguments.</li>
+  tasks and arguments.</li>
+<li>Tasks have an option for arguments.</li>
+<li>Tasks have an option for dependencies.</li>
+<li>Dependencies can call a task with specific arguments.</li>
 <li>Dependencies can have a conditional control flow (<code>if</code>).</li>
-<li>Allow the creation of groups, so the targets can be organized by topics.</li>
-<li>Targets and groups have an option for user defined variables and/or
-  environment variables.</li>
+<li>Allow the creation of groups, so the tasks can be organized by topics.</li>
+<li>Tasks and groups have an option for user defined variables and/or environment
+  variables.</li>
 <li>Access arguments, variables or environment variables via template (using
   Jinja2).</li>
 <li>Option for using dot environment files using <code>env-file</code> key.</li>
@@ -701,9 +701,9 @@ project. This is an example of a configuration file:</p>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">groups</span><span class="p">:</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">default</span><span class="p">:</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nt">env-file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">.env</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">tasks</span><span class="p">:</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">      </span><span class="nt">clean</span><span class="p">:</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Use this target to clean up temporary files</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Use this task to clean up temporary files</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">        </span><span class="nt">args</span><span class="p">:</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="w">          </span><span class="nt">all</span><span class="p">:</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bool</span>
@@ -719,7 +719,7 @@ project. This is an example of a configuration file:</p>
 <a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a><span class="w">            </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">store_true</span>
 <a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a><span class="w">            </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">if not set, the clean dependency will not be triggered.</span>
 <a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a><span class="w">        </span><span class="nt">dependencies</span><span class="p">:</span>
-<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">target</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clean</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clean</span>
 <a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a><span class="w">            </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ args.clean == true }}</span>
 <a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
 <a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a><span class="w">          </span><span class="no">echo &quot;build file x&quot;</span>
@@ -729,28 +729,28 @@ project. This is an example of a configuration file:</p>
 <p>Some examples of how to use it:</p>
 <ul>
 <li>
-<p>run the <code>build</code> target: <code>makim build</code></p>
+<p>run the <code>build</code> task: <code>makim build</code></p>
 </li>
 <li>
-<p>run the <code>clean</code> target: <code>makim clean</code></p>
+<p>run the <code>clean</code> task: <code>makim clean</code></p>
 </li>
 <li>
-<p>run the <code>build</code> target with the <code>clean</code> flag: <code>makim build --clean</code></p>
+<p>run the <code>build</code> task with the <code>clean</code> flag: <code>makim build --clean</code></p>
 </li>
 </ul>
 <p>The help menu for the <code>.makim.yaml</code> file would looks like this:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$ makim --help
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>usage: MakIm [--help] [--version] [--config-file MAKIM_FILE] [target]
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>usage: MakIm [--help] [--version] [--config-file MAKIM_FILE] [task]
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
 <a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>MakIm is a tool that helps you to organize and simplify your helper commands.
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>positional arguments:
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  target
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    Specify the target command to be performed. Options are:
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>  task
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    Specify the task command to be performed. Options are:
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
 <a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    default:
 <a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    --------
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>      default.clean =&gt; Use this target to clean up temporary files
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>      default.clean =&gt; Use this task to clean up temporary files
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>        ARGS:
 <a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>          --all: (bool) Remove all files that are tracked by git
 <a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>      default.build =&gt; Build the program

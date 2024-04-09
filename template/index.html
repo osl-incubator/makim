@@ -695,21 +695,21 @@ rather than covering all the possibilities with Jinja2.</p>
 <p><strong>Makim</strong> provides three different variable options that can be combined:
 <code>vars</code>, <code>env</code>, and <code>args</code>.</p>
 <p>Additionally, the <code>env</code> and <code>vars</code> option has three different scopes:
-<strong>global</strong>, <strong>group</strong>, and <strong>target</strong>. We will discuss each of them in the
+<strong>global</strong>, <strong>group</strong>, and <strong>task</strong>. We will discuss each of them in the
 following sections.</p>
 <h2 id="variables-scopes">Variables Scopes<a class="headerlink" href="#variables-scopes" title="Permanent link">&para;</a></h2>
 <p>Before delving into the different variable options, let's discuss <code>env</code> and
 <code>vars</code> scope, as it is essential for the subsequent sections. The <code>args</code>
-attribute just works in the <em>target</em> scope.</p>
+attribute just works in the <em>task</em> scope.</p>
 <p>As mentioned earlier, <strong>Makim</strong> <code>env</code> and <code>vars</code> has three scopes: <strong>global</strong>,
-<strong>group</strong>, and <strong>target</strong>.</p>
+<strong>group</strong>, and <strong>task</strong>.</p>
 <p>The order of their rendering is crucial. First, the <em>global</em> scope is processed.
 In the <em>group</em> scope, any variable defined globally is accessible via the <code>env</code>
 variable (e.g., <code>${{ env.my_global_env }}</code>). However, any
 variable defined in the <em>global</em> scope will be overridden by a variable with the
-same name in the <em>group</em> scope. The same applies to the <em>target</em> scope, where
-any variable defined in the <em>global</em> or <em>group</em> scope will be overridden by a
-variable defined in the <em>target</em> scope.</p>
+same name in the <em>group</em> scope. The same applies to the <em>task</em> scope, where any
+variable defined in the <em>global</em> or <em>group</em> scope will be overridden by a
+variable defined in the <em>task</em> scope.</p>
 <p>Moreover, <code>env</code> is a bit more complex, as its value can be defined in two
 different ways: either through the <code>env</code> attribute in the <code>.makim.yaml</code> file or
 from an environment file specified in the <code>env-file</code> attribute. First, the
@@ -724,8 +724,8 @@ variables.</p>
 <code>vars</code>, and <code>args</code>.</p>
 <ul>
 <li><code>args</code> allows users to pass parameters via the CLI (command line interface).
-  It can also be used for target dependencies when parameters need to be passed
-  to the dependency. However, this option is not available in the system context
+  It can also be used for task dependencies when parameters need to be passed to
+  the dependency. However, this option is not available in the system context
   (the commands executed defined by <code>run</code> attribute), it is only accessible
   within the Makim config file.</li>
 <li><code>vars</code> is a convenient way to define reusable variables in the code. For
@@ -741,8 +741,8 @@ variables.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nn">...</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="nt">groups</span><span class="p">:</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">  </span><span class="nt">group1</span><span class="p">:</span>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">      </span><span class="nt">target1</span><span class="p">:</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">    </span><span class="nt">tasks</span><span class="p">:</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">      </span><span class="nt">task1</span><span class="p">:</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">...</span>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="w">        </span><span class="l l-Scalar l-Scalar-Plain">env</span><span class="p p-Indicator">:</span>
 <a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="w">          </span><span class="nt">MYVAR</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
@@ -777,14 +777,14 @@ options of variables, respecting the scopes and rendering order:</p>
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="nt">vars</span><span class="p">:</span>
 <a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="w">      </span><span class="nt">MY_GROUP_VAR</span><span class="p">:</span>
 <a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">        </span><span class="s">&quot;my</span><span class="nv"> </span><span class="s">group</span><span class="nv"> </span><span class="s">env</span><span class="nv"> </span><span class="s">is</span><span class="nv"> </span><span class="s">${{</span><span class="nv"> </span><span class="s">env.MY_GROUP_ENV</span><span class="nv"> </span><span class="s">}}&quot;</span>
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">    </span><span class="nt">targets</span><span class="p">:</span>
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">      </span><span class="nt">target1</span><span class="p">:</span>
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">        </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;target</span><span class="nv"> </span><span class="s">1&quot;</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">    </span><span class="nt">tasks</span><span class="p">:</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">      </span><span class="nt">task1</span><span class="p">:</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">        </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;task</span><span class="nv"> </span><span class="s">1&quot;</span>
 <a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="w">        </span><span class="nt">env</span><span class="p">:</span>
 <a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">          </span><span class="nt">MY_TARGET_ENV</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
 <a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="w">        </span><span class="nt">args</span><span class="p">:</span>
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">          </span><span class="nt">my-target-arg</span><span class="p">:</span>
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">            </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;target</span><span class="nv"> </span><span class="s">arg&quot;</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="w">          </span><span class="nt">my-task-arg</span><span class="p">:</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="w">            </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;task</span><span class="nv"> </span><span class="s">arg&quot;</span>
 <a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="w">            </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
 <a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="w">            </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;${{</span><span class="nv"> </span><span class="s">env.MY_TARGET_ENV</span><span class="nv"> </span><span class="s">}}&quot;</span>
 <a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="w">        </span><span class="nt">vars</span><span class="p">:</span>
@@ -797,7 +797,7 @@ options of variables, respecting the scopes and rendering order:</p>
 <a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a><span class="w">          </span><span class="no">echo &quot;${{ env.MY_GROUP_VAR}}&quot;</span>
 <a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a><span class="w">          </span><span class="no">echo &quot;${{ env.MY_TARGET_ENV}}&quot;</span>
 <a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a><span class="w">          </span><span class="no">echo &quot;${{ env.MY_TARGET_VAR}}&quot;</span>
-<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a><span class="w">          </span><span class="no">echo &quot;${{ env.my_target_arg}}&quot;</span>
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a><span class="w">          </span><span class="no">echo &quot;${{ env.my_task_arg}}&quot;</span>
 </code></pre></div>
 
 
