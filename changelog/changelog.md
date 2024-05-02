@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.15.1](https://github.com/osl-incubator/makim/compare/1.15.0...1.15.1) (2024-05-02)
+
+
+### Bug Fixes
+
+* Fix issues with python version on CI ([#107](https://github.com/osl-incubator/makim/issues/107)) ([35fd405](https://github.com/osl-incubator/makim/commit/35fd405fd1406f5396d25f3f2629a72da8741cc5))
+
 # [1.15.0](https://github.com/osl-incubator/makim/compare/1.14.0...1.15.0) (2024-04-04)
 
 
