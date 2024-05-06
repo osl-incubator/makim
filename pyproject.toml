@@ -32,11 +32,11 @@ python-dotenv = ">=0.21.1"
 typer = ">=0.9.0"
 fuzzywuzzy = ">=0.18.0"
 python-levenshtein = ">=0.23.0"
-rich = ">=13.7.0"
+rich = ">=10.11.0"
 shellingham = ">=1.5.4"
 
 [tool.poetry.group.dev.dependencies]
-containers-sugar = "1.11.1"
+containers-sugar = ">=1.11.1"
 pytest = ">=7"
 pre-commit = ">=3"
 mypy = ">=1"
