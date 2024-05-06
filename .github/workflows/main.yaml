@@ -29,7 +29,6 @@ jobs:
           pr_sha: ${{ github.event.pull_request.head.sha }}
 
   tests:
-    needs: check-branch
     strategy:
       matrix:
         python_version:
@@ -64,7 +63,7 @@ jobs:
           activate-environment: makim
           auto-update-conda: true
           conda-solver: libmamba
-          python-version: ${{ matrix.python_version }}
+          python-version: "${{ matrix.python_version }}"
 
       - name: Check Poetry lock
         run: poetry check
@@ -125,7 +124,6 @@ jobs:
         uses: mxschmitt/action-tmate@v3
 
   linter-and-docs:
-    needs: check-branch
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
