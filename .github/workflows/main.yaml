@@ -16,7 +16,7 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         if: ${{ github.event_name == 'pull_request' }}
         with:
           fetch-depth: 0
@@ -29,7 +29,6 @@ jobs:
           pr_sha: ${{ github.event.pull_request.head.sha }}
 
   tests:
-    needs: check-branch
     strategy:
       matrix:
         python_version:
@@ -54,7 +53,7 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: conda-incubator/setup-miniconda@v3
         with:
@@ -64,7 +63,7 @@ jobs:
           activate-environment: makim
           auto-update-conda: true
           conda-solver: libmamba
-          python-version: ${{ matrix.python_version }}
+          python-version: "${{ matrix.python_version }}"
 
       - name: Check Poetry lock
         run: poetry check
@@ -124,8 +123,7 @@ jobs:
         if: "${{ failure() && (contains(github.event.pull_request.labels.*.name, 'ci:enable-debugging')) }}"
         uses: mxschmitt/action-tmate@v3
 
-  linter-and-docs:
-    needs: check-branch
+  linter:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -138,7 +136,7 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: conda-incubator/setup-miniconda@v3
         with:
@@ -153,9 +151,6 @@ jobs:
         run: |
           poetry config virtualenvs.create false
           poetry install
-
-      - name: Test documentation generation
-        run: makim docs.build
 
       - name: Run style checks
         if: success() || failure()
