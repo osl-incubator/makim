@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.15.2](https://github.com/osl-incubator/makim/compare/1.15.1...1.15.2) (2024-05-07)
+
+
+### Bug Fixes
+
+* Change rich lower bound pin to >=10.11.0 ([#108](https://github.com/osl-incubator/makim/issues/108)) ([d533213](https://github.com/osl-incubator/makim/commit/d53321347541184eb877c18d1d446c59e8900305))
+
 ## [1.15.1](https://github.com/osl-incubator/makim/compare/1.15.0...1.15.1) (2024-05-02)
 
 
