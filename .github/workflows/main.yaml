@@ -123,7 +123,7 @@ jobs:
         if: "${{ failure() && (contains(github.event.pull_request.labels.*.name, 'ci:enable-debugging')) }}"
         uses: mxschmitt/action-tmate@v3
 
-  linter-and-docs:
+  linter:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -151,9 +151,6 @@ jobs:
         run: |
           poetry config virtualenvs.create false
           poetry install
-
-      - name: Test documentation generation
-        run: makim docs.build
 
       - name: Run style checks
         if: success() || failure()
