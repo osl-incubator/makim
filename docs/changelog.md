@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.16.0](https://github.com/osl-incubator/makim/compare/1.15.2...1.16.0) (2024-07-24)
+
+
+### Features
+
+* **help:** Organize tasks by group inside the help menu ([#109](https://github.com/osl-incubator/makim/issues/109)) ([2cd746c](https://github.com/osl-incubator/makim/commit/2cd746c3a57fb0de0333d94c61063aca95f12967))
+
 ## [1.15.2](https://github.com/osl-incubator/makim/compare/1.15.1...1.15.2) (2024-05-07)
 
 
