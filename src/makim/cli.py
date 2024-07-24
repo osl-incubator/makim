@@ -272,7 +272,13 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
         args_param_list.append(f'"--{arg}": {arg_clean}')
 
     args_param_str = '{' + ','.join(args_param_list) + '}'
-    decorator = app.command(name, help=args.get('help', ''))
+    group_name = name.split('.')[0]
+
+    decorator = app.command(
+        name,
+        help=args.get('help', ''),
+        rich_help_panel=group_name,
+    )
 
     function_code = (
         f'def dynamic_command({args_str}):\n'
