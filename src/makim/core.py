@@ -123,7 +123,7 @@ class Makim:
         self.dry_run = False
         self.verbose = False
         self.shell_app = sh.xonsh
-        self.shell_args: List[str] = []
+        self.shell_args: list[str] = []
         self.tmp_suffix: str = '.makim'
 
     def _call_shell_app(self, cmd):
