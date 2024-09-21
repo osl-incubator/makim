@@ -172,7 +172,7 @@ def create_args_string(args: Dict[str, str]) -> str:
     args_rendered = []
 
     arg_template = (
-        '{arg_name}: {arg_type} = typer.Option('
+        '{arg_name}: Optional[{arg_type}] = typer.Option('
         '{default_value}, '
         '"--{name_flag}", '
         'help="{help_text}"'
@@ -184,9 +184,11 @@ def create_args_string(args: Dict[str, str]) -> str:
         name_clean = name.replace('-', '_')
         arg_type = normalize_string_type(spec.get('type', 'str'))
         help_text = spec.get('help', '')
-        default_value = '...'
+        default_value = 'None'
 
-        if not spec.get('required', False):
+        if not spec.get('required', False) and not spec.get(
+            'interactive', False
+        ):
             default_value = spec.get('default', '')
             default_value = get_default_value_str(arg_type, default_value)
 
@@ -206,7 +208,7 @@ def create_args_string(args: Dict[str, str]) -> str:
 
 
 def apply_click_options(
-    command_function: Callable, options: Dict[str, str]
+    command_function: Callable, options: Dict[str, Any]
 ) -> Callable:
     """
     Apply Click options to a Typer command function.
@@ -235,7 +237,9 @@ def apply_click_options(
 
         opt_args.update(
             {
-                'default': opt_default,
+                'default': None
+                if opt_data.get('interactive', False)
+                else opt_default,
                 'type': map_type_from_string(opt_type_str),
                 'help': opt_data.get('help', ''),
                 'show_default': True,
@@ -265,9 +269,9 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
     args_str = create_args_string(args)
     args_param_list = [f'"task": "{name}"']
 
-    args_data = cast(Dict[str, str], args.get('args', {}))
+    args_data = cast(Dict[str, Dict[str, str]], args.get('args', {}))
 
-    for arg in list(args_data.keys()):
+    for arg, arg_details in args_data.items():
         arg_clean = arg.replace('-', '_')
         args_param_list.append(f'"--{arg}": {arg_clean}')
 
@@ -280,24 +284,24 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
         rich_help_panel=group_name,
     )
 
-    function_code = (
-        f'def dynamic_command({args_str}):\n'
-        f'    makim.run({args_param_str})\n'
-        '\n'
-    )
+    function_code = f'def dynamic_command({args_str}):\n'
+
+    # handle interactive prompts
+    for arg, arg_details in args_data.items():
+        arg_clean = arg.replace('-', '_')
+        if arg_details.get('interactive', False):
+            function_code += f'    if {arg_clean} is None:\n'
+            function_code += f"        {arg_clean} = input('{arg}: ')\n"
+
+    function_code += f'    makim.run({args_param_str})\n'
 
     local_vars: Dict[str, Any] = {}
-    try:
-        exec(function_code, globals(), local_vars)
-    except Exception as e:
-        # breakpoint()
-        print(e)
-        print(function_code)
+    exec(function_code, globals(), local_vars)
     dynamic_command = decorator(local_vars['dynamic_command'])
 
     # Apply Click options to the Typer command
     if 'args' in args:
-        options_data = cast(Dict[str, str], args.get('args', {}))
+        options_data = cast(Dict[str, Dict[str, Any]], args.get('args', {}))
         dynamic_command = apply_click_options(dynamic_command, options_data)
 
 

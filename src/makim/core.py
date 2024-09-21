@@ -123,7 +123,7 @@ class Makim:
         self.dry_run = False
         self.verbose = False
         self.shell_app = sh.xonsh
-        self.shell_args: list[str] = []
+        self.shell_args: List[str] = []
         self.tmp_suffix: str = '.makim'
 
     def _call_shell_app(self, cmd):
@@ -541,7 +541,7 @@ class Makim:
             args_input[k_clean] = default
 
             input_flag = f'--{k}'
-            if args.get(input_flag):
+            if args.get(input_flag) is not None:
                 if action == 'store_true':
                     args_input[k_clean] = (
                         True if args[input_flag] is None else args[input_flag]
