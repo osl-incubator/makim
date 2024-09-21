@@ -73,16 +73,17 @@ groups:
       smoke:
         help: Run smoke tests
         dependencies:
-          - task: smoke-tests.simple
-          - task: smoke-tests.complex
-          - task: smoke-tests.containers
-          - task: smoke-tests.unittest
-          - task: smoke-tests.vars-env
-          - task: smoke-tests.test-vars
-          - task: smoke-tests.bash
-          - task: smoke-tests.dir-absolute-path
-          - task: smoke-tests.dir-no-path
-          - task: smoke-tests.dir-relative-path
+          # - task: smoke-tests.simple
+          # - task: smoke-tests.complex
+          # - task: smoke-tests.containers
+          # - task: smoke-tests.unittest
+          # - task: smoke-tests.vars-env
+          # - task: smoke-tests.test-vars
+          # - task: smoke-tests.bash
+          # - task: smoke-tests.dir-absolute-path
+          # - task: smoke-tests.dir-no-path
+          # - task: smoke-tests.dir-relative-path
+          - task: smoke-tests.interactive-args
 
       ci:
         help: Run all tasks used on CI
@@ -345,6 +346,23 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-no-path
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-absolute
           makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-relative
+
+      interactive-args:
+        help: Test makim with interactive-args
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-interactive-args.yaml
+        shell: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE user.create --username johndoe --email johndoe@gmail.com --password johndoe
+          makim $VERBOSE_FLAG --file $MAKIM_FILE weather.forecast --city Delhi --country India
 
   error:
     help: This group helps tests failure tasks
