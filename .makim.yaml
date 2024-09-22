@@ -73,16 +73,16 @@ groups:
       smoke:
         help: Run smoke tests
         dependencies:
-          # - task: smoke-tests.simple
-          # - task: smoke-tests.complex
-          # - task: smoke-tests.containers
-          # - task: smoke-tests.unittest
-          # - task: smoke-tests.vars-env
-          # - task: smoke-tests.test-vars
-          # - task: smoke-tests.bash
-          # - task: smoke-tests.dir-absolute-path
-          # - task: smoke-tests.dir-no-path
-          # - task: smoke-tests.dir-relative-path
+          - task: smoke-tests.simple
+          - task: smoke-tests.complex
+          - task: smoke-tests.containers
+          - task: smoke-tests.unittest
+          - task: smoke-tests.vars-env
+          - task: smoke-tests.test-vars
+          - task: smoke-tests.bash
+          - task: smoke-tests.dir-absolute-path
+          - task: smoke-tests.dir-no-path
+          - task: smoke-tests.dir-relative-path
           - task: smoke-tests.interactive-args
 
       ci:
