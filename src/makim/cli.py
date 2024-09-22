@@ -417,7 +417,7 @@ def run_app() -> None:
         suggestion = suggest_command(command_used, available_cmds)
 
         typer.secho(
-            f"Command {command_used} not found. Did you mean {suggestion}'?",
+            f"Command {command_used} not found. Did you mean '{suggestion}'?",
             fg='red',
         )
 
