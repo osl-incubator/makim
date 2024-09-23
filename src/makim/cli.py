@@ -291,7 +291,7 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
         arg_clean = arg.replace('-', '_')
         if arg_details.get('interactive', False):
             function_code += f'    if {arg_clean} is None:\n'
-            function_code += f"        {arg_clean} = input('{arg}: ')\n"
+            function_code += f"        {arg_clean} = click.prompt('{arg}')\n"
 
     function_code += f'    makim.run({args_param_str})\n'
 
