@@ -2,7 +2,7 @@ version: 1.0
 env-file: .env
 groups:
   group-scope:
-    shell: bash
+    backend: bash
     tasks:
       test:
         help: Test bash defined in the group scope

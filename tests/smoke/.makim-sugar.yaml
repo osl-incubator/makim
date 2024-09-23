@@ -14,7 +14,7 @@ groups:
         help: test running a docker service using containers-sugar
         dependencies:
           - task: containers.setup
-        shell: bash
+        backend: bash
         run: |
           sugar exec --service service1 --options -T --cmd python -c "print(1)"
           sugar stop --all

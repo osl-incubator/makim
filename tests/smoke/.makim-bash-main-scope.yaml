@@ -1,6 +1,6 @@
 version: 1.0
 env-file: .env
-shell: bash
+backend: bash
 groups:
   main-scope:
     tasks:
