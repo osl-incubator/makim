@@ -364,6 +364,14 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE user.create --username johndoe --email johndoe@gmail.com --password johndoe
           makim $VERBOSE_FLAG --file $MAKIM_FILE weather.forecast --city Delhi --country India
 
+          RESULT=$(echo mycity | makim $VERBOSE_FLAG --file $MAKIM_FILE weather.forecast --country mycountry)
+          STRING_VALIDATION="Fetching weather forecast for mycity, mycountry..."
+          # Check if RESULT contains SUBSTRING
+          if [[ "$RESULT" != *"$STRING_VALIDATION"* ]]; then
+              echo "STRING_VALIDATION not found in RESULT."
+              exit 1
+          fi
+
   error:
     help: This group helps tests failure tasks
     tasks:
