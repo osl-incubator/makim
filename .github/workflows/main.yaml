@@ -46,7 +46,7 @@ jobs:
 
     defaults:
       run:
-        backend: bash -l {0}
+        shell: bash -l {0}
 
     concurrency:
       group: ci-tests-${{ matrix.os }}-${{ matrix.python_version }}-${{ github.ref }}
@@ -129,7 +129,7 @@ jobs:
 
     defaults:
       run:
-        backend: bash -l {0}
+        shell: bash -l {0}
 
     concurrency:
       group: ci-linter-docs-${{ matrix.os }}-${{ matrix.python_version }}-${{ github.ref }}

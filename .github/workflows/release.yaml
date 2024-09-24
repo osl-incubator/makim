@@ -17,7 +17,7 @@ jobs:
 
     defaults:
       run:
-        backend: bash -l {0}
+        shell: bash -l {0}
 
     steps:
       - uses: actions/checkout@v4
