@@ -541,7 +541,7 @@ class Makim:
             args_input[k_clean] = default
 
             input_flag = f'--{k}'
-            if args.get(input_flag):
+            if args.get(input_flag) is not None:
                 if action == 'store_true':
                     args_input[k_clean] = (
                         True if args[input_flag] is None else args[input_flag]
