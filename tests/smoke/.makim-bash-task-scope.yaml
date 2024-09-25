@@ -10,7 +10,7 @@ groups:
           print(os.getcwd())
 
       test:
-        shell: bash
+        backend: bash
         help: Test bash defined in the task scope
         dependencies:
           - task: task-scope.dep

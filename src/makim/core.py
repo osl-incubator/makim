@@ -275,7 +275,7 @@ class Makim:
         self, scoped_config: dict[str, Any]
     ) -> AppConfigType:
         """Extract the shell app configuration from the scoped config data."""
-        shell_app_data: AppConfigType = scoped_config.get('shell', {})
+        shell_app_data: AppConfigType = scoped_config.get('backend', {})
 
         if not shell_app_data:
             return {}

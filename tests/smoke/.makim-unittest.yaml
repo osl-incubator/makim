@@ -111,12 +111,12 @@ groups:
 
       test-8:
         help: failure test in 1 line
-        shell: bash
+        backend: bash
         run: "false"
 
       test-9:
         help: failure test in the first line of 2 lines
-        shell: bash
+        backend: bash
         run: |
           false
           true

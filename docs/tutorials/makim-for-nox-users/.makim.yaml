@@ -5,7 +5,7 @@ groups:
     tasks:
       tests:
         help: Run nox tests
-        shell: nox
+        backend: nox
         run: |
           import nox
 
@@ -16,7 +16,7 @@ groups:
               session.run("pytest", "--version")
       lint:
         help: Run nox tests
-        shell: nox
+        backend: nox
         run: |
           import nox
 

@@ -5,12 +5,12 @@ groups:
     tasks:
       node:
         help: Test using nodejs
-        shell: node
+        backend: node
         run: console.log("Hello, World!");
 
       nox:
         help: Test using nox
-        shell:
+        backend:
           app: nox
           args: ["--noxfile"]
           suffix: .nox.py
@@ -24,27 +24,27 @@ groups:
 
       perl:
         help: Test using perl
-        shell: perl
+        backend: perl
         run: print "Hello, World!\n";
 
       php:
         help: Test using php
-        shell: php
+        backend: php
         run: print "Hello, World!\n";
 
       python:
         help: Test using php
-        shell: python
+        backend: python
         run: print("Hello, World!")
 
       r:
         help: Test using R
-        shell: Rscript
+        backend: Rscript
         run: print("Hello World!")
 
       sh:
         help: Test using sh
-        shell: sh
+        backend: sh
         run: echo "Hello, World!"
 
       all:
