@@ -1,0 +1,40 @@
+version: 1.0
+
+groups:
+  setup:
+    tasks:
+      check_dependencies:
+        help: Check if all required dependencies are installed
+        run: |
+          echo "Checking dependencies..."
+          echo "All dependencies are installed."
+
+      prepare_workspace:
+        help: Prepare the workspace for build
+        run: |
+          echo "Preparing workspace..."
+          echo "Workspace is ready."
+
+      deploy:
+        help: Deploy the project
+        run: |
+          echo "Project is deployed."
+
+  build:
+    tasks:
+      compile:
+        help: Compile the project
+        hooks:
+          pre-run:
+            - task: setup.check_dependencies
+              if: ${{ 1 == 1 }}
+            - task: setup.prepare_workspace
+              if: ${{ 1 == 2 }}
+
+          post-run:
+            - task: setup.deploy
+              if: ${{ 1 == 1 }}
+
+        run: |
+          echo "Compiling the project..."
+          echo "Project compiled successfully."
