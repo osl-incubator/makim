@@ -446,7 +446,6 @@ class Makim:
             )
 
     # run commands
-
     def _run_hooks(self, args: dict, hook_type: str):
         if not self.task_data.get('hooks', {}).get(hook_type):
             return
@@ -471,20 +470,6 @@ class Makim:
             )
 
         for hook_data in self.task_data['hooks'][hook_type]:
-            # checking for the conditional statement
-            if_stmt = hook_data.get('if')
-            if if_stmt:
-                result = TEMPLATE.from_string(str(if_stmt)).render(
-                    args=original_args_clean, env=self.env_scoped
-                )
-                if not yaml.safe_load(result):
-                    if self.verbose:
-                        MakimLogs.print_info(
-                            f'[II] Skipping {hook_type} hook: '
-                            f'{hook_data.get("task")}'
-                        )
-                    continue
-
             env, variables = makim_hook._load_scoped_data('task')
             for k, v in env.items():
                 os.environ[k] = v
@@ -508,6 +493,20 @@ class Makim:
 
             args_hook['task'] = hook_data['task']
             args_hook.update(args_hook_original)
+
+            # checking for the conditional statement
+            if_stmt = hook_data.get('if')
+            if if_stmt:
+                result = TEMPLATE.from_string(str(if_stmt)).render(
+                    args=original_args_clean, env=self.env_scoped
+                )
+                if not yaml.safe_load(result):
+                    if self.verbose:
+                        MakimLogs.print_info(
+                            f'[II] Skipping {hook_type} hook: '
+                            f'{hook_data.get("task")}'
+                        )
+                    continue
 
             makim_hook.run(deepcopy(args_hook))
 
@@ -620,3 +619,4 @@ class Makim:
 
         self._run_hooks(args, 'pre-run')
         self._run_command(args)
+        self._run_hooks(args, 'post-run')
