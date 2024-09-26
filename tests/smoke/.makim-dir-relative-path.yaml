@@ -16,8 +16,9 @@ groups:
     tasks:
       task-no-path:
         help: Test global relative path, group no-path, task no-path
-        dependencies:
-          - task: setup.create-folders
+        hooks:
+          pre-run:
+            - task: setup.create-folders
         run: |
           import os
           print(os.getcwd())
@@ -27,8 +28,9 @@ groups:
       task-absolute:
         dir: "/tmp/global-relative/task1"
         help: Test global relative path, group no-path, task absolute path
-        dependencies:
-          - task: setup.create-folders
+        hooks:
+          pre-run:
+            - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/task1"
@@ -37,8 +39,9 @@ groups:
       task-relative:
         dir: "task2"
         help: Test global relative path, group no-path, task relative path
-        dependencies:
-          - task: setup.create-folders
+        hooks:
+          pre-run:
+            - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/task2"
@@ -49,8 +52,9 @@ groups:
     tasks:
       task-no-path:
         help: Test global relative path, group absolute path, task no-path
-        dependencies:
-          - task: setup.create-folders
+        hooks:
+          pre-run:
+            - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/group-absolute"
@@ -60,8 +64,9 @@ groups:
         dir: "/tmp/global-relative/task2"
         help: |
           Test global relative path, group absolute path, task absolute path
-        dependencies:
-          - task: setup.create-folders
+        hooks:
+          pre-run:
+            - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/task2"
@@ -71,8 +76,9 @@ groups:
         dir: "task1"
         help: |
           Test global relative path, group absolute path, task relative path
-        dependencies:
-          - task: setup.create-folders
+        hooks:
+          pre-run:
+            - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/group-absolute/task1"
@@ -83,8 +89,9 @@ groups:
     tasks:
       task-no-path:
         help: Test global relative path, group relative path, task no-path
-        dependencies:
-          - task: setup.create-folders
+        hooks:
+          pre-run:
+            - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/group-relative"
@@ -94,8 +101,9 @@ groups:
         dir: "/tmp/global-relative/task2"
         help: |
           Test global relative path, group absolute path, task absolute path
-        dependencies:
-          - task: setup.create-folders
+        hooks:
+          pre-run:
+            - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/task2"
@@ -105,8 +113,9 @@ groups:
         dir: "task1"
         help: |
           Test global relative path, group absolute path, task relative path
-        dependencies:
-          - task: setup.create-folders
+        hooks:
+          pre-run:
+            - task: setup.create-folders
         run: |
           import os
           assert os.getcwd() == "/tmp/global-relative/group-relative/task1"

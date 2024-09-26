@@ -27,8 +27,9 @@ groups:
 
       test-3-b:
         help: test-3-b
-        dependencies:
-          - task: tests.test-3-a
+        hooks:
+          pre-run:
+            - task: tests.test-3-a
         run: assert True
 
       test-4-dep:
@@ -47,11 +48,12 @@ groups:
             help: Help trigger-dep
             type: bool
             action: store_true
-        dependencies:
-          - task: tests.test-4-dep
-            if: ${{ args.trigger_dep }}
-            args:
-              arg1: ${{ args.trigger_dep }}
+        hooks:
+          pre-run:
+            - task: tests.test-4-dep
+              if: ${{ args.trigger_dep }}
+              args:
+                arg1: ${{ args.trigger_dep }}
         run: "true"
 
       test-5-dep:
@@ -65,9 +67,10 @@ groups:
             help: Help trigger-dep
             type: bool
             action: store_true
-        dependencies:
-          - task: tests.test-5-dep
-            if: ${{ args.trigger_dep }}
+        hooks:
+          pre-run:
+            - task: tests.test-5-dep
+              if: ${{ args.trigger_dep }}
         run: assert True
 
       test-6-dep-1:
@@ -89,13 +92,14 @@ groups:
             help: Help trigger-dep
             type: bool
             action: store_true
-        dependencies:
-          - task: tests.test-6-dep-1
-            if: ${{ True }}
-          - task: tests.test-6-dep-2
-            if: ${{ False }}
-          - task: tests.test-6-dep-3
-            if: ${{ True }}
+        hooks:
+          pre-run:
+            - task: tests.test-6-dep-1
+              if: ${{ True }}
+            - task: tests.test-6-dep-2
+              if: ${{ False }}
+            - task: tests.test-6-dep-3
+              if: ${{ True }}
         run: |
           cat /tmp/makim-test.txt | grep "OK"
           rm -f /tmp/makim-test.txt

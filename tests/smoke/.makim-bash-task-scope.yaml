@@ -12,8 +12,9 @@ groups:
       test:
         backend: bash
         help: Test bash defined in the task scope
-        dependencies:
-          - task: task-scope.dep
+        hooks:
+          pre-run:
+            - task: task-scope.dep
         run: |
           export MAKIM_TEST=$(pwd)
           echo ${MAKIM_TEST}

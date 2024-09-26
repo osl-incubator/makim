@@ -15,8 +15,9 @@ groups:
 
       clean:
         help: Remove all unnecessary temporary files
-        dependencies:
-          - task: build.clean-gcda
+        hooks:
+          pre-run:
+            - task: build.clean-gcda
         run: echo "[II] Remove unnecessary files"
 
       install:
@@ -46,9 +47,10 @@ groups:
             help: Extra arguments for the build step
             type: string
             default: ""
-        dependencies:
-          - task: build.clean
-            if: ${{ args.clean }}
+        hooks:
+          pre-run:
+            - task: build.clean
+              if: ${{ args.clean }}
         run: |
           $ASAN_OPTIONS = '${{ args.asan_options }}'
           echo "[II] Build the package for release options:"
@@ -62,13 +64,14 @@ groups:
             help: Clean temporary files before the building step
             type: bool
             action: store_true
-        dependencies:
-          - task: build.release
-            args:
-              build-type: "debug"
-              extra: "-Ddev=enabled -Db_coverage=true -Doptimization=0"
-              clean: ${{ args.clean }}
-              asan-options: "fast_unwind_on_malloc=0"
+        hooks:
+          pre-run:
+            - task: build.release
+              args:
+                build-type: "debug"
+                extra: "-Ddev=enabled -Db_coverage=true -Doptimization=0"
+                clean: ${{ args.clean }}
+                asan-options: "fast_unwind_on_malloc=0"
 
   env:
     tasks:
@@ -102,9 +105,10 @@ groups:
 
       build:
         help: Build the general docs pages
-        dependencies:
-          - task: docs.clean
-          - task: docs.api
+        hooks:
+          pre-run:
+            - task: docs.clean
+            - task: docs.api
         run: echo "[II] Build general docs"
 
       clean:
@@ -113,9 +117,10 @@ groups:
 
       preview:
         help: Preview documentation result locally
-        dependencies:
-          - task: docs.clean
-          - task: docs.api
+        hooks:
+          pre-run:
+            - task: docs.clean
+            - task: docs.api
         run: echo "[II] Preview documentation result locally"
 
   tests:
@@ -142,16 +147,18 @@ groups:
 
       examples:
         help: Test all code generation for the example package files
-        dependencies:
-          - task: tests.gen-object
-          - task: tests.gen-ast
-          - task: tests.gen-llvm-ir
+        hooks:
+          pre-run:
+            - task: tests.gen-object
+            - task: tests.gen-ast
+            - task: tests.gen-llvm-ir
 
       all:
         help: Run sanitizer tests and code generation for examples
-        dependencies:
-          - task: tests.sanitizer
-          - task: tests.examples
+        hooks:
+          pre-run:
+            - task: tests.sanitizer
+            - task: tests.examples
 
   debug:
     tasks:
