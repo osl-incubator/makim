@@ -72,27 +72,29 @@ groups:
 
       smoke:
         help: Run smoke tests
-        dependencies:
-          - task: smoke-tests.simple
-          - task: smoke-tests.complex
-          - task: smoke-tests.containers
-          - task: smoke-tests.unittest
-          - task: smoke-tests.vars-env
-          - task: smoke-tests.test-vars
-          - task: smoke-tests.bash
-          - task: smoke-tests.dir-absolute-path
-          - task: smoke-tests.dir-no-path
-          - task: smoke-tests.dir-relative-path
-          - task: smoke-tests.interactive-args
-          - task: smoke-tests.run-hooks
+        hooks:
+          pre-run:
+            - task: smoke-tests.simple
+            - task: smoke-tests.complex
+            - task: smoke-tests.containers
+            - task: smoke-tests.unittest
+            - task: smoke-tests.vars-env
+            - task: smoke-tests.test-vars
+            - task: smoke-tests.bash
+            - task: smoke-tests.dir-absolute-path
+            - task: smoke-tests.dir-no-path
+            - task: smoke-tests.dir-relative-path
+            - task: smoke-tests.interactive-args
+            - task: smoke-tests.run-hooks
 
       ci:
         help: Run all tasks used on CI
-        dependencies:
-          - task: tests.linter
-          - task: tests.unittest
-          - task: tests.smoke
-          - task: docs.build
+        hooks:
+          pre-run:
+            - task: tests.linter
+            - task: tests.unittest
+            - task: tests.smoke
+            - task: docs.build
 
   smoke-tests:
     tasks:
