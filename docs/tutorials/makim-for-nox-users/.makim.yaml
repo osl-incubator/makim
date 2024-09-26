@@ -28,6 +28,7 @@ groups:
 
       all:
         help: Run nox tests
-        dependencies:
-          - task: nox.tests
-          - task: nox.lint
+        hooks:
+          pre-run:
+            - task: nox.tests
+            - task: nox.lint
