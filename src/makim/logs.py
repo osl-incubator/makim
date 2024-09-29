@@ -28,20 +28,20 @@ class MakimLogs:
     @staticmethod
     def raise_error(
         message: str, message_type: MakimError, command_error: int = 1
-    ):
+    ) -> None:
         """Print error message and exit with given error code."""
         console = Console(stderr=True, style='bold red')
         console.print(f'Makim Error #{message_type.value}: {message}')
         raise os._exit(command_error)
 
     @staticmethod
-    def print_info(message: str):
+    def print_info(message: str) -> None:
         """Print info message."""
         console = Console(style='blue')
         console.print(message)
 
     @staticmethod
-    def print_warning(message: str):
+    def print_warning(message: str) -> None:
         """Print warning message."""
         console = Console(style='yellow')
         console.print(message)

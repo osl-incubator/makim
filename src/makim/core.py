@@ -18,7 +18,7 @@ import warnings
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import dotenv
 import sh
@@ -95,25 +95,25 @@ class Makim:
     file: str = '.makim.yaml'
     dry_run: bool = False
     verbose: bool = False
-    global_data: dict = {}
+    global_data: Dict[str, Any] = {}
     shell_app: sh.Command = sh.xonsh
     shell_args: list[str] = []
     tmp_suffix: str = '.makim'
 
     # temporary variables
-    env: dict = {}  # initial env
-    env_scoped: dict = {}  # current env
+    env: Dict[str, Any] = {}  # initial env
+    env_scoped: Dict[str, Any] = {}  # current env
     # initial working directory
     working_directory: Optional[Path] = None
     # current working directory
     working_directory_scoped: Optional[Path] = None
-    args: Optional[object] = None
+    args: Optional[Dict[str, Any]] = None
     group_name: str = 'default'
-    group_data: dict = {}
+    group_data: Dict[str, Any] = {}
     task_name: str = ''
-    task_data: dict = {}
+    task_data: Dict[str, Any] = {}
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Prepare the Makim class with the default configuration."""
         os.environ['RAISE_SUBPROC_ERROR'] = '1'
         os.environ['XONSH_SHOW_TRACEBACK'] = '0'
@@ -126,7 +126,7 @@ class Makim:
         self.shell_args: list[str] = []
         self.tmp_suffix: str = '.makim'
 
-    def _call_shell_app(self, cmd):
+    def _call_shell_app(self, cmd: str) -> None:
         self._load_shell_app()
 
         fd, filepath = tempfile.mkstemp(suffix=self.tmp_suffix, text=True)
@@ -170,7 +170,7 @@ class Makim:
     def _check_makim_file(self, file_path: str = '') -> bool:
         return Path(file_path or self.file).exists()
 
-    def _verify_task_conditional(self, conditional) -> bool:
+    def _verify_task_conditional(self, conditional: Any) -> bool:
         # todo: implement verification
         print(f'condition {conditional} not verified')
         return False
@@ -208,7 +208,7 @@ class Makim:
             MakimError.MAKIM_TARGET_NOT_FOUND,
         )
 
-    def _change_group_data(self, group_name=None) -> None:
+    def _change_group_data(self, group_name: Optional[str] = None) -> None:
         groups = self.global_data['groups']
 
         if group_name is not None:
@@ -272,7 +272,7 @@ class Makim:
         return working_dir
 
     def _extract_shell_app_config(
-        self, scoped_config: dict[str, Any]
+        self, scoped_config: Dict[str, Any]
     ) -> AppConfigType:
         """Extract the shell app configuration from the scoped config data."""
         shell_app_data: AppConfigType = scoped_config.get('backend', {})
@@ -342,7 +342,7 @@ class Makim:
         self.shell_args = cmd_args
         self.tmp_suffix = cmd_tmp_suffix
 
-    def _load_dotenv(self, data_scope: dict) -> dict[str, str]:
+    def _load_dotenv(self, data_scope: Dict[str, Any]) -> Dict[str, str]:
         env_file = data_scope.get('env-file')
         if not env_file:
             return {}
@@ -363,14 +363,17 @@ class Makim:
 
     def _load_scoped_data(
         self, scope: str
-    ) -> tuple[dict[str, str], dict[str, str]]:
+    ) -> Tuple[Dict[str, str], Dict[str, str]]:
         scope_options = ('global', 'group', 'task')
         if scope not in scope_options:
             raise Exception(f'The given scope `{scope}` is not valid.')
 
         def _render_env_inplace(
-            env_user: dict, env_file: dict, variables: dict, env: dict
-        ):
+            env_user: Dict[str, Any],
+            env_file: Dict[str, Any],
+            variables: Dict[str, Any],
+            env: Dict[str, Any],
+        ) -> None:
             env.update(env_file)
             for k, v in env_user.items():
                 env[k] = TEMPLATE.from_string(str(v)).render(
@@ -380,29 +383,29 @@ class Makim:
         scope_id = scope_options.index(scope)
 
         env = deepcopy(dict(os.environ))
-        variables: dict = {}
+        variables: Dict[str, Any] = {}
 
         if scope_id >= SCOPE_GLOBAL:
             env_user = self.global_data.get('env', {})
             env_file = self._load_dotenv(self.global_data)
             _render_env_inplace(env_user, env_file, variables, env)
-            variables.update(self._load_scoped_vars('global', env=env))
+            variables.update(self._load_scoped_vars('global'))
 
         if scope_id >= SCOPE_GROUP:
             env_user = self.group_data.get('env', {})
             env_file = self._load_dotenv(self.group_data)
             _render_env_inplace(env_user, env_file, variables, env)
-            variables.update(self._load_scoped_vars('group', env=env))
+            variables.update(self._load_scoped_vars('group'))
 
         if scope_id == SCOPE_TARGET:
             env_user = self.task_data.get('env', {})
             env_file = self._load_dotenv(self.task_data)
             _render_env_inplace(env_user, env_file, variables, env)
-            variables.update(self._load_scoped_vars('task', env=env))
+            variables.update(self._load_scoped_vars('task'))
 
         return env, variables
 
-    def _load_scoped_vars(self, scope: str, env) -> dict:
+    def _load_scoped_vars(self, scope: str) -> Any:
         scope_options = ('global', 'group', 'task')
         if scope not in scope_options:
             raise Exception(f'The given scope `{scope}` is not valid.')
@@ -434,19 +437,22 @@ class Makim:
 
         return fix_dict_keys_recursively(variables)
 
-    def _load_task_args(self):
+    def _load_task_args(self) -> None:
+        if self.args is None:
+            self.args = {}
         for name, value in self.task_data.get('args', {}).items():
             qualified_name = f'--{name}'
-            if self.args.get(qualified_name):
-                continue
-            default = value.get('default')
-            is_bool = value.get('type', '') == 'bool'
-            self.args[qualified_name] = (
-                default if default is not None else False if is_bool else None
-            )
+            if qualified_name not in self.args:
+                default = value.get('default')
+                is_bool = value.get('type', '') == 'bool'
+                self.args[qualified_name] = (
+                    default
+                    if default is not None
+                    else (False if is_bool else None)
+                )
 
     # run commands
-    def _run_hooks(self, args: dict, hook_type: str):
+    def _run_hooks(self, args: Dict[str, Any], hook_type: str) -> None:
         if not self.task_data.get('hooks', {}).get(hook_type):
             return
         makim_hook = deepcopy(self)
@@ -510,7 +516,7 @@ class Makim:
 
             makim_hook.run(deepcopy(args_hook))
 
-    def _run_command(self, args: dict):
+    def _run_command(self, args: Dict[str, Any]) -> None:
         cmd = self.task_data.get('run', '').strip()
         if 'vars' not in self.group_data:
             self.group_data['vars'] = {}
@@ -589,7 +595,9 @@ class Makim:
 
         # public methods
 
-    def load(self, file: str, dry_run: bool = False, verbose: bool = False):
+    def load(
+        self, file: str, dry_run: bool = False, verbose: bool = False
+    ) -> None:
         """Load makim configuration."""
         self.file = file
         self.dry_run = dry_run
@@ -599,7 +607,7 @@ class Makim:
         self._verify_config()
         self.env = self._load_dotenv(self.global_data)
 
-    def run(self, args: dict):
+    def run(self, args: Dict[str, Any]) -> None:
         """Run makim task code."""
         self.args = args
 
