@@ -18,7 +18,7 @@ import warnings
 
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, Dict, List, Optional, Union, cast
 
 import dotenv
 import sh
@@ -95,23 +95,23 @@ class Makim:
     file: str = '.makim.yaml'
     dry_run: bool = False
     verbose: bool = False
-    global_data: Dict[str, Any] = {}
+    global_data: dict[str, Any] = {}
     shell_app: sh.Command = sh.xonsh
     shell_args: list[str] = []
     tmp_suffix: str = '.makim'
 
     # temporary variables
-    env: Dict[str, Any] = {}  # initial env
-    env_scoped: Dict[str, Any] = {}  # current env
+    env: dict[str, Any] = {}  # initial env
+    env_scoped: dict[str, Any] = {}  # current env
     # initial working directory
     working_directory: Optional[Path] = None
     # current working directory
     working_directory_scoped: Optional[Path] = None
-    args: Optional[Dict[str, Any]] = None
+    args: Optional[dict[str, Any]] = None
     group_name: str = 'default'
-    group_data: Dict[str, Any] = {}
+    group_data: dict[str, Any] = {}
     task_name: str = ''
-    task_data: Dict[str, Any] = {}
+    task_data: dict[str, Any] = {}
 
     def __init__(self) -> None:
         """Prepare the Makim class with the default configuration."""
@@ -272,7 +272,7 @@ class Makim:
         return working_dir
 
     def _extract_shell_app_config(
-        self, scoped_config: Dict[str, Any]
+        self, scoped_config: dict[str, Any]
     ) -> AppConfigType:
         """Extract the shell app configuration from the scoped config data."""
         shell_app_data: AppConfigType = scoped_config.get('backend', {})
@@ -327,7 +327,7 @@ class Makim:
                 shell_config = tmp_config
 
         cmd_name = str(shell_config.get('app', ''))
-        cmd_args: list[str] = cast(List[str], shell_config.get('args', []))
+        cmd_args: list[str] = cast(list[str], shell_config.get('args', []))
         cmd_tmp_suffix: str = str(
             shell_config.get('suffix', tmp_suffix_default)
         )
@@ -342,7 +342,7 @@ class Makim:
         self.shell_args = cmd_args
         self.tmp_suffix = cmd_tmp_suffix
 
-    def _load_dotenv(self, data_scope: Dict[str, Any]) -> Dict[str, str]:
+    def _load_dotenv(self, data_scope: dict[str, Any]) -> dict[str, str]:
         env_file = data_scope.get('env-file')
         if not env_file:
             return {}
@@ -363,16 +363,16 @@ class Makim:
 
     def _load_scoped_data(
         self, scope: str
-    ) -> Tuple[Dict[str, str], Dict[str, str]]:
+    ) -> tuple[dict[str, str], dict[str, str]]:
         scope_options = ('global', 'group', 'task')
         if scope not in scope_options:
             raise Exception(f'The given scope `{scope}` is not valid.')
 
         def _render_env_inplace(
-            env_user: Dict[str, Any],
-            env_file: Dict[str, Any],
-            variables: Dict[str, Any],
-            env: Dict[str, Any],
+            env_user: dict[str, Any],
+            env_file: dict[str, Any],
+            variables: dict[str, Any],
+            env: dict[str, Any],
         ) -> None:
             env.update(env_file)
             for k, v in env_user.items():
@@ -383,7 +383,7 @@ class Makim:
         scope_id = scope_options.index(scope)
 
         env = deepcopy(dict(os.environ))
-        variables: Dict[str, Any] = {}
+        variables: dict[str, Any] = {}
 
         if scope_id >= SCOPE_GLOBAL:
             env_user = self.global_data.get('env', {})
@@ -452,7 +452,7 @@ class Makim:
                 )
 
     # run commands
-    def _run_hooks(self, args: Dict[str, Any], hook_type: str) -> None:
+    def _run_hooks(self, args: dict[str, Any], hook_type: str) -> None:
         if not self.task_data.get('hooks', {}).get(hook_type):
             return
         makim_hook = deepcopy(self)
@@ -516,7 +516,7 @@ class Makim:
 
             makim_hook.run(deepcopy(args_hook))
 
-    def _run_command(self, args: Dict[str, Any]) -> None:
+    def _run_command(self, args: dict[str, Any]) -> None:
         cmd = self.task_data.get('run', '').strip()
         if 'vars' not in self.group_data:
             self.group_data['vars'] = {}
@@ -607,7 +607,7 @@ class Makim:
         self._verify_config()
         self.env = self._load_dotenv(self.global_data)
 
-    def run(self, args: Dict[str, Any]) -> None:
+    def run(self, args: dict[str, Any]) -> None:
         """Run makim task code."""
         self.args = args
 

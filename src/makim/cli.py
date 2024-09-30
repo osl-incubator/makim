@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import sys
 
-from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
+from typing import Any, Callable, Optional, Type, Union, cast
 
 import click
 import typer
@@ -77,7 +77,7 @@ def main(
         raise typer.Exit(0)
 
 
-def suggest_command(user_input: str, available_commands: List[str]) -> str:
+def suggest_command(user_input: str, available_commands: list[str]) -> str:
     """
     Suggest the closest command to the user input using fuzzy search.
 
@@ -173,7 +173,7 @@ def get_default_value_str(arg_type: str, value: Any) -> str:
     return f'{value or 0}'
 
 
-def create_args_string(args: Dict[str, str]) -> str:
+def create_args_string(args: dict[str, str]) -> str:
     """Return a string for arguments for a function for typer."""
     args_rendered = []
 
@@ -185,7 +185,7 @@ def create_args_string(args: Dict[str, str]) -> str:
         ')'
     )
 
-    args_data = cast(Dict[str, Dict[str, str]], args.get('args', {}))
+    args_data = cast(dict[str, dict[str, str]], args.get('args', {}))
     for name, spec in args_data.items():
         name_clean = name.replace('-', '_')
         arg_type = normalize_string_type(spec.get('type', 'str'))
@@ -214,7 +214,7 @@ def create_args_string(args: Dict[str, str]) -> str:
 
 
 def apply_click_options(
-    command_function: Callable[..., Any], options: Dict[str, Any]
+    command_function: Callable[..., Any], options: dict[str, Any]
 ) -> Callable[..., Any]:
     """
     Apply Click options to a Typer command function.
@@ -236,7 +236,7 @@ def apply_click_options(
             str, Optional[Union[str, int, float, bool, Type[Any]]]
         ] = {}
 
-        opt_data = cast(Dict[str, str], opt_details)
+        opt_data = cast(dict[str, str], opt_details)
         opt_type_str = normalize_string_type(opt_data.get('type', 'str'))
         opt_default = get_default_value(opt_type_str, opt_data.get('default'))
 
@@ -263,7 +263,7 @@ def apply_click_options(
     return command_function
 
 
-def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
+def create_dynamic_command(name: str, args: dict[str, str]) -> None:
     """
     Dynamically create a Typer command with the specified options.
 
@@ -277,7 +277,7 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
     args_str = create_args_string(args)
     args_param_list = [f'"task": "{name}"']
 
-    args_data = cast(Dict[str, Dict[str, str]], args.get('args', {}))
+    args_data = cast(dict[str, dict[str, str]], args.get('args', {}))
 
     for arg, arg_details in args_data.items():
         arg_clean = arg.replace('-', '_')
@@ -303,19 +303,19 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
 
     function_code += f'    makim.run({args_param_str})\n'
 
-    local_vars: Dict[str, Any] = {}
+    local_vars: dict[str, Any] = {}
     exec(function_code, globals(), local_vars)
     dynamic_command = decorator(local_vars['dynamic_command'])
 
     # Apply Click options to the Typer command
     if 'args' in args:
-        options_data = cast(Dict[str, Dict[str, Any]], args.get('args', {}))
+        options_data = cast(dict[str, dict[str, Any]], args.get('args', {}))
         dynamic_command = apply_click_options(dynamic_command, options_data)
 
 
 def extract_root_config(
     cli_list: list[str] = sys.argv,
-) -> Dict[str, str | bool]:
+) -> dict[str, str | bool]:
     """Extract the root configuration from the CLI."""
     params = cli_list[1:]
 
@@ -407,7 +407,7 @@ def run_app() -> None:
 
     # create tasks data
     # group_names = list(makim.global_data.get('groups', {}).keys())
-    tasks: Dict[str, Any] = {}
+    tasks: dict[str, Any] = {}
     for group_name, group_data in makim.global_data.get('groups', {}).items():
         for task_name, task_data in group_data.get('tasks', {}).items():
             tasks[f'{group_name}.{task_name}'] = task_data
