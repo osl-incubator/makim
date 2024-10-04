@@ -446,18 +446,17 @@ class Makim:
             )
 
     # run commands
-
-    def _run_dependencies(self, args: dict):
-        if not self.task_data.get('dependencies'):
+    def _run_hooks(self, args: dict, hook_type: str):
+        if not self.task_data.get('hooks', {}).get(hook_type):
             return
-        makim_dep = deepcopy(self)
-        args_dep_original = {
+        makim_hook = deepcopy(self)
+        args_hook_original = {
             'help': args.get('help', False),
             'version': args.get('version', False),
             'args': {},
         }
 
-        makim_dep._change_group_data()
+        makim_hook._change_group_data()
 
         # clean double dash prefix in args
         original_args_clean = {}
@@ -470,33 +469,33 @@ class Makim:
                 else arg_value
             )
 
-        for dep_data in self.task_data['dependencies']:
-            env, variables = makim_dep._load_scoped_data('task')
+        for hook_data in self.task_data['hooks'][hook_type]:
+            env, variables = makim_hook._load_scoped_data('task')
             for k, v in env.items():
                 os.environ[k] = v
 
-            makim_dep.env_scoped = deepcopy(env)
-            args_dep = {}
+            makim_hook.env_scoped = deepcopy(env)
+            args_hook = {}
 
             # update the arguments
-            for arg_name, arg_value in dep_data.get('args', {}).items():
+            for arg_name, arg_value in hook_data.get('args', {}).items():
                 unescaped_value = (
                     str(arg_value)
                     if isinstance(arg_value, str)
                     else str(arg_value)
                 )
 
-                args_dep[f'--{arg_name}'] = yaml.safe_load(
+                args_hook[f'--{arg_name}'] = yaml.safe_load(
                     TEMPLATE.from_string(unescaped_value).render(
-                        args=original_args_clean, env=makim_dep.env_scoped
+                        args=original_args_clean, env=makim_hook.env_scoped
                     )
                 )
 
-            args_dep['task'] = dep_data['task']
-            args_dep.update(args_dep_original)
+            args_hook['task'] = hook_data['task']
+            args_hook.update(args_hook_original)
 
             # checking for the conditional statement
-            if_stmt = dep_data.get('if')
+            if_stmt = hook_data.get('if')
             if if_stmt:
                 result = TEMPLATE.from_string(str(if_stmt)).render(
                     args=original_args_clean, env=self.env_scoped
@@ -504,12 +503,12 @@ class Makim:
                 if not yaml.safe_load(result):
                     if self.verbose:
                         MakimLogs.print_info(
-                            '[II] Skipping dependency: '
-                            f'{dep_data.get("task")}'
+                            f'[II] Skipping {hook_type} hook: '
+                            f'{hook_data.get("task")}'
                         )
                     continue
 
-            makim_dep.run(deepcopy(args_dep))
+            makim_hook.run(deepcopy(args_hook))
 
     def _run_command(self, args: dict):
         cmd = self.task_data.get('run', '').strip()
@@ -588,7 +587,7 @@ class Makim:
         os.environ.clear()
         os.environ.update(self.env_scoped)
 
-    # public methods
+        # public methods
 
     def load(self, file: str, dry_run: bool = False, verbose: bool = False):
         """Load makim configuration."""
@@ -618,5 +617,6 @@ class Makim:
                 'Condition (if) not satisfied.'
             )
 
-        self._run_dependencies(args)
+        self._run_hooks(args, 'pre-run')
         self._run_command(args)
+        self._run_hooks(args, 'post-run')

@@ -48,11 +48,12 @@ groups:
         run: echo "Hello, World!"
 
       all:
-        dependencies:
-          - task: main.node
-          - task: main.perl
-          # note: php from conda-forge has conflicts with r-base
-          # - task: main.php
-          - task: main.python
-          - task: main.r
-          - task: main.sh
+        hooks:
+          pre-run:
+            - task: main.node
+            - task: main.perl
+            # note: php from conda-forge has conflicts with r-base
+            # - task: main.php
+            - task: main.python
+            - task: main.r
+            - task: main.sh

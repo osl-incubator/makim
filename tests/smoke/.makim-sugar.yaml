@@ -12,8 +12,9 @@ groups:
           sugar ext restart --all --options -d
       run:
         help: test running a docker service using containers-sugar
-        dependencies:
-          - task: containers.setup
+        hooks:
+          pre-run:
+            - task: containers.setup
         backend: bash
         run: |
           sugar exec --service service1 --options -T --cmd python -c "print(1)"

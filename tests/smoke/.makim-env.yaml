@@ -78,10 +78,11 @@ groups:
       from-global:
         help: Test a rerender from the global scope
         env-file: .env
-        dependencies:
-          - task: rerender-env.dep
-            args:
-              my-value: "${{ env.GROUP_VAR_1 }}"
+        hooks:
+          pre-run:
+            - task: rerender-env.dep
+              args:
+                my-value: "${{ env.GROUP_VAR_1 }}"
         env:
           MYVAR_1: ${{ env.GLOBAL_VAR_1 }}
           MYVAR_2: ${{ env.GLOBAL_VAR_2 }}

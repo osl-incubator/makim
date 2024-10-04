@@ -31,11 +31,12 @@ groups:
             help: if not set, the clean dependency will not be triggered.
             type: bool
             action: store_true
-        dependencies:
-          - task: default.clean
-            if: ${{ args.clean or args.clean_all }}
-            args:
-              all: ${{ args.clean_all }}
+        hooks:
+          pre-run:
+            - task: default.clean
+              if: ${{ args.clean or args.clean_all }}
+              args:
+                all: ${{ args.clean_all }}
         run: |
           echo "build file x"
           echo "build file y"

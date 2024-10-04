@@ -11,8 +11,9 @@ groups:
             type: bool
             action: store_true
             help: Remove all files that are tracked by git
-        dependencies:
-          - task: group-deps.dep
+        hooks:
+          pre-run:
+            - task: group-deps.dep
         run: |
           export MAKIM_TEST=$(pwd)
           echo ${MAKIM_TEST}
