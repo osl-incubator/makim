@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 import sys
 
-from typing import Any, Callable, Optional, Type, Union, cast
+from typing import Any, Callable, Dict, Optional, Type, Union, cast
 
 import click
 import typer
@@ -185,7 +185,7 @@ def create_args_string(args: dict[str, str]) -> str:
         ')'
     )
 
-    args_data = cast(dict[str, dict[str, str]], args.get('args', {}))
+    args_data = cast(Dict[str, dict[str, str]], args.get('args', {}))
     for name, spec in args_data.items():
         name_clean = name.replace('-', '_')
         arg_type = normalize_string_type(spec.get('type', 'str'))
@@ -236,7 +236,7 @@ def apply_click_options(
             str, Optional[Union[str, int, float, bool, Type[Any]]]
         ] = {}
 
-        opt_data = cast(dict[str, str], opt_details)
+        opt_data = cast(Dict[str, str], opt_details)
         opt_type_str = normalize_string_type(opt_data.get('type', 'str'))
         opt_default = get_default_value(opt_type_str, opt_data.get('default'))
 
@@ -277,7 +277,7 @@ def create_dynamic_command(name: str, args: dict[str, str]) -> None:
     args_str = create_args_string(args)
     args_param_list = [f'"task": "{name}"']
 
-    args_data = cast(dict[str, dict[str, str]], args.get('args', {}))
+    args_data = cast(Dict[str, dict[str, str]], args.get('args', {}))
 
     for arg, arg_details in args_data.items():
         arg_clean = arg.replace('-', '_')
@@ -309,7 +309,7 @@ def create_dynamic_command(name: str, args: dict[str, str]) -> None:
 
     # Apply Click options to the Typer command
     if 'args' in args:
-        options_data = cast(dict[str, dict[str, Any]], args.get('args', {}))
+        options_data = cast(Dict[str, dict[str, Any]], args.get('args', {}))
         dynamic_command = apply_click_options(dynamic_command, options_data)
 
 
