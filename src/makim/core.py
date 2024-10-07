@@ -405,7 +405,7 @@ class Makim:
 
         return env, variables
 
-    def _load_scoped_vars(self, scope: str) -> Any:
+    def _load_scoped_vars(self, scope: str) -> dict[str, Any]:
         scope_options = ('global', 'group', 'task')
         if scope not in scope_options:
             raise Exception(f'The given scope `{scope}` is not valid.')
@@ -435,7 +435,7 @@ class Makim:
                 }
             )
 
-        return fix_dict_keys_recursively(variables)
+        return cast(Dict[str, Any], fix_dict_keys_recursively(variables))
 
     def _load_task_args(self) -> None:
         if self.args is None:
