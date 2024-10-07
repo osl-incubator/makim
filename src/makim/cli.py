@@ -12,7 +12,8 @@ import typer
 
 from fuzzywuzzy import process
 
-from makim import Makim, __version__
+from makim import __version__
+from makim.core import Makim
 
 CLI_ROOT_FLAGS_VALUES_COUNT = {
     '--dry-run': 0,
@@ -33,7 +34,7 @@ app = typer.Typer(
     ),
 )
 
-makim = Makim()
+makim: Makim = Makim()
 
 
 @app.callback(invoke_without_command=True)
@@ -76,7 +77,7 @@ def main(
         raise typer.Exit(0)
 
 
-def suggest_command(user_input: str, available_commands: list) -> str:
+def suggest_command(user_input: str, available_commands: list[str]) -> str:
     """
     Suggest the closest command to the user input using fuzzy search.
 
@@ -90,10 +91,10 @@ def suggest_command(user_input: str, available_commands: list) -> str:
     str: The suggested command.
     """
     suggestion, _ = process.extractOne(user_input, available_commands)
-    return suggestion
+    return str(suggestion)
 
 
-def map_type_from_string(type_name) -> Type:
+def map_type_from_string(type_name: str) -> Type[Union[str, int, float, bool]]:
     """
     Return a type object mapped from the type name.
 
@@ -119,7 +120,7 @@ def map_type_from_string(type_name) -> Type:
     return type_mapping.get(type_name, str)
 
 
-def normalize_string_type(type_name) -> str:
+def normalize_string_type(type_name: str) -> str:
     """
     Normalize the user type definition to the correct name.
 
@@ -151,9 +152,14 @@ def get_default_value(
 ) -> Optional[Union[str, int, float, bool]]:
     """Return the default value regarding its type in a string format."""
     if arg_type == 'bool':
-        return False
-
-    return value
+        return False if value is None else bool(value)
+    elif arg_type == 'int':
+        return int(value) if value is not None else None
+    elif arg_type == 'float':
+        return float(value) if value is not None else None
+    elif arg_type == 'str':
+        return str(value) if value is not None else None
+    return None
 
 
 def get_default_value_str(arg_type: str, value: Any) -> str:
@@ -167,7 +173,7 @@ def get_default_value_str(arg_type: str, value: Any) -> str:
     return f'{value or 0}'
 
 
-def create_args_string(args: Dict[str, str]) -> str:
+def create_args_string(args: dict[str, str]) -> str:
     """Return a string for arguments for a function for typer."""
     args_rendered = []
 
@@ -208,8 +214,8 @@ def create_args_string(args: Dict[str, str]) -> str:
 
 
 def apply_click_options(
-    command_function: Callable, options: Dict[str, Any]
-) -> Callable:
+    command_function: Callable[..., Any], options: dict[str, Any]
+) -> Callable[..., Any]:
     """
     Apply Click options to a Typer command function.
 
@@ -226,7 +232,9 @@ def apply_click_options(
         The command function with options applied.
     """
     for opt_name, opt_details in options.items():
-        opt_args: dict[str, Optional[Union[str, int, float, bool, Type]]] = {}
+        opt_args: dict[
+            str, Optional[Union[str, int, float, bool, Type[Any]]]
+        ] = {}
 
         opt_data = cast(Dict[str, str], opt_details)
         opt_type_str = normalize_string_type(opt_data.get('type', 'str'))
@@ -255,7 +263,7 @@ def apply_click_options(
     return command_function
 
 
-def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
+def create_dynamic_command(name: str, args: dict[str, str]) -> None:
     """
     Dynamically create a Typer command with the specified options.
 
@@ -295,7 +303,7 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
 
     function_code += f'    makim.run({args_param_str})\n'
 
-    local_vars: Dict[str, Any] = {}
+    local_vars: dict[str, Any] = {}
     exec(function_code, globals(), local_vars)
     dynamic_command = decorator(local_vars['dynamic_command'])
 
@@ -307,7 +315,7 @@ def create_dynamic_command(name: str, args: Dict[str, str]) -> None:
 
 def extract_root_config(
     cli_list: list[str] = sys.argv,
-) -> Dict[str, str | bool]:
+) -> dict[str, str | bool]:
     """Extract the root configuration from the CLI."""
     params = cli_list[1:]
 
@@ -399,7 +407,7 @@ def run_app() -> None:
 
     # create tasks data
     # group_names = list(makim.global_data.get('groups', {}).keys())
-    tasks: Dict[str, Any] = {}
+    tasks: dict[str, Any] = {}
     for group_name, group_data in makim.global_data.get('groups', {}).items():
         for task_name, task_data in group_data.get('tasks', {}).items():
             tasks[f'{group_name}.{task_name}'] = task_data
@@ -417,7 +425,9 @@ def run_app() -> None:
 
         command_used = _get_command_from_cli()
 
-        available_cmds = [cmd.name for cmd in app.registered_commands]
+        available_cmds = [
+            cmd.name for cmd in app.registered_commands if cmd.name is not None
+        ]
         suggestion = suggest_command(command_used, available_cmds)
 
         typer.secho(
