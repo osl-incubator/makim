@@ -1213,7 +1213,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span><span class="s2">"makim==1.15.0"</span>
+<div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-q<span class="w"> </span><span class="s2">"makim==1.16.0"</span>
 </pre></div>
 </div>
 </div>
@@ -1227,7 +1227,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <ul>
 <li><p>For those who prefer <code>conda</code>, execute:</p>
-<div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span><span class="s2">"makim==1.15.0"</span>
+<div class="highlight"><pre><span></span>conda<span class="w"> </span>install<span class="w"> </span><span class="s2">"makim==1.16.0"</span>
 </pre></div>
 </li>
 </ul>
@@ -1320,9 +1320,10 @@ os.environ["NO_COLOR"] = "1"</div>
            <span class="nb">type</span><span class="p">:</span> <span class="nb">bool</span>
            <span class="n">action</span><span class="p">:</span> <span class="n">store_true</span>
            <span class="n">help</span><span class="p">:</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">,</span> <span class="n">the</span> <span class="n">clean</span> <span class="n">dependency</span> <span class="n">will</span> <span class="ow">not</span> <span class="n">be</span> <span class="n">triggered</span><span class="o">.</span>
-       <span class="n">dependencies</span><span class="p">:</span>
-         <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="n">clean</span><span class="o">.</span><span class="n">tmp</span>
-           <span class="k">if</span><span class="p">:</span> <span class="err">$</span><span class="p">{{</span> <span class="n">args</span><span class="o">.</span><span class="n">clean</span> <span class="o">==</span> <span class="n">true</span> <span class="p">}}</span>
+       <span class="n">hooks</span><span class="p">:</span>
+         <span class="n">pre</span><span class="o">-</span><span class="n">run</span><span class="p">:</span>
+          <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="n">clean</span><span class="o">.</span><span class="n">tmp</span>
+            <span class="k">if</span><span class="p">:</span> <span class="err">$</span><span class="p">{{</span> <span class="n">args</span><span class="o">.</span><span class="n">clean</span> <span class="o">==</span> <span class="n">true</span> <span class="p">}}</span>
        <span class="n">run</span><span class="p">:</span> <span class="o">|</span>
          <span class="n">echo</span> <span class="s2">"Runnint unit tests..."</span>
 </pre></div>
@@ -1345,9 +1346,10 @@ groups:
            type: bool
            action: store_true
            help: if not set, the clean dependency will not be triggered.
-       dependencies:
-         - task: clean.tmp
-           if: ${{ args.clean == true }}
+       hooks:
+         pre-run:
+          - task: clean.tmp
+            if: ${{ args.clean == true }}
        run: |
          echo "Runnint unit tests..."</div>
 </div>
@@ -1747,36 +1749,37 @@ MSG_PREFIX="Running Makim: Hello, World,"</div>
     <span class="n">tasks</span><span class="p">:</span>
       <span class="n">node</span><span class="p">:</span>
         <span class="n">help</span><span class="p">:</span> <span class="n">Test</span> <span class="n">using</span> <span class="n">nodejs</span>
-        <span class="n">shell</span><span class="p">:</span> <span class="n">node</span>
+        <span class="n">backend</span><span class="p">:</span> <span class="n">node</span>
         <span class="n">run</span><span class="p">:</span> <span class="n">console</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="s2">"${{ env.MSG_PREFIX }} from NodeJS!"</span><span class="p">);</span>
       <span class="n">perl</span><span class="p">:</span>
         <span class="n">help</span><span class="p">:</span> <span class="n">Test</span> <span class="n">using</span> <span class="n">perl</span>
-        <span class="n">shell</span><span class="p">:</span> <span class="n">perl</span>
+        <span class="n">backend</span><span class="p">:</span> <span class="n">perl</span>
         <span class="n">run</span><span class="p">:</span> <span class="nb">print</span> <span class="s2">"${{ env.MSG_PREFIX }} from Perl!</span><span class="se">\n</span><span class="s2">"</span><span class="p">;</span>
 
       <span class="n">python</span><span class="p">:</span>
         <span class="n">help</span><span class="p">:</span> <span class="n">Test</span> <span class="n">using</span> <span class="n">php</span>
-        <span class="n">shell</span><span class="p">:</span> <span class="n">python</span>
+        <span class="n">baackend</span><span class="p">:</span> <span class="n">python</span>
         <span class="n">run</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">"${{ env.MSG_PREFIX }} from Python!"</span><span class="p">)</span>
 
       <span class="n">r</span><span class="p">:</span>
         <span class="n">help</span><span class="p">:</span> <span class="n">Test</span> <span class="n">using</span> <span class="n">R</span>
-        <span class="n">shell</span><span class="p">:</span> <span class="n">Rscript</span>
+        <span class="n">backend</span><span class="p">:</span> <span class="n">Rscript</span>
         <span class="n">run</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">"${{ env.MSG_PREFIX }} from R!"</span><span class="p">)</span>
 
       <span class="n">sh</span><span class="p">:</span>
         <span class="n">help</span><span class="p">:</span> <span class="n">Test</span> <span class="n">using</span> <span class="n">sh</span>
-        <span class="n">shell</span><span class="p">:</span> <span class="n">sh</span>
+        <span class="n">backend</span><span class="p">:</span> <span class="n">sh</span>
         <span class="n">run</span><span class="p">:</span> <span class="n">echo</span> <span class="s2">"${{ env.MSG_PREFIX }} from sh!"</span>
 
       <span class="n">run</span><span class="o">-</span><span class="nb">all</span><span class="p">:</span>
         <span class="n">help</span><span class="p">:</span> <span class="n">Run</span> <span class="n">tests</span> <span class="k">for</span> <span class="nb">all</span> <span class="n">the</span> <span class="n">other</span> <span class="n">tasks</span>
-        <span class="n">dependencies</span><span class="p">:</span>
-          <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="n">node</span>
-          <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="n">perl</span>
-          <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="n">python</span>
-          <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="n">r</span>
-          <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="n">sh</span>
+        <span class="n">hooks</span><span class="p">:</span>
+          <span class="n">pre</span><span class="o">-</span><span class="n">run</span><span class="p">:</span>
+            <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="n">node</span>
+            <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="n">perl</span>
+            <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="n">python</span>
+            <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="n">r</span>
+            <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="n">sh</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-9">%%writefile .makim.yaml
 version: 1.0
@@ -1786,36 +1789,37 @@ groups:
     tasks:
       node:
         help: Test using nodejs
-        shell: node
+        backend: node
         run: console.log("${{ env.MSG_PREFIX }} from NodeJS!");
       perl:
         help: Test using perl
-        shell: perl
+        backend: perl
         run: print "${{ env.MSG_PREFIX }} from Perl!\n";
 
       python:
         help: Test using php
-        shell: python
+        baackend: python
         run: print("${{ env.MSG_PREFIX }} from Python!")
 
       r:
         help: Test using R
-        shell: Rscript
+        backend: Rscript
         run: print("${{ env.MSG_PREFIX }} from R!")
 
       sh:
         help: Test using sh
-        shell: sh
+        backend: sh
         run: echo "${{ env.MSG_PREFIX }} from sh!"
 
       run-all:
         help: Run tests for all the other tasks
-        dependencies:
-          - task: node
-          - task: perl
-          - task: python
-          - task: r
-          - task: sh</div>
+        hooks:
+          pre-run:
+            - task: node
+            - task: perl
+            - task: python
+            - task: r
+            - task: sh</div>
 </div>
 </div>
 </div>
@@ -2342,23 +2346,24 @@ install staging dependencies:
         <span class="n">args</span><span class="p">:</span>
           <span class="n">i</span><span class="o">-</span><span class="n">am</span><span class="o">-</span><span class="n">sure</span><span class="p">:</span>
             <span class="nb">type</span><span class="p">:</span> <span class="nb">bool</span>
-        <span class="n">dependencies</span><span class="p">:</span>
-          <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="nb">print</span><span class="o">.</span><span class="n">name</span>
-            <span class="k">if</span><span class="p">:</span> <span class="err">$</span><span class="p">{{</span> <span class="n">args</span><span class="o">.</span><span class="n">i_am_sure</span> <span class="o">==</span> <span class="n">true</span> <span class="p">}}</span>
-            <span class="n">args</span><span class="p">:</span>
-              <span class="n">name</span><span class="p">:</span> <span class="n">Mary</span>
-          <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="nb">print</span><span class="o">.</span><span class="n">name</span>
-            <span class="k">if</span><span class="p">:</span> <span class="err">$</span><span class="p">{{</span> <span class="n">args</span><span class="o">.</span><span class="n">i_am_sure</span> <span class="o">==</span> <span class="n">true</span> <span class="p">}}</span>
-            <span class="n">args</span><span class="p">:</span>
-              <span class="n">name</span><span class="p">:</span> <span class="n">John</span>
-          <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="nb">print</span><span class="o">.</span><span class="n">name</span>
-            <span class="k">if</span><span class="p">:</span> <span class="err">$</span><span class="p">{{</span> <span class="n">args</span><span class="o">.</span><span class="n">i_am_sure</span> <span class="o">==</span> <span class="n">true</span> <span class="p">}}</span>
-            <span class="n">args</span><span class="p">:</span>
-              <span class="n">name</span><span class="p">:</span> <span class="n">Ellen</span>
-          <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="nb">print</span><span class="o">.</span><span class="n">name</span>
-            <span class="k">if</span><span class="p">:</span> <span class="err">$</span><span class="p">{{</span> <span class="n">args</span><span class="o">.</span><span class="n">i_am_sure</span> <span class="o">==</span> <span class="n">true</span> <span class="p">}}</span>
-            <span class="n">args</span><span class="p">:</span>
-              <span class="n">name</span><span class="p">:</span> <span class="n">Marc</span>
+        <span class="n">hokos</span><span class="p">:</span>
+          <span class="n">pre</span><span class="o">-</span><span class="n">run</span><span class="p">:</span>
+            <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="nb">print</span><span class="o">.</span><span class="n">name</span>
+              <span class="k">if</span><span class="p">:</span> <span class="err">$</span><span class="p">{{</span> <span class="n">args</span><span class="o">.</span><span class="n">i_am_sure</span> <span class="o">==</span> <span class="n">true</span> <span class="p">}}</span>
+              <span class="n">args</span><span class="p">:</span>
+                <span class="n">name</span><span class="p">:</span> <span class="n">Mary</span>
+            <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="nb">print</span><span class="o">.</span><span class="n">name</span>
+              <span class="k">if</span><span class="p">:</span> <span class="err">$</span><span class="p">{{</span> <span class="n">args</span><span class="o">.</span><span class="n">i_am_sure</span> <span class="o">==</span> <span class="n">true</span> <span class="p">}}</span>
+              <span class="n">args</span><span class="p">:</span>
+                <span class="n">name</span><span class="p">:</span> <span class="n">John</span>
+            <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="nb">print</span><span class="o">.</span><span class="n">name</span>
+              <span class="k">if</span><span class="p">:</span> <span class="err">$</span><span class="p">{{</span> <span class="n">args</span><span class="o">.</span><span class="n">i_am_sure</span> <span class="o">==</span> <span class="n">true</span> <span class="p">}}</span>
+              <span class="n">args</span><span class="p">:</span>
+                <span class="n">name</span><span class="p">:</span> <span class="n">Ellen</span>
+            <span class="o">-</span> <span class="n">task</span><span class="p">:</span> <span class="nb">print</span><span class="o">.</span><span class="n">name</span>
+              <span class="k">if</span><span class="p">:</span> <span class="err">$</span><span class="p">{{</span> <span class="n">args</span><span class="o">.</span><span class="n">i_am_sure</span> <span class="o">==</span> <span class="n">true</span> <span class="p">}}</span>
+              <span class="n">args</span><span class="p">:</span>
+                <span class="n">name</span><span class="p">:</span> <span class="n">Marc</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-16">%%writefile .makim.yaml
 version: 1.0.0
@@ -2378,23 +2383,24 @@ groups:
         args:
           i-am-sure:
             type: bool
-        dependencies:
-          - task: print.name
-            if: ${{ args.i_am_sure == true }}
-            args:
-              name: Mary
-          - task: print.name
-            if: ${{ args.i_am_sure == true }}
-            args:
-              name: John
-          - task: print.name
-            if: ${{ args.i_am_sure == true }}
-            args:
-              name: Ellen
-          - task: print.name
-            if: ${{ args.i_am_sure == true }}
-            args:
-              name: Marc</div>
+        hokos:
+          pre-run:
+            - task: print.name
+              if: ${{ args.i_am_sure == true }}
+              args:
+                name: Mary
+            - task: print.name
+              if: ${{ args.i_am_sure == true }}
+              args:
+                name: John
+            - task: print.name
+              if: ${{ args.i_am_sure == true }}
+              args:
+                name: Ellen
+            - task: print.name
+              if: ${{ args.i_am_sure == true }}
+              args:
+                name: Marc</div>
 </div>
 </div>
 </div>
