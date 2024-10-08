@@ -1,6 +1,21 @@
 # Release Notes
 ---
 
+# [1.17.0](https://github.com/osl-incubator/makim/compare/1.16.0...1.17.0) (2024-10-08)
+
+
+### Bug Fixes
+
+* Add missing single quote to the message about wrong command ([#111](https://github.com/osl-incubator/makim/issues/111)) ([af80420](https://github.com/osl-incubator/makim/commit/af80420aa3fa9ff7b1bc7cd5a4aab235f3769240))
+* Rename attribute shell to backend ([#114](https://github.com/osl-incubator/makim/issues/114)) ([7d617ce](https://github.com/osl-incubator/makim/commit/7d617ce54ad194fee59218d3c7478fb4219ff275))
+* **type-check:** update mypy configuration ([#117](https://github.com/osl-incubator/makim/issues/117)) ([f2bf92e](https://github.com/osl-incubator/makim/commit/f2bf92e2d20ab562cc211bdbe9ccbb2f1ff594dc))
+
+
+### Features
+
+* Add support for interactive args ([#112](https://github.com/osl-incubator/makim/issues/112)) ([f422e30](https://github.com/osl-incubator/makim/commit/f422e30904df2cc0c5e44a4eb5fa8eaa216b8ca6))
+* Change dependencies to hooks ([#115](https://github.com/osl-incubator/makim/issues/115)) ([be5c25b](https://github.com/osl-incubator/makim/commit/be5c25b3be7c8bb3b9ce1399ba09d6649cbcf0cc))
+
 # [1.16.0](https://github.com/osl-incubator/makim/compare/1.15.2...1.16.0) (2024-07-24)
 
 
