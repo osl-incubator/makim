@@ -17,6 +17,7 @@ import tempfile
 import warnings
 
 from copy import deepcopy
+from itertools import product
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union, cast
 
@@ -484,9 +485,6 @@ class Makim:
             else [matrix_config[k]]
             for k in keys
         ]
-
-        # Generate all combinations
-        from itertools import product
 
         combinations = []
         for combo in product(*values):
