@@ -1,0 +1,83 @@
+version: 1.0.0
+groups:
+  build:
+    vars:
+      app_name: "myapp"
+      base_image: "node:18"
+    tasks:
+      setup:
+        help: Setup development environment
+        matrix:
+          env:
+            - dev
+            - test
+            - prod
+          arch:
+            - amd64
+            - arm64
+        run: |
+          echo "[Setup] Environment: {{ matrix.env }}, Architecture: {{ matrix.arch }}"
+          echo "[Setup] Using base image: {{ vars.base_image }}"
+          echo "[Setup] Installing dependencies for {{ matrix.env }}"
+
+      lint:
+        help: Run linting checks
+        matrix:
+          type:
+            - eslint
+            - prettier
+          path:
+            - src
+            - tests
+        args:
+          fix:
+            type: bool
+            default: false
+            help: Automatically fix issues
+        run: |
+          echo "[Lint] Running {{ matrix.type }} on {{ matrix.path }}"
+          {% if args.fix %}
+          echo "[Lint] Auto-fixing enabled for {{ matrix.type }}"
+          {% endif %}
+
+  test:
+    vars:
+      timeout: "30s"
+    tasks:
+      unit:
+        help: Run unit tests across Node versions
+        matrix:
+          node:
+            - "16"
+            - "18"
+            - "20"
+          mode:
+            - basic
+            - coverage
+        run: |
+          echo "[Test] Using Node.js {{ matrix.node }}"
+          echo "[Test] Mode: {{ matrix.mode }}"
+          echo "[Test] Timeout set to {{ vars.timeout }}"
+
+      browser:
+        help: Run browser tests
+        matrix:
+          browser:
+            - chrome
+            - firefox
+          viewport:
+            - desktop
+            - mobile
+        args:
+          headless:
+            type: bool
+            default: true
+            help: Run in headless mode
+        run: |
+          echo "[Browser Test] Testing on {{ matrix.browser }}"
+          echo "[Browser Test] Viewport: {{ matrix.viewport }}"
+          {% if args.headless %}
+          echo "[Browser Test] Running in headless mode"
+          {% else %}
+          echo "[Browser Test] Running in GUI mode"
+          {% endif %}
