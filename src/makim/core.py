@@ -620,7 +620,7 @@ class Makim:
 
             # Render command with current matrix values
             current_cmd = TEMPLATE.from_string(cmd).render(
-                args=args_input, env=env, vars=current_vars
+                args=args_input, env=env, vars=current_vars, matrix=matrix_vars
             )
 
             if self.verbose:

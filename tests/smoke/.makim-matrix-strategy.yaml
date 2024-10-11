@@ -16,9 +16,9 @@ groups:
             - amd64
             - arm64
         run: |
-          echo "[Setup] Environment: {{ matrix.env }}, Architecture: {{ matrix.arch }}"
-          echo "[Setup] Using base image: {{ vars.base_image }}"
-          echo "[Setup] Installing dependencies for {{ matrix.env }}"
+          echo "[Setup] Environment: ${{ matrix.env }}, Architecture: ${{ matrix.arch }}"
+          echo "[Setup] Using base image: ${{ vars.base_image }}"
+          echo "[Setup] Installing dependencies for ${{ matrix.env }}"
 
       lint:
         help: Run linting checks
@@ -35,9 +35,9 @@ groups:
             default: false
             help: Automatically fix issues
         run: |
-          echo "[Lint] Running {{ matrix.type }} on {{ matrix.path }}"
+          echo "[Lint] Running ${{ matrix.type }} on ${{ matrix.path }}"
           {% if args.fix %}
-          echo "[Lint] Auto-fixing enabled for {{ matrix.type }}"
+          echo "[Lint] Auto-fixing enabled for ${{ matrix.type }}"
           {% endif %}
 
   test:
@@ -55,9 +55,9 @@ groups:
             - basic
             - coverage
         run: |
-          echo "[Test] Using Node.js {{ matrix.node }}"
-          echo "[Test] Mode: {{ matrix.mode }}"
-          echo "[Test] Timeout set to {{ vars.timeout }}"
+          echo "[Test] Using Node.js ${{ matrix.node }}"
+          echo "[Test] Mode: ${{ matrix.mode }}"
+          echo "[Test] Timeout set to ${{ vars.timeout }}"
 
       browser:
         help: Run browser tests
@@ -74,8 +74,8 @@ groups:
             default: true
             help: Run in headless mode
         run: |
-          echo "[Browser Test] Testing on {{ matrix.browser }}"
-          echo "[Browser Test] Viewport: {{ matrix.viewport }}"
+          echo "[Browser Test] Testing on ${{ matrix.browser }}"
+          echo "[Browser Test] Viewport: ${{ matrix.viewport }}"
           {% if args.headless %}
           echo "[Browser Test] Running in headless mode"
           {% else %}
