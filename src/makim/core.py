@@ -113,13 +113,6 @@ class Makim:
     group_data: dict[str, Any] = {}
     task_name: str = ''
     task_data: dict[str, Any] = {}
-    # matrix variables
-    matrix_config: dict[
-        str, Any
-    ] = {}  # stores the original matrix configuration
-    matrix_current: dict[
-        str, Any
-    ] = {}  # stores current matrix combination values
 
     def __init__(self) -> None:
         """Prepare the Makim class with the default configuration."""
@@ -459,6 +452,33 @@ class Makim:
                     else (False if is_bool else None)
                 )
 
+    def _log_command_execution(
+        self, execution_context: dict[str, Any], width: int
+    ) -> None:
+        """Log the command execution details.
+
+        execution_context should contain: args_input, current_vars,
+        env, and optionally matrix_vars
+        """
+        MakimLogs.print_info('=' * width)
+        MakimLogs.print_info(
+            'TARGET: ' + f'{self.group_name}.{self.task_name}'
+        )
+        MakimLogs.print_info('ARGS:')
+        MakimLogs.print_info(pprint.pformat(execution_context['args_input']))
+        MakimLogs.print_info('VARS:')
+        MakimLogs.print_info(pprint.pformat(execution_context['current_vars']))
+        MakimLogs.print_info('ENV:')
+        MakimLogs.print_info(str(execution_context['env']))
+
+        if execution_context.get('matrix_vars'):
+            MakimLogs.print_info('MATRIX:')
+            MakimLogs.print_info(
+                pprint.pformat(execution_context['matrix_vars'])
+            )
+
+        MakimLogs.print_info('-' * width)
+
     def _generate_matrix_combinations(
         self, matrix_config: dict[str, Any]
     ) -> list[dict[str, Any]]:
@@ -568,13 +588,13 @@ class Makim:
             )
 
         # Get matrix configuration if it exists
-        self.matrix_config = self.task_data.get('matrix', {})
-        matrix_combinations = self._generate_matrix_combinations(
-            self.matrix_config
-        )
+        matrix_combinations: list[dict[str, Any]] = [{}]
+        if matrix_config := self.task_data.get('matrix', {}):
+            matrix_combinations = self._generate_matrix_combinations(
+                matrix_config
+            )
 
         env, variables = self._load_scoped_data('task')
-
         self.env_scoped = deepcopy(env)
 
         args_input = {'file': self.file}
@@ -612,11 +632,14 @@ class Makim:
 
         # Run command for each matrix combination
         for matrix_vars in matrix_combinations:
-            self.matrix_current = matrix_vars
+            # Update environment variables
+            for k, v in env.items():
+                os.environ[k] = v
 
             # Create a copy of variables and update with matrix values
             current_vars = deepcopy(variables)
-            current_vars['matrix'] = self.matrix_current
+            if matrix_vars:
+                current_vars['matrix'] = matrix_vars
 
             # Render command with current matrix values
             current_cmd = TEMPLATE.from_string(cmd).render(
@@ -624,20 +647,15 @@ class Makim:
             )
 
             if self.verbose:
-                MakimLogs.print_info('=' * width)
-                MakimLogs.print_info(
-                    'TARGET: ' + f'{self.group_name}.{self.task_name}'
-                )
-                MakimLogs.print_info('ARGS:')
-                MakimLogs.print_info(pprint.pformat(args_input))
-                MakimLogs.print_info('VARS:')
-                MakimLogs.print_info(pprint.pformat(current_vars))
-                MakimLogs.print_info('ENV:')
-                MakimLogs.print_info(str(env))
-                if matrix_vars:
-                    MakimLogs.print_info('MATRIX:')
-                    MakimLogs.print_info(pprint.pformat(matrix_vars))
-                MakimLogs.print_info('-' * width)
+                # Prepare execution context for logging
+                execution_context = {
+                    'args_input': args_input,
+                    'current_vars': current_vars,
+                    'env': env,
+                    'matrix_vars': matrix_vars,
+                }
+                # Log command execution details
+                self._log_command_execution(execution_context, width)
                 MakimLogs.print_info(
                     '>>> ' + current_cmd.replace('\n', '\n>>> ')
                 )

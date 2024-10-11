@@ -86,6 +86,7 @@ groups:
             - task: smoke-tests.dir-relative-path
             - task: smoke-tests.interactive-args
             - task: smoke-tests.run-hooks
+            - task: smoke-tests.matrix
 
       ci:
         help: Run all tasks used on CI
@@ -390,6 +391,27 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
           makim $VERBOSE_FLAG --file $MAKIM_FILE build.compile
+
+      matrix:
+        help: Test makim with matrix combination
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-matrix-strategy.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.setup
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.lint
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.lint --fix
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.unit
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.browser
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.browser --headless
 
   error:
     help: This group helps tests failure tasks
