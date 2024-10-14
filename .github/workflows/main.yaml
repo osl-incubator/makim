@@ -146,6 +146,7 @@ jobs:
           activate-environment: makim
           auto-update-conda: true
           conda-solver: libmamba
+          python-version: "3.9"
 
       - name: Install dependencies
         run: |
