@@ -495,7 +495,7 @@ class Makim:
             List of dictionaries, each containing one possible combination
         """
         if not matrix_config:
-            return [{}]
+            return []
 
         # Convert matrix config into format suitable for product
         keys = list(matrix_config.keys())
@@ -588,7 +588,7 @@ class Makim:
             )
 
         # Get matrix configuration if it exists
-        matrix_combinations: list[dict[str, Any]] = [{}]
+        matrix_combinations: list[dict[str, Any]] = []
         if matrix_config := self.task_data.get('matrix', {}):
             matrix_combinations = self._generate_matrix_combinations(
                 matrix_config
@@ -631,7 +631,7 @@ class Makim:
         width, _ = get_terminal_size()
 
         # Run command for each matrix combination
-        for matrix_vars in matrix_combinations:
+        for matrix_vars in matrix_combinations or [{}]:
             # Update environment variables
             for k, v in env.items():
                 os.environ[k] = v
