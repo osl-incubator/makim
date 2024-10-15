@@ -23,11 +23,11 @@ exclude = [
 "makim" = "makim.__main__:run_app"
 
 [tool.poetry.dependencies]
-python = ">=3.8.1,<4"
+python = ">=3.9,<4"
 sh = ">=2.0.0"
 pyyaml = ">=5.0"
 jinja2 = ">=2.0"
-xonsh = ">=0.14.0"
+xonsh = ">=0.15.0"
 python-dotenv = ">=0.21.1"
 typer = ">=0.9.0"
 fuzzywuzzy = ">=0.18.0"
