@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.18.1](https://github.com/osl-incubator/makim/compare/1.18.0...1.18.1) (2024-10-15)
+
+
+### Bug Fixes
+
+* Fix xonsh version ([#120](https://github.com/osl-incubator/makim/issues/120)) ([e53e131](https://github.com/osl-incubator/makim/commit/e53e13112ba59b7641917ea6c1672233f4d41d64))
+
 # [1.18.0](https://github.com/osl-incubator/makim/compare/1.17.0...1.18.0) (2024-10-15)
 
 
