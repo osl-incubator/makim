@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.18.0](https://github.com/osl-incubator/makim/compare/1.17.0...1.18.0) (2024-10-15)
+
+
+### Features
+
+* Add matrix strategy ([#118](https://github.com/osl-incubator/makim/issues/118)) ([89894cf](https://github.com/osl-incubator/makim/commit/89894cf7ec10adf4cc0a8675382286fc5144b4fb))
+
 # [1.17.0](https://github.com/osl-incubator/makim/compare/1.16.0...1.17.0) (2024-10-08)
 
 
