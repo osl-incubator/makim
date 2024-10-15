@@ -17,6 +17,7 @@ import tempfile
 import warnings
 
 from copy import deepcopy
+from itertools import product
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union, cast
 
@@ -363,7 +364,7 @@ class Makim:
 
     def _load_scoped_data(
         self, scope: str
-    ) -> tuple[dict[str, str], dict[str, str]]:
+    ) -> tuple[dict[str, str], dict[str, Any]]:
         scope_options = ('global', 'group', 'task')
         if scope not in scope_options:
             raise Exception(f'The given scope `{scope}` is not valid.')
@@ -451,6 +452,66 @@ class Makim:
                     else (False if is_bool else None)
                 )
 
+    def _log_command_execution(
+        self, execution_context: dict[str, Any], width: int
+    ) -> None:
+        """Log the command execution details.
+
+        execution_context should contain: args_input, current_vars,
+        env, and optionally matrix_vars
+        """
+        MakimLogs.print_info('=' * width)
+        MakimLogs.print_info(
+            'TARGET: ' + f'{self.group_name}.{self.task_name}'
+        )
+        MakimLogs.print_info('ARGS:')
+        MakimLogs.print_info(pprint.pformat(execution_context['args_input']))
+        MakimLogs.print_info('VARS:')
+        MakimLogs.print_info(pprint.pformat(execution_context['current_vars']))
+        MakimLogs.print_info('ENV:')
+        MakimLogs.print_info(str(execution_context['env']))
+
+        if execution_context.get('matrix_vars'):
+            MakimLogs.print_info('MATRIX:')
+            MakimLogs.print_info(
+                pprint.pformat(execution_context['matrix_vars'])
+            )
+
+        MakimLogs.print_info('-' * width)
+
+    def _generate_matrix_combinations(
+        self, matrix_config: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+        """Generate all possible combinations from matrix configuration.
+
+        Parameters
+        ----------
+        matrix_config : dict
+            Dictionary containing matrix variables and their possible values
+
+        Returns
+        -------
+        list[dict]
+            List of dictionaries, each containing one possible combination
+        """
+        if not matrix_config:
+            return []
+
+        # Convert matrix config into format suitable for product
+        keys = list(matrix_config.keys())
+        values = [
+            matrix_config[k]
+            if isinstance(matrix_config[k], list)
+            else [matrix_config[k]]
+            for k in keys
+        ]
+
+        combinations = []
+        for combo in product(*values):
+            combinations.append(dict(zip(keys, combo)))
+
+        return combinations
+
     # run commands
     def _run_hooks(self, args: dict[str, Any], hook_type: str) -> None:
         if not self.task_data.get('hooks', {}).get(hook_type):
@@ -518,20 +579,22 @@ class Makim:
 
     def _run_command(self, args: dict[str, Any]) -> None:
         cmd = self.task_data.get('run', '').strip()
-        if 'vars' not in self.group_data:
-            self.group_data['vars'] = {}
 
-        if not isinstance(self.group_data['vars'], dict):
+        if not isinstance(self.group_data.get('vars', {}), dict):
             MakimLogs.raise_error(
                 '`vars` attribute inside the group '
                 f'{self.group_name} is not a dictionary.',
                 MakimError.MAKIM_VARS_ATTRIBUTE_INVALID,
             )
 
-        env, variables = self._load_scoped_data('task')
-        for k, v in env.items():
-            os.environ[k] = v
+        # Get matrix configuration if it exists
+        matrix_combinations: list[dict[str, Any]] = []
+        if matrix_config := self.task_data.get('matrix', {}):
+            matrix_combinations = self._generate_matrix_combinations(
+                matrix_config
+            )
 
+        env, variables = self._load_scoped_data('task')
         self.env_scoped = deepcopy(env)
 
         args_input = {'file': self.file}
@@ -565,36 +628,47 @@ class Makim:
                     MakimError.MAKIM_ARGUMENT_REQUIRED,
                 )
 
-        cmd = str(cmd)
-        cmd = TEMPLATE.from_string(cmd).render(
-            args=args_input, env=env, vars=variables
-        )
         width, _ = get_terminal_size()
 
-        if self.verbose:
-            MakimLogs.print_info('=' * width)
-            MakimLogs.print_info(
-                'TARGET: ' + f'{self.group_name}.{self.task_name}'
-            )
-            MakimLogs.print_info('ARGS:')
-            MakimLogs.print_info(pprint.pformat(args_input))
-            MakimLogs.print_info('VARS:')
-            MakimLogs.print_info(pprint.pformat(variables))
-            MakimLogs.print_info('ENV:')
-            MakimLogs.print_info(str(env))
-            MakimLogs.print_info('-' * width)
-            MakimLogs.print_info('>>> ' + cmd.replace('\n', '\n>>> '))
-            MakimLogs.print_info('=' * width)
+        # Run command for each matrix combination
+        for matrix_vars in matrix_combinations or [{}]:
+            # Update environment variables
+            for k, v in env.items():
+                os.environ[k] = v
 
-        if not self.dry_run and cmd:
-            self._call_shell_app(cmd)
+            # Create a copy of variables and update with matrix values
+            current_vars = deepcopy(variables)
+            if matrix_vars:
+                current_vars['matrix'] = matrix_vars
+
+            # Render command with current matrix values
+            current_cmd = TEMPLATE.from_string(cmd).render(
+                args=args_input, env=env, vars=current_vars, matrix=matrix_vars
+            )
+
+            if self.verbose:
+                # Prepare execution context for logging
+                execution_context = {
+                    'args_input': args_input,
+                    'current_vars': current_vars,
+                    'env': env,
+                    'matrix_vars': matrix_vars,
+                }
+                # Log command execution details
+                self._log_command_execution(execution_context, width)
+                MakimLogs.print_info(
+                    '>>> ' + current_cmd.replace('\n', '\n>>> ')
+                )
+                MakimLogs.print_info('=' * width)
+
+            if not self.dry_run and current_cmd:
+                self._call_shell_app(current_cmd)
 
         # move back the environment variable to the previous values
         os.environ.clear()
         os.environ.update(self.env_scoped)
 
-        # public methods
-
+    # public methods
     def load(
         self, file: str, dry_run: bool = False, verbose: bool = False
     ) -> None:
