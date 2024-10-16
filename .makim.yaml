@@ -424,3 +424,26 @@ groups:
         help: Raise an system error
         backend: bash
         run: exit 3
+
+  docker:
+    help: Tasks with docker
+    tasks:
+      build:
+        help: Build the dockerfile for ssh tests
+        dir: containers
+        run: docker build -t ssh-test .
+
+      start:
+        help: Start a service from the dockerfile for ssh tests
+        dir: containers
+        hooks:
+          pre-run:
+            - task: docker.build
+        run: docker run -d -p 2222:22 --rm ssh-test
+
+      test:
+        help: Test ssh connection with the docker service
+        dir: containers
+        run: |
+          # it requires the password manually
+          ssh -o StrictHostKeyChecking=no testuser@localhost -p 2222
