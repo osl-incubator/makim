@@ -12,7 +12,10 @@ packages = [
   {include = "makim", from="src"},
 ]
 
-include = ["src/makim/py.typed"]
+include = [
+  "src/makim/py.typed",
+  "src/makim/schema.json",
+]
 
 exclude = [
   ".git/*",
@@ -34,6 +37,7 @@ fuzzywuzzy = ">=0.18.0"
 python-levenshtein = ">=0.23.0"
 rich = ">=10.11.0"
 shellingham = ">=1.5.4"
+jsonschema = ">=4"
 
 [tool.poetry.group.dev.dependencies]
 containers-sugar = ">=1.11.1"

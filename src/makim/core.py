@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import copy
 import io
+import json
 import os
 import pprint
 import sys
@@ -26,10 +27,13 @@ import sh
 import yaml  # type: ignore
 
 from jinja2 import Environment
+from jsonschema import ValidationError, validate
 from typing_extensions import TypeAlias
 
 from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
+
+SUGAR_CURRENT_PATH = Path(__file__).parent
 
 AppConfigType: TypeAlias = Dict[str, Union[str, List[str]]]
 
@@ -183,6 +187,52 @@ class Makim:
                 MakimError.MAKIM_CONFIG_FILE_NOT_FOUND,
             )
 
+    def validate_config(self) -> None:
+        """
+        Validate the .makim.yaml against the predefined JSON Schema.
+
+        Raises
+        ------
+            MakimError: If the configuration does not conform to the schema.
+        """
+        try:
+            with open(SUGAR_CURRENT_PATH / 'schema.json', 'r') as schema_file:
+                schema = json.load(schema_file)
+
+            config_data = self.global_data
+
+            # Validate the configuration against the schema
+            validate(instance=config_data, schema=schema)
+
+            if self.verbose:
+                MakimLogs.print_info('Configuration validation successful.')
+
+        except ValidationError as ve:
+            error_message = f'Configuration validation error: {ve.message}'
+            MakimLogs.raise_error(
+                error_message, MakimError.CONFIG_VALIDATION_ERROR
+            )
+        except yaml.YAMLError as ye:
+            error_message = f'YAML parsing error: {ye}'
+            MakimLogs.raise_error(error_message, MakimError.YAML_PARSING_ERROR)
+        except json.JSONDecodeError as je:
+            error_message = f'JSON schema decoding error: {je}'
+            MakimLogs.raise_error(
+                error_message, MakimError.JSON_SCHEMA_DECODING_ERROR
+            )
+        except FileNotFoundError:
+            error_message = f'Configuration file {self.file} not found.'
+            MakimLogs.raise_error(
+                error_message, MakimError.MAKIM_CONFIG_FILE_NOT_FOUND
+            )
+        except Exception as e:
+            error_message = (
+                f'Unexpected error during configuration validation: {e}'
+            )
+            MakimLogs.raise_error(
+                error_message, MakimError.CONFIG_VALIDATION_UNEXPECTED_ERROR
+            )
+
     def _verify_config(self) -> None:
         if not len(self.global_data['groups']):
             MakimLogs.raise_error(
@@ -238,6 +288,8 @@ class Makim:
             content = f.read()
             content_io = io.StringIO(content)
             self.global_data = yaml.safe_load(content_io)
+
+        self.validate_config()
 
     def _resolve_working_directory(self, scope: str) -> Optional[Path]:
         scope_options = ('global', 'group', 'task')
