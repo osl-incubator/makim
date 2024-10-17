@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.19.0](https://github.com/osl-incubator/makim/compare/1.18.1...1.19.0) (2024-10-17)
+
+
+### Features
+
+* Check if the .makim.yaml file is valid according to the schema file ([#122](https://github.com/osl-incubator/makim/issues/122)) ([29d0b51](https://github.com/osl-incubator/makim/commit/29d0b5140b9c6c512ed2e06223fdbc4e98b8fa97))
+
 ## [1.18.1](https://github.com/osl-incubator/makim/compare/1.18.0...1.18.1) (2024-10-15)
 
 
