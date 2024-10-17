@@ -2,20 +2,33 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Makim Configuration Schema",
   "type": "object",
-  "required": ["version", "groups"],
+  "required": ["groups"],
   "properties": {
-    "version": {
-      "type": "string",
-      "pattern": "^\\d+\\.\\d+.*$",
-      "description": "Version of the Makim configuration."
-    },
     "env-file": {
       "type": "string",
       "description": "Path to the environment file."
     },
+    "env": {
+      "type": "object",
+      "description": "Environment variables for the group.",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "vars": {
+      "type": "object",
+      "description": "Variables for the group.",
+      "additionalProperties": {
+        "type": ["string", "number", "boolean", "array", "object"]
+      }
+    },
     "backend": {
       "type": "string",
       "description": "Shell backend to use."
+    },
+    "dir": {
+      "type": "string",
+      "description": "Change the directory to a specific path."
     },
     "groups": {
       "type": "object",
@@ -23,8 +36,12 @@
       "patternProperties": {
         "^[a-zA-Z0-9_-]+$": {
           "type": "object",
-          "required": ["help", "tasks"],
+          "required": ["tasks"],
           "properties": {
+            "backend": {
+              "type": "string",
+              "description": "Shell backend to use."
+            },
             "help": {
               "type": "string",
               "description": "Description of the group."
@@ -40,6 +57,10 @@
                 "type": "string"
               }
             },
+            "dir": {
+              "type": "string",
+              "description": "Change the directory to a specific path."
+            },
             "vars": {
               "type": "object",
               "description": "Variables for the group.",
@@ -53,7 +74,7 @@
               "patternProperties": {
                 "^[a-zA-Z0-9_-]+$": {
                   "type": "object",
-                  "required": ["help", "run"],
+                  "required": [],
                   "properties": {
                     "help": {
                       "type": "string",
@@ -78,6 +99,10 @@
                         "type": "string"
                       }
                     },
+                    "dir": {
+                      "type": "string",
+                      "description": "Change the directory to a specific path."
+                    },
                     "args": {
                       "type": "object",
                       "description": "Arguments for the task.",
@@ -92,7 +117,7 @@
                             },
                             "type": {
                               "type": "string",
-                              "enum": ["str", "bool"],
+                              "enum": ["string", "bool"],
                               "description": "Type of the argument."
                             },
                             "default": {
@@ -107,10 +132,27 @@
                               "type": "string",
                               "enum": ["store_true"],
                               "description": "Action to perform with the argument."
+                            },
+                            "interactive": {
+                              "type": "boolean",
+                              "description": "Set the argument as interactive."
                             }
                           },
                           "additionalProperties": false
                         }
+                      }
+                    },
+                    "vars": {
+                      "type": "object",
+                      "description": "Variables for the group.",
+                      "additionalProperties": {
+                        "type": [
+                          "string",
+                          "number",
+                          "boolean",
+                          "array",
+                          "object"
+                        ]
                       }
                     },
                     "hooks": {

@@ -1,4 +1,3 @@
-version: 1.0
 groups:
   nox:
     help: A set of functionality ported from noxfile.py

@@ -1,4 +1,3 @@
-version: 1.0
 compose-app: docker-compose
 services:
   project-name: makim-tests
