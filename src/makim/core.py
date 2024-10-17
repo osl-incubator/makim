@@ -33,7 +33,7 @@ from typing_extensions import TypeAlias
 from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
 
-SUGAR_CURRENT_PATH = Path(__file__).parent
+MAKIM_CURRENT_PATH = Path(__file__).parent
 
 AppConfigType: TypeAlias = Dict[str, Union[str, List[str]]]
 
@@ -175,19 +175,7 @@ class Makim:
     def _check_makim_file(self, file_path: str = '') -> bool:
         return Path(file_path or self.file).exists()
 
-    def _verify_task_conditional(self, conditional: Any) -> bool:
-        # todo: implement verification
-        print(f'condition {conditional} not verified')
-        return False
-
-    def _verify_args(self) -> None:
-        if not self._check_makim_file():
-            MakimLogs.raise_error(
-                f'Makim file {self.file} not found.',
-                MakimError.MAKIM_CONFIG_FILE_NOT_FOUND,
-            )
-
-    def validate_config(self) -> None:
+    def _validate_config(self) -> None:
         """
         Validate the .makim.yaml against the predefined JSON Schema.
 
@@ -196,7 +184,7 @@ class Makim:
             MakimError: If the configuration does not conform to the schema.
         """
         try:
-            with open(SUGAR_CURRENT_PATH / 'schema.json', 'r') as schema_file:
+            with open(MAKIM_CURRENT_PATH / 'schema.json', 'r') as schema_file:
                 schema = json.load(schema_file)
 
             config_data = self.global_data
@@ -231,6 +219,18 @@ class Makim:
             )
             MakimLogs.raise_error(
                 error_message, MakimError.CONFIG_VALIDATION_UNEXPECTED_ERROR
+            )
+
+    def _verify_task_conditional(self, conditional: Any) -> bool:
+        # todo: implement verification
+        print(f'condition {conditional} not verified')
+        return False
+
+    def _verify_args(self) -> None:
+        if not self._check_makim_file():
+            MakimLogs.raise_error(
+                f'Makim file {self.file} not found.',
+                MakimError.MAKIM_CONFIG_FILE_NOT_FOUND,
             )
 
     def _verify_config(self) -> None:
@@ -289,7 +289,7 @@ class Makim:
             content_io = io.StringIO(content)
             self.global_data = yaml.safe_load(content_io)
 
-        self.validate_config()
+        self._validate_config()
 
     def _resolve_working_directory(self, scope: str) -> Optional[Path]:
         scope_options = ('global', 'group', 'task')
