@@ -5,14 +5,14 @@ groups:
         help: Create a new user
         args:
           username:
-            type: str
+            type: string
             help: The username for the new user
           email:
-            type: str
+            type: string
             help: The email address for the new user
             interactive: true
           password:
-            type: str
+            type: string
             help: The password for the new user
             interactive: true
         run: |
@@ -27,11 +27,11 @@ groups:
         help: Get the weather forecast for a location
         args:
           city:
-            type: str
+            type: string
             help: Enter the city for weather forecast
             interactive: true
           country:
-            type: str
+            type: string
             help: Enter the country for weather forecast
             interactive: true
         run: |

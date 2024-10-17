@@ -1,4 +1,3 @@
-version: 1.0
 vars:
   global-var-str: "global"
   global-var-dict:

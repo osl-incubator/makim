@@ -1,4 +1,3 @@
-version: 1.0
 env-file: .env
 groups:
   main:
@@ -10,10 +9,7 @@ groups:
 
       nox:
         help: Test using nox
-        backend:
-          app: nox
-          args: ["--noxfile"]
-          suffix: .nox.py
+        backend: nox
 
         run: |
           import nox

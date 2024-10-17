@@ -1,4 +1,3 @@
-version: 1.0
 env-file: .env
 groups:
   default:
@@ -56,7 +55,7 @@ groups:
       skip-error:
         help: This task should print until item 3
         env:
-          RAISE_SUBPROC_ERROR: 0
+          RAISE_SUBPROC_ERROR: "0"
         run: |
           echo 1
           wrongecho

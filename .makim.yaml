@@ -1,4 +1,3 @@
-version: 1.0
 groups:
   clean:
     tasks:
@@ -87,6 +86,7 @@ groups:
             - task: smoke-tests.interactive-args
             - task: smoke-tests.run-hooks
             - task: smoke-tests.matrix
+            - task: makim smoke-tests.shell-app
 
       ci:
         help: Run all tasks used on CI
