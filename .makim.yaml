@@ -431,19 +431,31 @@ groups:
       build:
         help: Build the dockerfile for ssh tests
         dir: containers
+        env:
+          DOCKER_BUILDKIT: "0"
         run: docker build -t ssh-test .
 
       start:
         help: Start a service from the dockerfile for ssh tests
         dir: containers
+        env:
+          DOCKER_BUILDKIT: "0"
         hooks:
           pre-run:
             - task: docker.build
-        run: docker run -d -p 2222:22 --rm ssh-test
+        run: docker run -d -p 2222:22 --rm --name ssh-test ssh-test
+
+      stop:
+        help: Start a service from the dockerfile for ssh tests
+        dir: containers
+        env:
+          DOCKER_BUILDKIT: "0"
+        run: docker stop ssh-test
 
       test:
         help: Test ssh connection with the docker service
         dir: containers
         run: |
           # it requires the password manually
+          ssh-keygen -R "[localhost]:2222" || true
           ssh -o StrictHostKeyChecking=no testuser@localhost -p 2222
