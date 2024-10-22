@@ -1,0 +1,12 @@
+hosts:
+  test_container:
+    host: localhost
+    port: 2222
+    user: testuser
+    password: testpassword
+groups:
+  remote_test:
+    tasks:
+      echo_test:
+        remote: test_container
+        run: echo "Hello from remote host"
