@@ -5,8 +5,27 @@ hosts:
     user: testuser
     password: testpassword
 groups:
+  docker:
+    help: Tasks with docker
+    tasks:
+      start:
+        help: Start a service from the dockerfile for ssh tests
+        dir: ../../containers
+        hooks:
+          pre-run:
+            - task: docker.build
+        run: docker run -d -p 2222:22 --rm ssh-test
+
+      build:
+        help: Build the dockerfile for ssh tests
+        dir: ../../containers
+        run: docker build -t ssh-test .
+
   remote_test:
     tasks:
       echo_test:
+        hooks:
+          pre-run:
+            - task: docker.start
         remote: test_container
         run: echo "Hello from remote host"
