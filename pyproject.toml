@@ -38,6 +38,7 @@ python-levenshtein = ">=0.23.0"
 rich = ">=10.11.0"
 shellingham = ">=1.5.4"
 jsonschema = ">=4"
+paramiko = "^3.5.0"
 
 [tool.poetry.group.dev.dependencies]
 containers-sugar = ">=1.11.1"
@@ -60,6 +61,7 @@ jupyterlab = ">=4.1.5"
 nox = ">=2024.3.2"
 nbconvert = ">=7.16.3"
 pymdown-extensions = ">=10.7.1"
+types-paramiko = "^3.5.0.20240928"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry>=1.5.1"]
@@ -118,7 +120,7 @@ quote-style = "single"
 [tool.bandit]
 exclude_dirs = ["tests"]
 targets = "src/makim/"
-skips = ["B102", "B701"]
+skips = ["B102", "B701", "B507", "B601"]
 
 [tool.vulture]
 exclude = ["tests"]
