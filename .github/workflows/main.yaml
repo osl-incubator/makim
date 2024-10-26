@@ -113,6 +113,9 @@ jobs:
       - name: Run unit tests
         run: makim tests.unittest
 
+      - name: Run smoke test for interactive args
+        run: makim smoke-tests.interactive-args
+
       - name: Semantic Release PR Title Check
         uses: osl-incubator/semantic-release-pr-title-check@v1.4.1
         if: success() || failure()
