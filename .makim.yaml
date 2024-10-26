@@ -87,7 +87,7 @@ groups:
             - task: smoke-tests.run-hooks
             - task: smoke-tests.matrix
             - task: smoke-tests.shell-app
-            - task: smoke_tests.ssh-remote-execution
+            - task: smoke-tests.ssh-remote-execution
 
       ci:
         help: Run all tasks used on CI
