@@ -86,7 +86,8 @@ groups:
             - task: smoke-tests.interactive-args
             - task: smoke-tests.run-hooks
             - task: smoke-tests.matrix
-            - task: makim smoke-tests.shell-app
+            - task: smoke-tests.shell-app
+            - task: smoke_tests.ssh-remote-execution
 
       ci:
         help: Run all tasks used on CI
@@ -412,6 +413,22 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.unit
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.browser
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.browser --headless
+
+      ssh-remote-execution:
+        help: Test makim with remote execution
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-ssh.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE remote_test.echo_test
 
   error:
     help: This group helps tests failure tasks
