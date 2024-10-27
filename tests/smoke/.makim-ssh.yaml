@@ -10,7 +10,7 @@ groups:
     tasks:
       start:
         help: Start a service from the dockerfile for ssh tests
-        dir: ../../containers
+        dir: containers
         hooks:
           pre-run:
             - task: docker.build
@@ -18,7 +18,7 @@ groups:
 
       build:
         help: Build the dockerfile for ssh tests
-        dir: ../../containers
+        dir: containers
         run: docker build -t ssh-test .
 
   remote_test:
