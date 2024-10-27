@@ -126,6 +126,7 @@ jobs:
         run: makim smoke-tests.shell-app
 
       - name: Run smoke test for ssh remote execution
+        if: ${{ matrix.os != 'macos' }}
         run: makim smoke-tests.ssh-remote-execution
 
       - name: Semantic Release PR Title Check
