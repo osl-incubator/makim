@@ -475,4 +475,4 @@ groups:
         run: |
           # it requires the password manually
           ssh-keygen -R "[localhost]:2222" || true
-          ssh -o StrictHostKeyChecking=no testuser@localhost -p 2222
+          ssh -o StrictHostKeyChecking=no testuser@localhost -p 2222 'pwd'
