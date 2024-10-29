@@ -4,22 +4,30 @@ hosts:
     port: 2222
     user: testuser
     password: testpassword
+backend: bash
 groups:
   docker:
     help: Tasks with docker
     tasks:
+      build:
+        help: Build the dockerfile for ssh tests
+        dir: containers
+        run: docker build -t ssh-test .
+
       start:
         help: Start a service from the dockerfile for ssh tests
         dir: containers
         hooks:
           pre-run:
             - task: docker.build
-        run: docker run -d -p 2222:22 --rm ssh-test
+        run: docker run -d -p 2222:22 --rm --name ssh-test ssh-test
 
-      build:
-        help: Build the dockerfile for ssh tests
+      stop:
+        help: Start a service from the dockerfile for ssh tests
         dir: containers
-        run: docker build -t ssh-test .
+        env:
+          DOCKER_BUILDKIT: "0"
+        run: docker stop ssh-test
 
   remote_test:
     tasks:
@@ -27,5 +35,9 @@ groups:
         hooks:
           pre-run:
             - task: docker.start
+          post-run:
+            - task: docker.stop
         remote: test_container
-        run: echo "Hello from remote host"
+        run: |
+          hostname
+          pwd

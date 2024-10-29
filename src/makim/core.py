@@ -186,10 +186,14 @@ class Makim:
                 port=host_config.get('port', 22),
             )
 
-            stdin, stdout, stderr = ssh.exec_command(cmd)
+            stdin, stdout, stderr = ssh.exec_command(
+                cmd, environment=os.environ
+            )
 
             if self.verbose:
-                MakimLogs.print_info(stdout.read().decode('utf-8'))
+                MakimLogs.print_info(cmd)
+
+            MakimLogs.print_info(stdout.read().decode('utf-8'))
 
             error = stderr.read().decode('utf-8')
             if error:
