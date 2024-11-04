@@ -51,7 +51,7 @@
               "description": "Password for SSH connection (optional)."
             },
             "port": {
-              "type": "number",
+              "type": "string",
               "description": "SSH port number (default is 22)."
             }
           },
