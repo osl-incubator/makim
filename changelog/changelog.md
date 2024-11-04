@@ -1,6 +1,18 @@
 # Release Notes
 ---
 
+# [1.20.0](https://github.com/osl-incubator/makim/compare/1.19.0...1.20.0) (2024-11-04)
+
+
+### Bug Fixes
+
+* Fix validate_config function name ([#123](https://github.com/osl-incubator/makim/issues/123)) ([d92a9c6](https://github.com/osl-incubator/makim/commit/d92a9c65c9d754a8ada12e5f647cf8793f353956))
+
+
+### Features
+
+* **ssh:** support SSH-based command execution ([#124](https://github.com/osl-incubator/makim/issues/124)) ([dd0b2fd](https://github.com/osl-incubator/makim/commit/dd0b2fdd6bb1177aa594317d4094a0c82c6ad3f6))
+
 # [1.19.0](https://github.com/osl-incubator/makim/compare/1.18.1...1.19.0) (2024-10-17)
 
 
