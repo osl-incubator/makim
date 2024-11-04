@@ -20,9 +20,10 @@ import warnings
 from copy import deepcopy
 from itertools import product
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, TypedDict, Union, cast
 
 import dotenv
+import paramiko
 import sh
 import yaml  # type: ignore
 
@@ -58,6 +59,19 @@ TEMPLATE = Environment(
     variable_start_string='${{',
     variable_end_string='}}',
 )
+
+
+class HostConfig(TypedDict):
+    """
+    Type definition for SSH host configuration containing.
+
+    Includes username, host, port, and optional password.
+    """
+
+    username: str
+    host: str
+    port: int
+    password: Optional[str]
 
 
 def strip_recursively(data: Any) -> Any:
@@ -117,6 +131,7 @@ class Makim:
     group_data: dict[str, Any] = {}
     task_name: str = ''
     task_data: dict[str, Any] = {}
+    ssh_config: dict[str, Any] = {}
 
     def __init__(self) -> None:
         """Prepare the Makim class with the default configuration."""
@@ -171,6 +186,84 @@ class Makim:
                 MakimError.SH_KEYBOARD_INTERRUPT,
             )
         os.close(fd)
+
+    def _call_shell_remote(
+        self, cmd: str, host_config: dict[str, Any]
+    ) -> None:
+        try:
+            # Render the host configuration values
+            env, variables = self._load_scoped_data('task')
+            rendered_config = self._render_host_config(host_config, env)
+
+            ssh = paramiko.SSHClient()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+            ssh.connect(
+                username=rendered_config['username'],
+                password=rendered_config.get('password'),
+                hostname=rendered_config['host'],
+                port=rendered_config['port'],
+            )
+
+            stdin, stdout, stderr = ssh.exec_command(
+                cmd, environment=os.environ
+            )
+
+            if self.verbose:
+                MakimLogs.print_info(cmd)
+
+            MakimLogs.print_info(stdout.read().decode('utf-8'))
+
+            error = stderr.read().decode('utf-8')
+            if error:
+                MakimLogs.raise_error(error, MakimError.SSH_EXECUTION_ERROR)
+
+            ssh.close()
+        except paramiko.AuthenticationException:
+            MakimLogs.raise_error(
+                f"Authentication failed for host {host_config['host']}",
+                MakimError.SSH_AUTHENTICATION_FAILED,
+            )
+        except paramiko.SSHException as ssh_exception:
+            MakimLogs.raise_error(
+                f'SSH error: {ssh_exception!s}',
+                MakimError.SSH_CONNECTION_ERROR,
+            )
+        except Exception as e:
+            MakimLogs.raise_error(
+                f'Unexpected error during remote execution: {e!s}',
+                MakimError.SSH_EXECUTION_ERROR,
+            )
+
+    def _render_host_config(
+        self, host_config: dict[str, Any], env: dict[str, str]
+    ) -> HostConfig:
+        """Render the host configuration values using Jinja2 templates."""
+        rendered: dict[str, Optional[str]] = {}
+
+        for key in ('user', 'host', 'password', 'port'):
+            value = host_config.get(key, '')
+            str_value = str(value) if value is not None else ''
+
+            if isinstance(value, str):
+                str_value = TEMPLATE.from_string(str_value).render(env=env)
+
+            if key == 'port':
+                rendered[key] = str_value if str_value.isdigit() else '22'
+            elif key == 'password':
+                rendered[key] = str_value if str_value else None
+            else:
+                rendered[key] = str_value
+
+        return cast(
+            HostConfig,
+            {
+                'username': rendered['user'],
+                'host': rendered['host'],
+                'port': int(rendered['port']) if rendered['port'] else 22,
+                'password': rendered['password'],
+            },
+        )
 
     def _check_makim_file(self, file_path: str = '') -> bool:
         return Path(file_path or self.file).exists()
@@ -288,6 +381,8 @@ class Makim:
             content = f.read()
             content_io = io.StringIO(content)
             self.global_data = yaml.safe_load(content_io)
+
+        self.ssh_config = self.global_data.get('hosts', {})
 
         self._validate_config()
 
@@ -631,6 +726,7 @@ class Makim:
 
     def _run_command(self, args: dict[str, Any]) -> None:
         cmd = self.task_data.get('run', '').strip()
+        remote_host = self.task_data.get('remote')
 
         if not isinstance(self.group_data.get('vars', {}), dict):
             MakimLogs.raise_error(
@@ -682,8 +778,7 @@ class Makim:
 
         width, _ = get_terminal_size()
 
-        # Run command for each matrix combination
-        for matrix_vars in matrix_combinations or [{}]:
+        def process_matrix_combination(matrix_vars: dict[str, Any]) -> None:
             # Update environment variables
             for k, v in env.items():
                 os.environ[k] = v
@@ -714,7 +809,25 @@ class Makim:
                 MakimLogs.print_info('=' * width)
 
             if not self.dry_run and current_cmd:
-                self._call_shell_app(current_cmd)
+                if remote_host:
+                    host_config = self.ssh_config.get(remote_host)
+                    if not host_config:
+                        MakimLogs.raise_error(
+                            f"""
+                            Remote host '{remote_host}' configuration 
+                            not found.
+                            """,
+                            MakimError.REMOTE_HOST_NOT_FOUND,
+                        )
+                    self._call_shell_remote(
+                        current_cmd, cast(dict[str, Any], host_config)
+                    )
+                else:
+                    self._call_shell_app(current_cmd)
+
+        # Run command for each matrix combination
+        for matrix_vars in matrix_combinations or [{}]:
+            process_matrix_combination(matrix_vars)
 
         # move back the environment variable to the previous values
         os.environ.clear()

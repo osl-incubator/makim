@@ -1,0 +1,44 @@
+env-file: .env-ssh
+hosts:
+  test_container:
+    host: ${{ env.SSH_HOST }}
+    port: ${{ env.SSH_PORT }}
+    user: ${{ env.SSH_USER }}
+    password: ${{ env.SSH_PASSWORD }}
+backend: bash
+groups:
+  docker:
+    help: Tasks with docker
+    tasks:
+      build:
+        help: Build the dockerfile for ssh tests
+        dir: containers
+        run: docker build -t ssh-test .
+
+      start:
+        help: Start a service from the dockerfile for ssh tests
+        dir: containers
+        hooks:
+          pre-run:
+            - task: docker.build
+        run: docker run -d -p 2222:22 --rm --name ssh-test ssh-test
+
+      stop:
+        help: Start a service from the dockerfile for ssh tests
+        dir: containers
+        env:
+          DOCKER_BUILDKIT: "0"
+        run: docker stop ssh-test
+
+  remote_test:
+    tasks:
+      echo_test:
+        hooks:
+          pre-run:
+            - task: docker.start
+          post-run:
+            - task: docker.stop
+        remote: test_container
+        run: |
+          hostname
+          pwd

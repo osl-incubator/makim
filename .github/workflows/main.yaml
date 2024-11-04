@@ -113,6 +113,22 @@ jobs:
       - name: Run unit tests
         run: makim tests.unittest
 
+      - name: Run smoke test for interactive args
+        run: makim smoke-tests.interactive-args
+
+      - name: Run smoke test for hooks (pre and post)
+        run: makim smoke-tests.run-hooks
+
+      - name: Run smoke test for matrix combinations
+        run: makim smoke-tests.matrix
+
+      - name: Run smoke test for shell app
+        run: makim smoke-tests.shell-app
+
+      - name: Run smoke test for ssh remote execution
+        if: ${{ matrix.os != 'macos' }}
+        run: makim smoke-tests.ssh-remote-execution
+
       - name: Semantic Release PR Title Check
         uses: osl-incubator/semantic-release-pr-title-check@v1.4.1
         if: success() || failure()

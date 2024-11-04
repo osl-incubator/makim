@@ -30,6 +30,36 @@
       "type": "string",
       "description": "Change the directory to a specific path."
     },
+    "hosts": {
+      "type": "object",
+      "description": "Configuration for remote hosts.",
+      "patternProperties": {
+        "^[a-zA-Z0-9_-]+$": {
+          "type": "object",
+          "required": ["host", "user"],
+          "properties": {
+            "host": {
+              "type": "string",
+              "description": "Hostname or IP address of the remote host."
+            },
+            "user": {
+              "type": "string",
+              "description": "Username for SSH connection."
+            },
+            "password": {
+              "type": "string",
+              "description": "Password for SSH connection (optional)."
+            },
+            "port": {
+              "type": "string",
+              "description": "SSH port number (default is 22)."
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "groups": {
       "type": "object",
       "description": "Task groups defined by the user.",
@@ -76,6 +106,10 @@
                   "type": "object",
                   "required": [],
                   "properties": {
+                    "remote": {
+                      "type": "string",
+                      "description": "Name of the remote host to execute the task on."
+                    },
                     "help": {
                       "type": "string",
                       "description": "Description of the task."
