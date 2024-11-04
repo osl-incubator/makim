@@ -187,7 +187,9 @@ class Makim:
             )
         os.close(fd)
 
-    def _call_shell_remote(self, cmd: str, host_config: Any) -> None:
+    def _call_shell_remote(
+        self, cmd: str, host_config: dict[str, Any]
+    ) -> None:
         try:
             # Render the host configuration values
             env, variables = self._load_scoped_data('task')
@@ -237,32 +239,30 @@ class Makim:
         self, host_config: dict[str, Any], env: dict[str, str]
     ) -> HostConfig:
         """Render the host configuration values using Jinja2 templates."""
-        rendered: Dict[str, Any] = {}
+        rendered: dict[str, Optional[str]] = {}
 
         for key in ('user', 'host', 'password', 'port'):
             value = host_config.get(key, '')
+            str_value = str(value) if value is not None else ''
 
-            if value is None and key == 'password':
-                rendered[key] = None
-                continue
-
-            str_value = str(value) if value != '' else ''
             if isinstance(value, str):
                 str_value = TEMPLATE.from_string(str_value).render(env=env)
 
             if key == 'port':
-                rendered[key] = int(str_value) if str_value.isdigit() else 22
+                rendered[key] = str_value if str_value.isdigit() else '22'
             elif key == 'password':
                 rendered[key] = str_value if str_value else None
             else:
                 rendered[key] = str_value
 
-        # Cast to HostConfig to ensure type safety
-        return HostConfig(
-            username=rendered['user'],
-            host=rendered['host'],
-            port=rendered['port'],
-            password=rendered.get('password'),
+        return cast(
+            HostConfig,
+            {
+                'username': rendered['user'],
+                'host': rendered['host'],
+                'port': int(rendered['port']) if rendered['port'] else 22,
+                'password': rendered['password'],
+            },
         )
 
     def _check_makim_file(self, file_path: str = '') -> bool:
@@ -813,11 +813,15 @@ class Makim:
                     host_config = self.ssh_config.get(remote_host)
                     if not host_config:
                         MakimLogs.raise_error(
-                            f"Remote host '{remote_host}' configuration "
-                            'not found.',
+                            f"""
+                            Remote host '{remote_host}' configuration 
+                            not found.
+                            """,
                             MakimError.REMOTE_HOST_NOT_FOUND,
                         )
-                    self._call_shell_remote(current_cmd, host_config)
+                    self._call_shell_remote(
+                        current_cmd, cast(dict[str, Any], host_config)
+                    )
                 else:
                     self._call_shell_app(current_cmd)
 
