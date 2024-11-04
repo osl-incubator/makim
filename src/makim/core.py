@@ -196,16 +196,11 @@ class Makim:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            # Use typed dict values to ensure correct types for paramiko
             ssh.connect(
-                username=rendered_config[
-                    'username'
-                ],  # Already str from _render_host_config
-                password=rendered_config.get(
-                    'password'
-                ),  # Already Optional[str]
-                hostname=rendered_config['host'],  # Already str
-                port=rendered_config['port'],  # Already int
+                username=rendered_config['username'],
+                password=rendered_config.get('password'),
+                hostname=rendered_config['host'],
+                port=rendered_config['port'],
             )
 
             stdin, stdout, stderr = ssh.exec_command(
@@ -244,7 +239,6 @@ class Makim:
         """Render the host configuration values using Jinja2 templates."""
         rendered: Dict[str, Any] = {}
 
-        # Handle each field with appropriate type conversion
         for key in ('username', 'host', 'password', 'port'):
             value = host_config.get(key, '')
 
@@ -252,19 +246,15 @@ class Makim:
                 rendered[key] = None
                 continue
 
-            # Convert to string and render if it's a template
             str_value = str(value) if value != '' else ''
             if isinstance(value, str):
                 str_value = TEMPLATE.from_string(str_value).render(env=env)
 
-            # Handle each field according to its required type
             if key == 'port':
                 rendered[key] = int(str_value) if str_value.isdigit() else 22
             elif key == 'password':
                 rendered[key] = str_value if str_value else None
-            else:  # username and host
-                if not str_value:
-                    raise ValueError(f'{key} is required and cannot be empty')
+            else:
                 rendered[key] = str_value
 
         # Ensure all required fields are present
