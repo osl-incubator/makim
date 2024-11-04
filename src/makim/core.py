@@ -239,7 +239,7 @@ class Makim:
         """Render the host configuration values using Jinja2 templates."""
         rendered: Dict[str, Any] = {}
 
-        for key in ('username', 'host', 'password', 'port'):
+        for key in ('user', 'host', 'password', 'port'):
             value = host_config.get(key, '')
 
             if value is None and key == 'password':
@@ -257,13 +257,9 @@ class Makim:
             else:
                 rendered[key] = str_value
 
-        # Ensure all required fields are present
-        if 'port' not in rendered:
-            rendered['port'] = 22
-
         # Cast to HostConfig to ensure type safety
         return HostConfig(
-            username=rendered['username'],
+            username=rendered['user'],
             host=rendered['host'],
             port=rendered['port'],
             password=rendered.get('password'),
