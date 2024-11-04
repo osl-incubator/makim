@@ -20,7 +20,7 @@ import warnings
 from copy import deepcopy
 from itertools import product
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, TypedDict, Union, cast
 
 import dotenv
 import paramiko
@@ -59,6 +59,19 @@ TEMPLATE = Environment(
     variable_start_string='${{',
     variable_end_string='}}',
 )
+
+
+class HostConfig(TypedDict):
+    """
+    Type definition for SSH host configuration containing.
+
+    Includes username, host, port, and optional password.
+    """
+
+    username: str
+    host: str
+    port: int
+    password: Optional[str]
 
 
 def strip_recursively(data: Any) -> Any:
@@ -176,14 +189,23 @@ class Makim:
 
     def _call_shell_remote(self, cmd: str, host_config: Any) -> None:
         try:
+            # Render the host configuration values
+            env, variables = self._load_scoped_data('task')
+            rendered_config = self._render_host_config(host_config, env)
+
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
+            # Use typed dict values to ensure correct types for paramiko
             ssh.connect(
-                username=host_config['user'],
-                password=host_config.get('password'),
-                hostname=host_config['host'],
-                port=host_config.get('port', 22),
+                username=rendered_config[
+                    'username'
+                ],  # Already str from _render_host_config
+                password=rendered_config.get(
+                    'password'
+                ),  # Already Optional[str]
+                hostname=rendered_config['host'],  # Already str
+                port=rendered_config['port'],  # Already int
             )
 
             stdin, stdout, stderr = ssh.exec_command(
@@ -215,6 +237,47 @@ class Makim:
                 f'Unexpected error during remote execution: {e!s}',
                 MakimError.SSH_EXECUTION_ERROR,
             )
+
+    def _render_host_config(
+        self, host_config: dict[str, Any], env: dict[str, str]
+    ) -> HostConfig:
+        """Render the host configuration values using Jinja2 templates."""
+        rendered: Dict[str, Any] = {}
+
+        # Handle each field with appropriate type conversion
+        for key in ('username', 'host', 'password', 'port'):
+            value = host_config.get(key, '')
+
+            if value is None and key == 'password':
+                rendered[key] = None
+                continue
+
+            # Convert to string and render if it's a template
+            str_value = str(value) if value != '' else ''
+            if isinstance(value, str):
+                str_value = TEMPLATE.from_string(str_value).render(env=env)
+
+            # Handle each field according to its required type
+            if key == 'port':
+                rendered[key] = int(str_value) if str_value.isdigit() else 22
+            elif key == 'password':
+                rendered[key] = str_value if str_value else None
+            else:  # username and host
+                if not str_value:
+                    raise ValueError(f'{key} is required and cannot be empty')
+                rendered[key] = str_value
+
+        # Ensure all required fields are present
+        if 'port' not in rendered:
+            rendered['port'] = 22
+
+        # Cast to HostConfig to ensure type safety
+        return HostConfig(
+            username=rendered['username'],
+            host=rendered['host'],
+            port=rendered['port'],
+            password=rendered.get('password'),
+        )
 
     def _check_makim_file(self, file_path: str = '') -> bool:
         return Path(file_path or self.file).exists()

@@ -1,9 +1,10 @@
+env-file: .env-ssh
 hosts:
   test_container:
-    host: localhost
-    port: 2222
-    user: testuser
-    password: testpassword
+    host: ${{ env.SSH_HOST }}
+    port: ${{ env.SSH_PORT }}
+    user: ${{ env.SSH_USER }}
+    password: ${{ env.SSH_PASSWORD }}
 backend: bash
 groups:
   docker:
