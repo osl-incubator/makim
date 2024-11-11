@@ -270,6 +270,35 @@
         }
       },
       "additionalProperties": false
+    },
+    "scheduler": {
+      "type": "object",
+      "description": "Scheduler configuration for tasks",
+      "patternProperties": {
+        "^[a-zA-Z0-9_-]+$": {
+          "type": "object",
+          "required": ["schedule", "task"],
+          "properties": {
+            "schedule": {
+              "type": "string",
+              "description": "Cron-style schedule for the task (e.g., '* * * * *' for every minute)"
+            },
+            "task": {
+              "type": "string",
+              "description": "Full task path in the format 'group.task'"
+            },
+            "args": {
+              "type": "object",
+              "description": "Arguments to pass to the scheduled task",
+              "additionalProperties": {
+                "type": ["string", "boolean"]
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false
