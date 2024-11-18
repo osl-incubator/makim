@@ -1,20 +1,16 @@
 """Manages scheduled tasks for Makim using APScheduler."""
 
 import asyncio
-
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-
-from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED
 from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from croniter import croniter
-
 from makim.core import Makim
 from makim.logs import MakimError, MakimLogs
-
 
 class MakimScheduler:
     """Manages scheduled tasks for Makim using APScheduler."""
@@ -45,9 +41,7 @@ class MakimScheduler:
         )
 
         # Listen for job events
-        self.scheduler.add_listener(
-            self._log_job_event, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR
-        )
+        self.scheduler.add_listener(self._log_job_event, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
 
     def _ensure_db_directory(self) -> None:
         """Ensure the database directory exists."""
@@ -75,9 +69,9 @@ class MakimScheduler:
         """Log job execution success or failure."""
         job = self.scheduler.get_job(event.job_id)
         if event.exception:
-            MakimLogs.print_error(f'Job {job.id} failed: {event.exception}')
+            MakimLogs.print_error(f"Job {job.id} failed: {event.exception}")
         else:
-            MakimLogs.print_info(f'Job {job.id} executed successfully.')
+            MakimLogs.print_info(f"Job {job.id} executed successfully.")
 
     def _validate_and_parse_schedule(self, schedule: str) -> dict:
         """Validate and parse cron expressions."""
@@ -98,7 +92,7 @@ class MakimScheduler:
             return cron_params
         except ValueError:
             MakimLogs.raise_error(
-                f'Invalid cron expression: {schedule}',
+                f"Invalid cron expression: {schedule}",
                 MakimError.SCHEDULER_INVALID_SCHEDULE,
             )
 
@@ -150,6 +144,22 @@ class MakimScheduler:
                 f"Failed to remove job '{job_id}': {e!s}",
                 MakimError.SCHEDULER_JOB_ERROR,
             )
+
+    # def get_job_status(self, job_id: str) -> dict:
+    #     """Get the status of a scheduled job."""
+    #     job = self.scheduler.get_job(job_id)
+    #     if not job:
+    #         MakimLogs.raise_error(
+    #             f"Job '{job_id}' not found", MakimError.SCHEDULER_JOB_NOT_FOUND
+    #         )
+
+    #     return {
+    #         'id': job.id,
+    #         'next_run': job.next_run_time,
+    #         'last_run': job.last_run_time,  # New attribute added
+    #         'schedule': str(job.trigger),
+    #         'active': job.next_run_time is not None,
+    #     }
 
     def list_jobs(self) -> list[dict[str, Any]]:
         """List all scheduled jobs."""

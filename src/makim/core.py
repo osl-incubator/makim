@@ -33,6 +33,7 @@ from typing_extensions import TypeAlias
 
 from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
+from makim.scheduler import MakimScheduler
 
 MAKIM_CURRENT_PATH = Path(__file__).parent
 
@@ -145,6 +146,7 @@ class Makim:
         self.shell_app = sh.xonsh
         self.shell_args: list[str] = []
         self.tmp_suffix: str = '.makim'
+        self.scheduler = MakimScheduler(self)  # Initialize the scheduler
 
     def _call_shell_app(self, cmd: str) -> None:
         self._load_shell_app()
@@ -659,6 +661,34 @@ class Makim:
 
         return combinations
 
+    # scheduler methods
+    def add_scheduled_job(self, job_id: str, task_name: str, schedule: str, args: dict = None) -> None:
+        """Add a new scheduled job."""
+        self.scheduler.add_job(job_id, task_name, schedule, args)
+
+    def remove_scheduled_job(self, job_id: str) -> None:
+        """Remove a scheduled job."""
+        self.scheduler.remove_job(job_id)
+
+    def list_scheduled_jobs(self) -> list[dict]:
+        """List all scheduled jobs."""
+        return self.scheduler.list_jobs()
+
+    # def get_scheduled_job_status(self, job_id: str) -> dict:
+    #     """Get the status of a scheduled job."""
+    #     return self.scheduler.get_job_status(job_id)
+
+    def load_scheduled_tasks(self) -> None:
+        """Load scheduled tasks from the configuration."""
+        if 'scheduler' in self.global_data:
+            scheduler_config = self.global_data['scheduler']
+            for job_id, job_config in scheduler_config.items():
+                task_name = job_config.get('task')
+                schedule = job_config.get('schedule')
+                args = job_config.get('args', {})
+                if task_name and schedule:
+                    self.add_scheduled_job(job_id, task_name, schedule, args)
+
     # run commands
     def _run_hooks(self, args: dict[str, Any], hook_type: str) -> None:
         if not self.task_data.get('hooks', {}).get(hook_type):
@@ -854,6 +884,7 @@ class Makim:
         self._verify_args()
         self._change_task(args['task'])
         self._load_task_args()
+        self.load_scheduled_tasks()
 
         # commands
         if self.task_data.get('if') and not self._verify_task_conditional(
