@@ -39,6 +39,7 @@ rich = ">=10.11.0"
 shellingham = ">=1.5.4"
 jsonschema = ">=4"
 paramiko = "^3.5.0"
+croniter = "^5.0.1"
 
 [tool.poetry.group.dev.dependencies]
 containers-sugar = ">=1.11.1"
