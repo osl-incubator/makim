@@ -120,7 +120,6 @@ def run_app() -> None:
     )
 
     # create tasks data
-    # group_names = list(makim.global_data.get('groups', {}).keys())
     tasks: dict[str, Any] = {}
     for group_name, group_data in makim.global_data.get('groups', {}).items():
         for task_name, task_data in group_data.get('tasks', {}).items():
