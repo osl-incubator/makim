@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Callable, Dict, Optional, Type, Union, cast
 
 import click
+import typer  # noqa
 
 from fuzzywuzzy import process
 from typer import Typer
