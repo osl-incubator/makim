@@ -2,79 +2,12 @@
 
 from __future__ import annotations
 
-import os
-import sys
-
 from typing import Any, Callable, Dict, Optional, Type, Union, cast
 
 import click
-import typer
 
 from fuzzywuzzy import process
-
-from makim import __version__
-from makim.core import Makim
-
-CLI_ROOT_FLAGS_VALUES_COUNT = {
-    '--dry-run': 0,
-    '--file': 1,
-    '--help': 0,  # not necessary to store this value
-    '--verbose': 0,
-    '--version': 0,  # not necessary to store this value
-}
-
-app = typer.Typer(
-    help=(
-        'Makim is a tool that helps you to organize '
-        'and simplify your helper commands.'
-    ),
-    epilog=(
-        'If you have any problem, open an issue at: '
-        'https://github.com/osl-incubator/makim'
-    ),
-)
-
-makim: Makim = Makim()
-
-
-@app.callback(invoke_without_command=True)
-def main(
-    ctx: typer.Context,
-    version: bool = typer.Option(
-        None,
-        '--version',
-        '-v',
-        is_flag=True,
-        help='Show the version and exit',
-    ),
-    file: str = typer.Option(
-        '.makim.yaml',
-        '--file',
-        help='Makim config file',
-    ),
-    dry_run: bool = typer.Option(
-        None,
-        '--dry-run',
-        is_flag=True,
-        help='Execute the command in dry mode',
-    ),
-    verbose: bool = typer.Option(
-        None,
-        '--verbose',
-        is_flag=True,
-        help='Execute the command in verbose mode',
-    ),
-) -> None:
-    """Process envers for specific flags, otherwise show the help menu."""
-    typer.echo(f'Makim file: {file}')
-
-    if version:
-        typer.echo(f'Version: {__version__}')
-        raise typer.Exit()
-
-    if ctx.invoked_subcommand is None:
-        typer.echo(ctx.get_help())
-        raise typer.Exit(0)
+from typer import Typer
 
 
 def suggest_command(user_input: str, available_commands: list[str]) -> str:
@@ -263,7 +196,9 @@ def apply_click_options(
     return command_function
 
 
-def create_dynamic_command(name: str, args: dict[str, str]) -> None:
+def create_dynamic_command(
+    app: Typer, name: str, args: dict[str, str]
+) -> None:
     """
     Dynamically create a Typer command with the specified options.
 
@@ -313,130 +248,53 @@ def create_dynamic_command(name: str, args: dict[str, str]) -> None:
         dynamic_command = apply_click_options(dynamic_command, options_data)
 
 
-def extract_root_config(
-    cli_list: list[str] = sys.argv,
-) -> dict[str, str | bool]:
-    """Extract the root configuration from the CLI."""
-    params = cli_list[1:]
-
-    # default values
-    makim_file = '.makim.yaml'
-    dry_run = False
-    verbose = False
-
-    try:
-        idx = 0
-        while idx < len(params):
-            arg = params[idx]
-            if arg not in CLI_ROOT_FLAGS_VALUES_COUNT:
-                break
-
-            if arg == '--file':
-                try:
-                    makim_file = params[idx + 1]
-                except IndexError:
-                    pass
-            elif arg == '--dry-run':
-                dry_run = True
-            elif arg == '--verbose':
-                verbose = True
-
-            idx += 1 + CLI_ROOT_FLAGS_VALUES_COUNT[arg]
-    except Exception:
-        red_text = typer.style(
-            'The makim config file was not correctly detected. '
-            'Using the default .makim.yaml.',
-            fg=typer.colors.RED,
-            bold=True,
-        )
-        typer.echo(red_text, err=True, color=True)
-
-    return {
-        'file': makim_file,
-        'dry_run': dry_run,
-        'verbose': verbose,
-    }
-
-
-def _get_command_from_cli() -> str:
+def create_dynamic_command_cron(
+    app: Typer, name: str, args: dict[str, str]
+) -> None:
     """
-    Get the group and task from CLI.
+    Dynamically create a Typer command with the specified options.
 
-    This function is based on `CLI_ROOT_FLAGS_VALUES_COUNT`.
+    Parameters
+    ----------
+    name : str
+        The command name.
+    args : dict
+        The command arguments and options.
     """
-    params = sys.argv[1:]
-    command = ''
+    args_str = create_args_string(args)
+    args_param_list = [f'"task": "{name}"']
 
-    try:
-        idx = 0
-        while idx < len(params):
-            arg = params[idx]
-            if arg not in CLI_ROOT_FLAGS_VALUES_COUNT:
-                command = f'flag `{arg}`' if arg.startswith('--') else arg
-                break
+    args_data = cast(Dict[str, Dict[str, str]], args.get('args', {}))
 
-            idx += 1 + CLI_ROOT_FLAGS_VALUES_COUNT[arg]
-    except Exception as e:
-        print(e)
+    for arg, arg_details in args_data.items():
+        arg_clean = arg.replace('-', '_')
+        args_param_list.append(f'"--{arg}": {arg_clean}')
 
-    return command
+    args_param_str = '{' + ','.join(args_param_list) + '}'
+    group_name = 'cron'
 
-
-def run_app() -> None:
-    """Run the typer app."""
-    root_config = extract_root_config()
-
-    config_file_path = cast(str, root_config.get('file', '.makim.yaml'))
-
-    cli_completion_words = [
-        w for w in os.getenv('COMP_WORDS', '').split('\n') if w
-    ]
-
-    if not makim._check_makim_file(config_file_path) and cli_completion_words:
-        # autocomplete call
-        root_config = extract_root_config(cli_completion_words)
-        config_file_path = cast(str, root_config.get('file', '.makim.yaml'))
-        if not makim._check_makim_file(config_file_path):
-            return
-
-    makim.load(
-        file=config_file_path,
-        dry_run=cast(bool, root_config.get('dry_run', False)),
-        verbose=cast(bool, root_config.get('verbose', False)),
+    decorator = app.command(
+        name,
+        help=args.get('help', ''),
+        rich_help_panel=group_name,
     )
 
-    # create tasks data
-    # group_names = list(makim.global_data.get('groups', {}).keys())
-    tasks: dict[str, Any] = {}
-    for group_name, group_data in makim.global_data.get('groups', {}).items():
-        for task_name, task_data in group_data.get('tasks', {}).items():
-            tasks[f'{group_name}.{task_name}'] = task_data
+    function_code = f'def dynamic_command({args_str}):\n'
 
-    # Add dynamically created commands to Typer app
-    for name, args in tasks.items():
-        create_dynamic_command(name, args)
-    try:
-        app()
-    except SystemExit as e:
-        # code 2 means code not found
-        error_code = 2
-        if e.code != error_code:
-            raise e
+    # handle interactive prompts
+    for arg, arg_details in args_data.items():
+        arg_clean = arg.replace('-', '_')
+        if arg_details.get('interactive', False):
+            function_code += f'    if {arg_clean} is None:\n'
+            function_code += f"        {arg_clean} = click.prompt('{arg}')\n"
 
-        command_used = _get_command_from_cli()
+    function_code += f'    makim.run({args_param_str})\n'
 
-        available_cmds = [
-            cmd.name for cmd in app.registered_commands if cmd.name is not None
-        ]
-        suggestion = suggest_command(command_used, available_cmds)
+    local_vars: dict[str, Any] = {}
+    exec(function_code, globals(), local_vars)
+    dynamic_command = decorator(local_vars['dynamic_command'])
 
-        typer.secho(
-            f"Command {command_used} not found. Did you mean '{suggestion}'?",
-            fg='red',
-        )
-
-        raise e
-
-
-if __name__ == '__main__':
-    run_app()
+    # Apply Click options to the Typer command
+    if 'args' in args:
+        options_data = cast(Dict[str, Dict[str, Any]], args.get('args', {}))
+        dynamic_command = apply_click_options(dynamic_command, options_data)
