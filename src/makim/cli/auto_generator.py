@@ -10,6 +10,8 @@ import typer  # noqa
 from fuzzywuzzy import process
 from typer import Typer
 
+from makim.core import Makim
+
 
 def suggest_command(user_input: str, available_commands: list[str]) -> str:
     """
@@ -198,7 +200,7 @@ def apply_click_options(
 
 
 def create_dynamic_command(
-    app: Typer, name: str, args: dict[str, str]
+    makim: Makim, app: Typer, name: str, args: dict[str, str]
 ) -> None:
     """
     Dynamically create a Typer command with the specified options.
@@ -250,7 +252,7 @@ def create_dynamic_command(
 
 
 def create_dynamic_command_cron(
-    app: Typer, name: str, args: dict[str, str]
+    makim: Makim, app: Typer, name: str, args: dict[str, str]
 ) -> None:
     """
     Dynamically create a Typer command with the specified options.

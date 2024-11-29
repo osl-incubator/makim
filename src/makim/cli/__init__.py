@@ -137,7 +137,7 @@ def run_app() -> None:
             'scheduler', {}
         ).items():
             create_dynamic_command_cron(
-                typer_cron, schedule_name, schedule_params or {}
+                makim, typer_cron, schedule_name, schedule_params or {}
             )
 
         # Add cron command
@@ -145,7 +145,7 @@ def run_app() -> None:
 
     # Add dynamically commands to Typer app
     for name, args in tasks.items():
-        create_dynamic_command(app, name, args)
+        create_dynamic_command(makim, app, name, args)
 
     try:
         app()
