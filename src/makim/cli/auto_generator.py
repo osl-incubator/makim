@@ -242,7 +242,10 @@ def create_dynamic_command(
     function_code += f'    makim.run({args_param_str})\n'
 
     local_vars: dict[str, Any] = {}
-    exec(function_code, globals(), local_vars)
+    global_vars: dict[str, Any] = globals()
+    global_vars['makim'] = makim
+
+    exec(function_code, global_vars, local_vars)
     dynamic_command = decorator(local_vars['dynamic_command'])
 
     # Apply Click options to the Typer command
@@ -278,5 +281,8 @@ def create_dynamic_command_cron(
     function_code += f'    makim.run({args_param_str})\n'
 
     local_vars: dict[str, Any] = {}
-    exec(function_code, globals(), local_vars)
+    global_vars: dict[str, Any] = globals()
+    global_vars['makim'] = makim
+
+    exec(function_code, global_vars, local_vars)
     decorator(local_vars['dynamic_command'])
