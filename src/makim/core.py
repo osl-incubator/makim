@@ -814,7 +814,7 @@ class Makim:
                     if not host_config:
                         MakimLogs.raise_error(
                             f"""
-                            Remote host '{remote_host}' configuration 
+                            Remote host '{remote_host}' configuration
                             not found.
                             """,
                             MakimError.REMOTE_HOST_NOT_FOUND,
