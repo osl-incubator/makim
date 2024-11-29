@@ -261,15 +261,7 @@ def create_dynamic_command_cron(
     args : dict
         The command arguments and options.
     """
-    args_str = create_args_string(args)
     args_param_list = [f'"task": "{name}"']
-
-    args_data = cast(Dict[str, Dict[str, str]], args.get('args', {}))
-
-    for arg, arg_details in args_data.items():
-        arg_clean = arg.replace('-', '_')
-        args_param_list.append(f'"--{arg}": {arg_clean}')
-
     args_param_str = '{' + ','.join(args_param_list) + '}'
     group_name = 'cron'
 
@@ -279,22 +271,9 @@ def create_dynamic_command_cron(
         rich_help_panel=group_name,
     )
 
-    function_code = f'def dynamic_command({args_str}):\n'
-
-    # handle interactive prompts
-    for arg, arg_details in args_data.items():
-        arg_clean = arg.replace('-', '_')
-        if arg_details.get('interactive', False):
-            function_code += f'    if {arg_clean} is None:\n'
-            function_code += f"        {arg_clean} = click.prompt('{arg}')\n"
-
+    function_code = 'def dynamic_command():\n'
     function_code += f'    makim.run({args_param_str})\n'
 
     local_vars: dict[str, Any] = {}
     exec(function_code, globals(), local_vars)
-    dynamic_command = decorator(local_vars['dynamic_command'])
-
-    # Apply Click options to the Typer command
-    if 'args' in args:
-        options_data = cast(Dict[str, Dict[str, Any]], args.get('args', {}))
-        dynamic_command = apply_click_options(dynamic_command, options_data)
+    decorator(local_vars['dynamic_command'])

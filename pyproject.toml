@@ -125,7 +125,7 @@ skips = ["B102", "B701", "B507", "B601"]
 [tool.vulture]
 exclude = ["tests"]
 ignore_decorators = []
-ignore_names = []
+ignore_names = ["verbose", "dry_run"]
 make_whitelist = true
 min_confidence = 80
 paths = ["src/makim/"]

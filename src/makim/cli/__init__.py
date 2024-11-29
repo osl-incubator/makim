@@ -126,31 +126,6 @@ def run_app() -> None:
         for task_name, task_data in group_data.get('tasks', {}).items():
             tasks[f'{group_name}.{task_name}'] = task_data
 
-    # add dummy test data:
-    """
-    scheduler:
-        build:
-            schedule: "* * * * *"  # hourly, daily, weekly, monthly, yearly
-            task: main.build
-            args:
-                clean: true
-        clean:
-            schedule: "* * * * *"
-            task: main.clean
-    """
-
-    makim.global_data['scheduler'] = {
-        'build': {
-            'schedule': '* * * * *',
-            'task': 'main.build',
-            'args': {'clean': True},
-        },
-        'clean': {
-            'schedule': '* * * * *',
-            'task': 'main.clean',
-        },
-    }
-
     # Add dynamically cron commands to Typer app
     if 'scheduler' in makim.global_data:
         typer_cron = typer.Typer(
