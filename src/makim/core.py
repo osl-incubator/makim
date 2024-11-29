@@ -745,7 +745,7 @@ class Makim:
         env, variables = self._load_scoped_data('task')
         self.env_scoped = deepcopy(env)
 
-        args_input = {'file': self.file}
+        args_input: dict[str, str | bool | float | int] = {'file': self.file}
         for k, v in self.task_data.get('args', {}).items():
             if not isinstance(v, dict):
                 raise Exception('`args` attribute should be a dictionary.')

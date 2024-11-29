@@ -36,5 +36,5 @@ def test_failure(task, args, error_code):
     os._exit = sys.exit
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         m.run(args)
-    assert pytest_wrapped_e.type == SystemExit
+    assert pytest_wrapped_e.type is SystemExit
     assert pytest_wrapped_e.value.code == error_code
