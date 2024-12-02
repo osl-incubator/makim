@@ -6,9 +6,9 @@ groups:
         help: build necessary docker image
         run: |
           pwd
-          sugar pull --all
-          sugar build --all
-          sugar ext restart --all --options -d
+          sugar compose pull --all
+          sugar compose build --all
+          sugar compose-ext restart --all --options "-d"
       run:
         help: test running a docker service using containers-sugar
         hooks:
@@ -16,5 +16,5 @@ groups:
             - task: containers.setup
         backend: bash
         run: |
-          sugar exec --service service1 --options -T --cmd python -c "print(1)"
-          sugar stop --all
+          sugar compose exec --service service1 --options "-T" --cmd "python -c 'print(1)'"
+          sugar compose stop --all

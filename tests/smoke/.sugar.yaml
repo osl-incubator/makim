@@ -1,8 +1,8 @@
-compose-app: docker-compose
+backend: compose
+env-file: .env
 services:
   project-name: makim-tests
-  compose-path: containers/compose.yaml
-  env-file: .env
+  config-path: containers/compose.yaml
   default: service1
   available:
     - name: service1
