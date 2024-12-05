@@ -9,9 +9,12 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from croniter import croniter
-from makim.core import Makim
 from makim.logs import MakimError, MakimLogs
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from makim import Makim
+    
 class MakimScheduler:
     """Manages scheduled tasks for Makim using APScheduler."""
 
