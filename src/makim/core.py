@@ -133,6 +133,7 @@ class Makim:
     task_name: str = ''
     task_data: dict[str, Any] = {}
     ssh_config: dict[str, Any] = {}
+    scheduler: Optional[MakimScheduler] = None
 
     def __init__(self) -> None:
         """Prepare the Makim class with the default configuration."""
@@ -146,7 +147,7 @@ class Makim:
         self.shell_app = sh.xonsh
         self.shell_args: list[str] = []
         self.tmp_suffix: str = '.makim'
-        self.scheduler = MakimScheduler(self)  # Initialize the scheduler
+        self.scheduler = None
 
     def _call_shell_app(self, cmd: str) -> None:
         self._load_shell_app()
@@ -387,7 +388,28 @@ class Makim:
         self.ssh_config = self.global_data.get('hosts', {})
 
         self._validate_config()
+        
+        if 'scheduler' in self.global_data:
+            if self.scheduler is None:
+                self.scheduler = MakimScheduler(self)
+            
+            # Load scheduler configurations
+            for name, config in self.global_data['scheduler'].items():
+                schedule = config.get('schedule')
+                task = config.get('task')
+                args = config.get('args', {})
+                
+                if schedule and task:
+                    try:
+                        self.scheduler.add_job(name, schedule, task, args)
+                    except Exception as e:
+                        MakimLogs.print_info(f"Failed to load scheduler {name}: {e}")
 
+    def shutdown(self) -> None:
+        """Cleanup resources before exit."""
+        if self.scheduler:
+            self.scheduler.shutdown()
+            
     def _resolve_working_directory(self, scope: str) -> Optional[Path]:
         scope_options = ('global', 'group', 'task')
         if scope not in scope_options:
@@ -661,34 +683,6 @@ class Makim:
 
         return combinations
 
-    # scheduler methods
-    def add_scheduled_job(self, job_id: str, task_name: str, schedule: str, args: dict = None) -> None:
-        """Add a new scheduled job."""
-        self.scheduler.add_job(job_id, task_name, schedule, args)
-
-    def remove_scheduled_job(self, job_id: str) -> None:
-        """Remove a scheduled job."""
-        self.scheduler.remove_job(job_id)
-
-    def list_scheduled_jobs(self) -> list[dict]:
-        """List all scheduled jobs."""
-        return self.scheduler.list_jobs()
-
-    # def get_scheduled_job_status(self, job_id: str) -> dict:
-    #     """Get the status of a scheduled job."""
-    #     return self.scheduler.get_job_status(job_id)
-
-    def load_scheduled_tasks(self) -> None:
-        """Load scheduled tasks from the configuration."""
-        if 'scheduler' in self.global_data:
-            scheduler_config = self.global_data['scheduler']
-            for job_id, job_config in scheduler_config.items():
-                task_name = job_config.get('task')
-                schedule = job_config.get('schedule')
-                args = job_config.get('args', {})
-                if task_name and schedule:
-                    self.add_scheduled_job(job_id, task_name, schedule, args)
-
     # run commands
     def _run_hooks(self, args: dict[str, Any], hook_type: str) -> None:
         if not self.task_data.get('hooks', {}).get(hook_type):
@@ -884,7 +878,6 @@ class Makim:
         self._verify_args()
         self._change_task(args['task'])
         self._load_task_args()
-        self.load_scheduled_tasks()
 
         # commands
         if self.task_data.get('if') and not self._verify_task_conditional(

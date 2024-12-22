@@ -1,187 +1,163 @@
-"""Manages scheduled tasks for Makim using APScheduler."""
+from __future__ import annotations
 
-import asyncio
+import json
+import os
+import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Any
-from apscheduler.executors.pool import ThreadPoolExecutor
-from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from typing import Any, Dict, Optional
+
 from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
-from croniter import croniter
-from makim.logs import MakimError, MakimLogs
-from typing import TYPE_CHECKING
+from apscheduler.triggers.cron import CronTrigger
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.job import Job
 
-if TYPE_CHECKING:
-    from makim import Makim
-    
 class MakimScheduler:
-    """Manages scheduled tasks for Makim using APScheduler."""
+    """Handles task scheduling for Makim."""
 
-    _instance = None  # Singleton pattern for scheduler instance
+    def __init__(self, makim_instance: Any):
+        """Initialize the scheduler with configuration."""
+        self.config_file = makim_instance.file
+        self.scheduler = None
+        self.job_store_path = Path.home() / '.makim' / 'jobs.sqlite'
+        self.job_history_path = Path.home() / '.makim' / 'history.json'
+        self._setup_directories()
+        self._initialize_scheduler()
+        self.job_history: Dict[str, list[Dict[str, Any]]] = self._load_history()
 
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super(MakimScheduler, cls).__new__(cls)
-        return cls._instance
-
-    def __init__(self, makim_instance: 'Makim'):
-        self.makim = makim_instance
-        self.db_path = Path.home() / '.makim' / 'jobs.db'
-        self._ensure_db_directory()
-
-        # Configure job stores and executors
+    def _setup_directories(self) -> None:
+        """Create necessary directories for job storage."""
+        self.job_store_path.parent.mkdir(parents=True, exist_ok=True)
+        
+    def _initialize_scheduler(self) -> None:
+        """Initialize the APScheduler with SQLite backend."""
         jobstores = {
-            'default': SQLAlchemyJobStore(url=f'sqlite:///{self.db_path}')
+            'default': SQLAlchemyJobStore(url=f'sqlite:///{self.job_store_path}')
         }
-        executors = {'default': ThreadPoolExecutor(20)}
+        self.scheduler = BackgroundScheduler(jobstores=jobstores)
+        self.scheduler.start()
 
-        # Initialize scheduler with SQLite storage
-        self.scheduler = BackgroundScheduler(
-            jobstores=jobstores,
-            executors=executors,
-            job_defaults={'coalesce': False, 'max_instances': 3},
-        )
+    def _load_history(self) -> Dict[str, list[Dict[str, Any]]]:
+        """Load job execution history from file."""
+        if self.job_history_path.exists():
+            with open(self.job_history_path, 'r') as f:
+                return json.load(f)
+        return {}
 
-        # Listen for job events
-        self.scheduler.add_listener(self._log_job_event, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
+    def _save_history(self) -> None:
+        """Save job execution history to file."""
+        with open(self.job_history_path, 'w') as f:
+            json.dump(self.job_history, f)
 
-    def _ensure_db_directory(self) -> None:
-        """Ensure the database directory exists."""
-        self.db_path.parent.mkdir(parents=True, exist_ok=True)
+    def _log_execution(self, name: str, event: str, result: Optional[str] = None, error: Optional[str] = None) -> None:
+        """Log execution details to history."""
+        if name not in self.job_history:
+            self.job_history[name] = []
+            
+        self.job_history[name].append({
+            'timestamp': datetime.now().isoformat(),
+            'event': event,
+            'result': result,
+            'error': error
+        })
+        self._save_history()
 
-    def _execute_task(self, task_name: str, args: dict) -> None:
-        """Execute a Makim task within the scheduler."""
+    @staticmethod
+    def _run_makim_task(config_file: str, task: str, args: Dict[str, Any]) -> None:
+        """Static method to execute a Makim task."""
+        cmd = ['makim', '--file', config_file, task]
+        
+        # Convert args to command line arguments
+        for key, value in (args or {}).items():
+            if isinstance(value, bool):
+                if value:
+                    cmd.append(f'--{key}')
+            else:
+                cmd.extend([f'--{key}', str(value)])
+        
         try:
-            # Create a new event loop for this thread
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+            return result.stdout
+        except subprocess.CalledProcessError as e:
+            raise Exception(f"Job execution failed: {e.stderr}")
 
-            # Run the task
-            default_args = self.makim.global_data.get('default_args', {})
-            merged_args = {**default_args, **(args or {})}
-            self.makim.run({'task': task_name, **merged_args})
-        except Exception as e:
-            MakimLogs.print_error(
-                f'Error executing scheduled task {task_name}: {e!s}'
-            )
-        finally:
-            loop.close()
+    def add_job(self, name: str, schedule: str, task: str, args: Optional[Dict[str, Any]] = None) -> None:
+        """Add a new scheduled job."""
+        if not self.scheduler:
+            raise RuntimeError("Scheduler not initialized")
 
-    def _log_job_event(self, event) -> None:
-        """Log job execution success or failure."""
-        job = self.scheduler.get_job(event.job_id)
-        if event.exception:
-            MakimLogs.print_error(f"Job {job.id} failed: {event.exception}")
-        else:
-            MakimLogs.print_info(f"Job {job.id} executed successfully.")
-
-    def _validate_and_parse_schedule(self, schedule: str) -> dict:
-        """Validate and parse cron expressions."""
         try:
-            # Use croniter to validate and compute next run time
-            base_time = datetime.now()
-            iter = croniter(schedule, base_time)
-
-            # Get parsed schedule for APScheduler
-            next_time = iter.get_next(datetime)
-            cron_params = {
-                'minute': iter.next_exact('minute'),
-                'hour': iter.next_exact('hour'),
-                'day': iter.next_exact('day'),
-                'month': iter.next_exact('month'),
-                'day_of_week': iter.next_exact('weekday'),
-            }
-            return cron_params
-        except ValueError:
-            MakimLogs.raise_error(
-                f"Invalid cron expression: {schedule}",
-                MakimError.SCHEDULER_INVALID_SCHEDULE,
-            )
-
-    def add_job(
-        self,
-        job_id: str,
-        task_name: str,
-        schedule: str,
-        args: dict[Any, Any] = None,
-    ) -> None:
-        """
-        Add a new scheduled job.
-
-        Parameters
-        ----------
-        job_id : str
-            Unique identifier for the job
-        task_name : str
-            Name of the Makim task to execute
-        schedule : str
-            Cron schedule expression
-        args : dict[Any, Any], optional
-            Arguments to pass to the task
-        """
-        cron_params = self._validate_and_parse_schedule(schedule)
-        try:
+            # Create trigger from schedule
+            trigger = CronTrigger.from_crontab(schedule)
+            
+            # Add the job using the static method
             self.scheduler.add_job(
-                func=self._execute_task,
-                trigger='cron',
-                args=[task_name, args or {}],
-                id=job_id,
-                **cron_params,
+                func=self._run_makim_task,
+                trigger=trigger,
+                args=[self.config_file, task, args or {}],
+                id=name,
+                name=name,
                 replace_existing=True,
+                misfire_grace_time=None
             )
-            MakimLogs.print_info(f"Successfully scheduled job '{job_id}'")
+            
+            self._log_execution(name, 'scheduled')
+            
         except Exception as e:
-            MakimLogs.raise_error(
-                f"Failed to schedule job '{job_id}': {e!s}",
-                MakimError.SCHEDULER_JOB_ERROR,
-            )
+            self._log_execution(name, 'schedule_failed', error=str(e))
+            raise
 
-    def remove_job(self, job_id: str) -> None:
+    def remove_job(self, name: str) -> None:
         """Remove a scheduled job."""
+        if not self.scheduler:
+            raise RuntimeError("Scheduler not initialized")
+        
         try:
-            self.scheduler.remove_job(job_id)
-            MakimLogs.print_info(f"Successfully removed job '{job_id}'")
+            self.scheduler.remove_job(name)
+            self._log_execution(name, 'removed')
         except Exception as e:
-            MakimLogs.raise_error(
-                f"Failed to remove job '{job_id}': {e!s}",
-                MakimError.SCHEDULER_JOB_ERROR,
-            )
+            self._log_execution(name, 'remove_failed', error=str(e))
+            raise
 
-    # def get_job_status(self, job_id: str) -> dict:
-    #     """Get the status of a scheduled job."""
-    #     job = self.scheduler.get_job(job_id)
-    #     if not job:
-    #         MakimLogs.raise_error(
-    #             f"Job '{job_id}' not found", MakimError.SCHEDULER_JOB_NOT_FOUND
-    #         )
+    def get_job(self, name: str) -> Optional[Job]:
+        """Get a job by name."""
+        if not self.scheduler:
+            raise RuntimeError("Scheduler not initialized")
+        
+        return self.scheduler.get_job(name)
 
-    #     return {
-    #         'id': job.id,
-    #         'next_run': job.next_run_time,
-    #         'last_run': job.last_run_time,  # New attribute added
-    #         'schedule': str(job.trigger),
-    #         'active': job.next_run_time is not None,
-    #     }
-
-    def list_jobs(self) -> list[dict[str, Any]]:
+    def list_jobs(self) -> list[Dict[str, Any]]:
         """List all scheduled jobs."""
-        return [
-            {
+        if not self.scheduler:
+            raise RuntimeError("Scheduler not initialized")
+        
+        jobs = []
+        for job in self.scheduler.get_jobs():
+            job_info = {
                 'id': job.id,
-                'next_run': job.next_run_time,
-                'last_run': job.last_run_time,  # Include last run
+                'name': job.name,
+                'next_run_time': job.next_run_time.isoformat() if job.next_run_time else None,
                 'schedule': str(job.trigger),
             }
-            for job in self.scheduler.get_jobs()
-        ]
+            jobs.append(job_info)
+        return jobs
 
-    def start(self) -> None:
-        """Start the scheduler."""
-        if not self.scheduler.running:
-            self.scheduler.start()
+    def get_job_status(self, name: str) -> Dict[str, Any]:
+        """Get detailed status of a specific job."""
+        job = self.get_job(name)
+        if not job:
+            return {'error': 'Job not found'}
 
-    def stop(self) -> None:
-        """Stop the scheduler."""
-        if self.scheduler.running:
+        history = self.job_history.get(name, [])
+        
+        return {
+            'name': name,
+            'next_run_time': job.next_run_time.isoformat() if job.next_run_time else None,
+            'schedule': str(job.trigger),
+            'history': history
+        }
+
+    def shutdown(self) -> None:
+        """Shutdown the scheduler."""
+        if self.scheduler:
             self.scheduler.shutdown()
