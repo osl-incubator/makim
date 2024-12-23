@@ -24,6 +24,28 @@ class MakimScheduler:
         self._setup_directories()
         self._initialize_scheduler()
         self.job_history: Dict[str, list[Dict[str, Any]]] = self._load_history()
+        self._sync_jobs_with_config(makim_instance.global_data.get('scheduler', {}))
+        
+    def _sync_jobs_with_config(self, config_jobs: Dict[str, Any]) -> None:
+        """Synchronize scheduler jobs with current config file."""
+        if not self.scheduler:
+            return
+
+        # Remove jobs not in current config
+        current_jobs = set(self.scheduler.get_jobs())
+        config_job_ids = set(config_jobs.keys())
+        
+        for job in current_jobs:
+            if job.id not in config_job_ids:
+                self.scheduler.remove_job(job.id)
+                
+        # Clear history for removed jobs
+        self.job_history = {
+            name: history 
+            for name, history in self.job_history.items() 
+            if name in config_job_ids
+        }
+        self._save_history()
 
     def _setup_directories(self) -> None:
         """Create necessary directories for job storage."""
@@ -31,6 +53,9 @@ class MakimScheduler:
         
     def _initialize_scheduler(self) -> None:
         """Initialize the APScheduler with SQLite backend."""
+        if Path(self.job_store_path).exists():
+            Path(self.job_store_path).unlink()
+            
         jobstores = {
             'default': SQLAlchemyJobStore(url=f'sqlite:///{self.job_store_path}')
         }
