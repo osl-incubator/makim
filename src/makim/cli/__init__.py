@@ -15,6 +15,8 @@ from makim.cli.auto_generator import (
 )
 from makim.cli.config import CLI_ROOT_FLAGS_VALUES_COUNT, extract_root_config
 from makim.core import Makim
+from rich.table import Table
+from rich.console import Console
 
 app = typer.Typer(
     help=(
@@ -138,11 +140,47 @@ def run_app() -> None:
 
         @typer_cron.command(help="List all scheduled tasks")
         def list():
-            print("list")
+            """List all scheduled tasks."""
+            if not makim.scheduler:
+                typer.echo("No scheduled tasks configured.")
+                return
+
+            console = Console()
+            table = Table(show_header=True, header_style="bold")
+            table.add_column("Name")
+            table.add_column("Next Run")
+
+            jobs = makim.scheduler.list_jobs()
+            for job in jobs:
+                table.add_row(
+                    job['name'],
+                    job['next_run_time'] or "Not scheduled"
+                )
+
+            console.print(table)
 
         @typer_cron.command(help="Start a scheduler by its name")
         def start(name: str):
-            print("start")
+            """Start (enable) a scheduled task."""
+            if not makim.scheduler:
+                typer.echo("No scheduler configured.")
+                return
+
+            try:
+                schedule_config = makim.global_data.get("scheduler", {}).get(name)
+                if not schedule_config:
+                    typer.echo(f"No configuration found for schedule '{name}'")
+                    return
+
+                makim.scheduler.add_job(
+                    name=name,
+                    schedule=schedule_config["schedule"],
+                    task=schedule_config["task"],
+                    args=schedule_config.get("args", {})
+                )
+                typer.echo(f"Successfully started schedule '{name}'")
+            except Exception as e:
+                typer.echo(f"Failed to start schedule '{name}': {e}", err=True)
 
         @typer_cron.command(help="Stop a scheduler by its name")
         def stop(name: str):
