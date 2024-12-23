@@ -33,6 +33,7 @@ from typing_extensions import TypeAlias
 
 from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
+from makim.scheduler import MakimScheduler
 
 MAKIM_CURRENT_PATH = Path(__file__).parent
 
@@ -132,6 +133,7 @@ class Makim:
     task_name: str = ''
     task_data: dict[str, Any] = {}
     ssh_config: dict[str, Any] = {}
+    scheduler: Optional[MakimScheduler] = None
 
     def __init__(self) -> None:
         """Prepare the Makim class with the default configuration."""
@@ -145,6 +147,7 @@ class Makim:
         self.shell_app = sh.xonsh
         self.shell_args: list[str] = []
         self.tmp_suffix: str = '.makim'
+        self.scheduler = None
 
     def _call_shell_app(self, cmd: str) -> None:
         self._load_shell_app()
@@ -385,7 +388,28 @@ class Makim:
         self.ssh_config = self.global_data.get('hosts', {})
 
         self._validate_config()
+        
+        if 'scheduler' in self.global_data:
+            if self.scheduler is None:
+                self.scheduler = MakimScheduler(self)
+            
+            # Load scheduler configurations
+            for name, config in self.global_data['scheduler'].items():
+                schedule = config.get('schedule')
+                task = config.get('task')
+                args = config.get('args', {})
+                
+                if schedule and task:
+                    try:
+                        self.scheduler.add_job(name, schedule, task, args)
+                    except Exception as e:
+                        MakimLogs.print_info(f"Failed to load scheduler {name}: {e}")
 
+    def shutdown(self) -> None:
+        """Cleanup resources before exit."""
+        if self.scheduler:
+            self.scheduler.shutdown()
+            
     def _resolve_working_directory(self, scope: str) -> Optional[Path]:
         scope_options = ('global', 'group', 'task')
         if scope not in scope_options:
