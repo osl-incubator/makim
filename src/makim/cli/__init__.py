@@ -139,7 +139,7 @@ def run_app() -> None:
             )
 
         @typer_cron.command(help="List all scheduled tasks")
-        def list():
+        def list() -> None:
             """List all scheduled tasks."""
             if not makim.scheduler:
                 typer.echo("No scheduled tasks configured.")
@@ -160,7 +160,7 @@ def run_app() -> None:
             console.print(table)
 
         @typer_cron.command(help="Start a scheduler by its name")
-        def start(name: str):
+        def start(name: str) -> None:
             """Start (enable) a scheduled task."""
             if not makim.scheduler:
                 typer.echo("No scheduler configured.")
@@ -183,10 +183,19 @@ def run_app() -> None:
                 typer.echo(f"Failed to start schedule '{name}': {e}", err=True)
 
         @typer_cron.command(help="Stop a scheduler by its name")
-        def stop(name: str):
-            print("Stop")
+        def stop(name: str) -> None:
+            """Stop (disable) a scheduled task."""
+            if not makim.scheduler:
+                typer.echo("No scheduler configured.")
+                return
+                
+            try:
+                makim.scheduler.remove_job(name)
+                typer.echo(f"Successfully stopped schedule '{name}'")
+            except Exception as e:
+                typer.echo(f"Failed to stop schedule '{name}': {e}", err=True)
 
-        app.add_typer(typer_cron, name="cron", rich_help_panel="Extensions")
+                app.add_typer(typer_cron, name="cron", rich_help_panel="Extensions")
 
     # Add dynamically created commands to the Typer app
     for name, args in tasks.items():
