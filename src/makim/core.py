@@ -221,7 +221,7 @@ class Makim:
             ssh.close()
         except paramiko.AuthenticationException:
             MakimLogs.raise_error(
-                f"Authentication failed for host {host_config['host']}",
+                f'Authentication failed for host {host_config["host"]}',
                 MakimError.SSH_AUTHENTICATION_FAILED,
             )
         except paramiko.SSHException as ssh_exception:
@@ -693,11 +693,7 @@ class Makim:
 
             # update the arguments
             for arg_name, arg_value in hook_data.get('args', {}).items():
-                unescaped_value = (
-                    str(arg_value)
-                    if isinstance(arg_value, str)
-                    else str(arg_value)
-                )
+                unescaped_value = str(arg_value)
 
                 args_hook[f'--{arg_name}'] = yaml.safe_load(
                     TEMPLATE.from_string(unescaped_value).render(
@@ -860,8 +856,7 @@ class Makim:
             self.task_data['if']
         ):
             return warnings.warn(
-                f'{args["task"]} not executed. '
-                'Condition (if) not satisfied.'
+                f'{args["task"]} not executed. Condition (if) not satisfied.'
             )
 
         self._run_hooks(args, 'pre-run')

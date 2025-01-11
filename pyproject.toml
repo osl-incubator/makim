@@ -1,44 +1,50 @@
-[tool.poetry]
+[project]
 name = "makim"
 version = "1.20.0"  # semantic-release
 description = "Simplify the usage of containers"
-authors = ["Ivan Ogasawara <ivan.ogasawara@gmail.com>"]
+authors = [
+  {name = "Ivan Ogasawara", email = "ivan.ogasawara@gmail.com"}
+]
 license = "BSD 3 Clause"
 repository = "https://github.com/osl-incubator/makim"
 homepage = "https://github.com/osl-incubator/makim"
 readme = "README.md"
+requires-python = ">=3.9,<4"
+dependencies = [
+  "sh >= 2.0.0",
+  "pyyaml >= 5.0",
+  "jinja2 >= 2.0",
+  "xonsh >= 0.15.0",
+  "python-dotenv >= 0.21.1",
+  "typer >= 0.9.0",
+  "fuzzywuzzy >= 0.18.0",
+  "python-levenshtein >= 0.23.0",
+  "rich >= 10.11.0",
+  "shellingham >= 1.5.4",
+  "jsonschema >= 4",
+  "paramiko  >= 3.5.0",
+  "types-paramiko >= 3.5.0"
+]
 
+[project.scripts]
+"makim" = "makim.__main__:run_app"
+
+[build-system]
+requires = ["poetry-core>=2", "poetry>=2"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
 packages = [
   {include = "makim", from="src"},
 ]
-
 include = [
   "src/makim/py.typed",
   "src/makim/schema.json",
 ]
-
 exclude = [
   ".git/*",
   ".env*",
 ]
-
-[tool.poetry.scripts]
-"makim" = "makim.__main__:run_app"
-
-[tool.poetry.dependencies]
-python = ">=3.9,<4"
-sh = ">=2.0.0"
-pyyaml = ">=5.0"
-jinja2 = ">=2.0"
-xonsh = ">=0.15.0"
-python-dotenv = ">=0.21.1"
-typer = ">=0.9.0"
-fuzzywuzzy = ">=0.18.0"
-python-levenshtein = ">=0.23.0"
-rich = ">=10.11.0"
-shellingham = ">=1.5.4"
-jsonschema = ">=4"
-paramiko = "^3.5.0"
 
 [tool.poetry.group.dev.dependencies]
 containers-sugar = ">=1.11.1"
@@ -56,16 +62,11 @@ mkdocstrings = {version=">=0.19.0", extras=["python"]}
 ruff = ">=0.1.5"
 bandit = ">=1.7.5"
 vulture = ">=2.7"
-compose-go = ">=2.20.2"
+compose-go = ">=2.20.2,<2.31.0"
 jupyterlab = ">=4.1.5"
 nox = ">=2024.3.2"
 nbconvert = ">=7.16.3"
 pymdown-extensions = ">=10.7.1"
-types-paramiko = "^3.5.0.20240928"
-
-[build-system]
-requires = ["poetry-core>=1.0.0", "poetry>=1.5.1"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 testpaths = [
