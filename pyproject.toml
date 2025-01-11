@@ -26,6 +26,9 @@ dependencies = [
   "types-paramiko >= 3.5.0"
 ]
 
+[project.scripts]
+"makim" = "makim.__main__:run_app"
+
 [build-system]
 requires = ["poetry-core>=2", "poetry>=2"]
 build-backend = "poetry.core.masonry.api"
@@ -42,9 +45,6 @@ exclude = [
   ".git/*",
   ".env*",
 ]
-
-[tool.poetry.scripts]
-"makim" = "makim.__main__:run_app"
 
 [tool.poetry.group.dev.dependencies]
 containers-sugar = ">=1.11.1"
