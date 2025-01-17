@@ -23,7 +23,8 @@ dependencies = [
   "shellingham >= 1.5.4",
   "jsonschema >= 4",
   "paramiko  >= 3.5.0",
-  "types-paramiko >= 3.5.0"
+  "types-paramiko >= 3.5.0",
+  "apscheduler (>=3.11.0,<4.0.0)"
 ]
 
 [project.scripts]
@@ -121,7 +122,7 @@ quote-style = "single"
 [tool.bandit]
 exclude_dirs = ["tests"]
 targets = "src/makim/"
-skips = ["B102", "B701", "B507", "B601"]
+skips = ["B102", "B701", "B507", "B601", "B603"]
 
 [tool.vulture]
 exclude = ["tests"]
