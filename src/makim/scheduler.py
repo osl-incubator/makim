@@ -303,25 +303,3 @@ class MakimScheduler:
             }
             jobs.append(job_info)
         return jobs
-
-    def get_job_status(self, name: str) -> Dict[str, Any]:
-        """Get detailed status of a specific job."""
-        job = self.get_job(name)
-        if not job:
-            return {'error': 'Job not found'}
-
-        history = self.job_history.get(name, [])
-
-        return {
-            'name': name,
-            'next_run_time': job.next_run_time.isoformat()
-            if job.next_run_time
-            else None,
-            'schedule': str(job.trigger),
-            'history': history,
-        }
-
-    def shutdown(self) -> None:
-        """Shutdown the scheduler."""
-        if self.scheduler:
-            self.scheduler.shutdown()
