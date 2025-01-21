@@ -24,13 +24,34 @@ class Config:
 
 
 def init_globals(config_file: str, history_path: Path) -> None:
-    """Initialize global variables needed for job execution."""
+    """
+    Initialize global variables needed for job execution.
+
+    Parameters
+    ----------
+    config_file : str
+        Path to the configuration file.
+    history_path : Path
+        Path to the job history file.
+    """
     Config.config_file = config_file
     Config.job_history_path = history_path
 
 
 def _sanitize_command(cmd_list: list[str]) -> list[str]:
-    """Sanitize command arguments to prevent command injection."""
+    """
+    Sanitize command arguments to prevent command injection.
+
+    Parameters
+    ----------
+    cmd_list : list of str
+        List of command arguments.
+
+    Returns
+    -------
+    list of str
+        Sanitized list of command arguments.
+    """
     return [shlex.quote(str(arg)) for arg in cmd_list]
 
 
@@ -41,20 +62,25 @@ def log_execution(
     error: Optional[str] = None,
     task: Optional[str] = None,
 ) -> None:
-    """Log execution details.
+    """
+    Log execution details.
 
-    Args:
-        name: The scheduler name
-        event: Event ('scheduled', 'execution_completed', 'execution_failed')
-        result: Output from task execution
-        error: Error message if execution failed
-        task: Associated task name
+    Parameters
+    ----------
+    name : str
+        The scheduler name.
+    event : str
+        Event type ('scheduled', 'execution_completed', 'execution_failed').
+    result : Optional[str], optional
+        Output from task execution, by default None.
+    error : Optional[str], optional
+        Error message if execution failed, by default None.
+    task : Optional[str], optional
+        Associated task name, by default None.
     """
     if Config.job_history_path is None:
         raise RuntimeError('Job history path not initialized')
-
     try:
-        # Load existing history
         if Config.job_history_path.exists():
             with open(Config.job_history_path, 'r') as f:
                 history = json.load(f)
@@ -63,11 +89,9 @@ def log_execution(
 
         current_time = datetime.now().isoformat()
 
-        # Initialize list for scheduler if it doesn't exist
         if name not in history:
             history[name] = []
 
-        # Create new execution entry
         execution_entry = {
             'scheduled_timestamp': current_time,
             'event': event,
@@ -77,7 +101,6 @@ def log_execution(
             'task': task,
         }
 
-        # Update execution details based on event type
         if event != 'scheduled':
             execution_entry.update(
                 {
@@ -86,7 +109,6 @@ def log_execution(
                     'error': error,
                 }
             )
-            # Update the last scheduled timestamp
             if history[name]:
                 last_scheduled = next(
                     (
@@ -100,14 +122,10 @@ def log_execution(
                     execution_entry['scheduled_timestamp'] = last_scheduled[
                         'scheduled_timestamp'
                     ]
-
-        # Append new execution to the history
         history[name].append(execution_entry)
 
-        # Save updated history
         with open(Config.job_history_path, 'w') as f:
             json.dump(history, f, indent=2)
-
     except Exception as e:
         print(f'Failed to log execution: {e}')
 
@@ -115,19 +133,22 @@ def log_execution(
 def run_makim_task(
     task: str, scheduler_name: str, args: Optional[Dict[str, Any]] = None
 ) -> None:
-    """Execute a Makim task.
+    """
+    Execute a Makim task.
 
-    Args:
-        task: The task to execute
-        scheduler_name: The name of the scheduler that triggered this task
-        args: Optional arguments for the task
+    Parameters
+    ----------
+    task : str
+        The task to execute.
+    scheduler_name : str
+        The name of the scheduler that triggered this task.
+    args : Optional[Dict[str, Any]], optional
+        Optional arguments for the task, by default None.
     """
     if Config.config_file is None or Config.job_history_path is None:
         raise RuntimeError('Global configuration not initialized')
 
-    # Build base command with known safe values
     cmd = ['makim', '--file', Config.config_file, task]
-
     if args:
         for key, value in args.items():
             safe_key = str(key)
@@ -136,7 +157,6 @@ def run_makim_task(
                     cmd.append(f'--{safe_key}')
             else:
                 cmd.extend([f'--{safe_key}', str(value)])
-
     safe_cmd = _sanitize_command(cmd)
 
     try:
@@ -146,25 +166,36 @@ def run_makim_task(
             text=True,
             check=True,
         )
-        # Log successful execution using the scheduler name
         log_execution(
             scheduler_name, 'execution_completed', result=result.stdout
         )
-
     except subprocess.CalledProcessError as e:
         error_msg = (
             f'Job execution failed:\nSTDERR: {e.stderr}\nSTDOUT: {e.stdout}'
         )
-        # Log failed execution using the scheduler name
         log_execution(scheduler_name, 'execution_failed', error=error_msg)
         raise
 
 
 class MakimScheduler:
-    """Handles task scheduling for Makim."""
+    """
+    Handles task scheduling for Makim.
+
+    Parameters
+    ----------
+    makim_instance : Makim
+        Makim instance containing configuration details.
+    """
 
     def __init__(self, makim_instance: Any):
-        """Initialize the scheduler with configuration."""
+        """
+        Initialize the scheduler with configuration.
+
+        Parameters
+        ----------
+        makim_instance : Makim
+            Instance containing configuration details.
+        """
         self.config_file = makim_instance.file
         self.scheduler = None
         self.job_store_path = Path.home() / '.makim' / 'jobs.sqlite'
@@ -182,19 +213,23 @@ class MakimScheduler:
         )
 
     def _sync_jobs_with_config(self, config_jobs: Dict[str, Any]) -> None:
-        """Synchronize scheduler jobs with current config file."""
+        """
+        Synchronize scheduler jobs with current config file.
+
+        Parameters
+        ----------
+        config_jobs : dict
+            Dictionary of scheduled jobs from the configuration.
+        """
         if not self.scheduler:
             return
 
-        # Use job IDs instead of Job objects
         current_job_ids = {job.id for job in self.scheduler.get_jobs()}
         config_job_ids = set(config_jobs.keys())
 
-        # Remove jobs not in current config
         for job_id in current_job_ids - config_job_ids:
             self.scheduler.remove_job(job_id)
 
-        # Clear history for removed jobs
         self.job_history = {
             name: history
             for name, history in self.job_history.items()
@@ -218,11 +253,17 @@ class MakimScheduler:
             self.scheduler.start()
 
     def _load_history(self) -> Dict[str, list[Dict[str, Any]]]:
-        """Load job execution history from file."""
+        """
+        Load job execution history from file.
+
+        Returns
+        -------
+        dict
+            Dictionary of job execution history.
+        """
         if self.job_history_path.exists():
             with open(self.job_history_path, 'r') as f:
                 loaded_history = json.load(f)
-                # Ensure the loaded data matches the expected type
                 if not isinstance(loaded_history, dict):
                     return {}
                 return cast(Dict[str, list[Dict[str, Any]]], loaded_history)
@@ -240,35 +281,50 @@ class MakimScheduler:
         task: str,
         args: Optional[Dict[str, Any]] = None,
     ) -> None:
-        """Add a new scheduled job."""
+        """
+        Add a new scheduled job.
+
+        Parameters
+        ----------
+        name : str
+            The name of the job.
+        schedule : str
+            Cron expression defining job schedule.
+        task : str
+            The task to be executed.
+        args : dict, optional
+            Additional arguments for the task, by default None.
+        """
         if not self.scheduler:
             raise RuntimeError('Scheduler not initialized')
 
         try:
-            # Create trigger from schedule
             trigger = CronTrigger.from_crontab(schedule)
+            log_execution(name, 'scheduled', task=task)
 
-            # Initialize the job entry with task information
-            log_execution(name, 'scheduled', task=task)  # Added task parameter
-
-            # Add the job using the module-level function
             self.scheduler.add_job(
                 func='makim.scheduler:run_makim_task',
                 trigger=trigger,
-                args=[task, name],  # Pass scheduler_name as an argument
+                args=[task, name],
                 kwargs={'args': args or {}},
                 id=name,
                 name=name,
                 replace_existing=True,
                 misfire_grace_time=None,
             )
-
         except Exception as e:
             log_execution(name, 'schedule_failed', error=str(e))
             raise
 
     def remove_job(self, name: str) -> None:
-        """Remove a scheduled job."""
+        """
+        Remove a scheduled job.
+
+        Parameters
+        ----------
+        name : str
+            The name of the job to remove.
+        """
         if not self.scheduler:
             raise RuntimeError('Scheduler not initialized')
 
@@ -280,14 +336,32 @@ class MakimScheduler:
             raise
 
     def get_job(self, name: str) -> Optional[Job]:
-        """Get a job by name."""
+        """
+        Get a job by name.
+
+        Parameters
+        ----------
+        name : str
+            The name of the job.
+
+        Returns
+        -------
+        Job or None
+            The job object if found, otherwise None.
+        """
         if not self.scheduler:
             raise RuntimeError('Scheduler not initialized')
-
         return self.scheduler.get_job(name)
 
     def list_jobs(self) -> list[Dict[str, Any]]:
-        """List all scheduled jobs."""
+        """
+        List all scheduled jobs.
+
+        Returns
+        -------
+        list of dict
+            A list of dictionaries containing job details.
+        """
         if not self.scheduler:
             raise RuntimeError('Scheduler not initialized')
 
