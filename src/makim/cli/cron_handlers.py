@@ -7,6 +7,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from makim.cli.auto_generator import create_dynamic_command_cron
 from makim.core import Makim
 
 
@@ -19,6 +20,71 @@ def _create_cron_table() -> Table:
     table.add_column('Status', style='green')
     table.add_column('Next Run', style='magenta')
     return table
+
+
+def _handle_cron_commands(makim_instance: Makim) -> typer.Typer:
+    """Create and handle cron-related commands.
+
+    Returns
+    -------
+        typer.Typer: The cron command group with all subcommands.
+    """
+    typer_cron = typer.Typer(
+        help='Tasks Scheduler',
+        invoke_without_command=True,
+    )
+
+    if 'scheduler' in makim_instance.global_data:
+        for schedule_name, schedule_params in makim_instance.global_data.get(
+            'scheduler', {}
+        ).items():
+            create_dynamic_command_cron(
+                makim_instance,
+                typer_cron,
+                schedule_name,
+                schedule_params or {},
+            )
+
+        @typer_cron.command(help='List all scheduled tasks')
+        def list() -> None:
+            """List tasks defined in .makim.yaml and their current status."""
+            _handle_cron_list(makim_instance)
+
+        @typer_cron.command(help='Start a scheduler by its name')
+        def start(
+            name: str = typer.Argument(
+                None,
+                help="""Name of the scheduler to start.
+                Use '--all' for all schedulers""",
+            ),
+            all: bool = typer.Option(
+                False,
+                '--all',
+                help='Start all available schedulers',
+                is_flag=True,
+            ),
+        ) -> None:
+            """Start (enable) a scheduled task."""
+            _handle_cron_start(makim_instance, name, all)
+
+        @typer_cron.command(help='Stop a scheduler by its name')
+        def stop(
+            name: str = typer.Argument(
+                None,
+                help="""Name of the scheduler to stop.
+                Use '--all' for all schedulers""",
+            ),
+            all: bool = typer.Option(
+                False,
+                '--all',
+                help='Stop all running schedulers',
+                is_flag=True,
+            ),
+        ) -> None:
+            """Stop (disable) scheduled task(s)."""
+            _handle_cron_stop(makim_instance, name, all)
+
+    return typer_cron
 
 
 def _handle_cron_list(makim_instance: Makim) -> None:
