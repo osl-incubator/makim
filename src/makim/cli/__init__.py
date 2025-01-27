@@ -1,4 +1,4 @@
-"""Cli functions to define the arguments and to call Makim."""
+"""CLI functions to define the arguments and call Makim."""
 
 from __future__ import annotations
 
@@ -12,10 +12,12 @@ import typer
 from makim import __version__
 from makim.cli.auto_generator import (
     create_dynamic_command,
-    create_dynamic_command_cron,
     suggest_command,
 )
 from makim.cli.config import CLI_ROOT_FLAGS_VALUES_COUNT, extract_root_config
+from makim.cli.cron_handlers import (
+    _handle_cron_commands,
+)
 from makim.core import Makim
 
 app = typer.Typer(
@@ -60,7 +62,7 @@ def main(
         help='Execute the command in verbose mode',
     ),
 ) -> None:
-    """Process envers for specific flags, otherwise show the help menu."""
+    """Process top-level flags; otherwise, show the help menu."""
     typer.echo(f'Makim file: {file}')
 
     if version:
@@ -97,9 +99,8 @@ def _get_command_from_cli() -> str:
 
 
 def run_app() -> None:
-    """Run the typer app."""
+    """Run the Typer app."""
     root_config = extract_root_config()
-
     config_file_path = cast(str, root_config.get('file', '.makim.yaml'))
 
     cli_completion_words = [
@@ -107,7 +108,6 @@ def run_app() -> None:
     ]
 
     if not makim._check_makim_file(config_file_path) and cli_completion_words:
-        # autocomplete call
         root_config = extract_root_config(cli_completion_words)
         config_file_path = cast(str, root_config.get('file', '.makim.yaml'))
         if not makim._check_makim_file(config_file_path):
@@ -119,43 +119,29 @@ def run_app() -> None:
         verbose=cast(bool, root_config.get('verbose', False)),
     )
 
-    # create tasks data
     tasks: dict[str, Any] = {}
     for group_name, group_data in makim.global_data.get('groups', {}).items():
         for task_name, task_data in group_data.get('tasks', {}).items():
             tasks[f'{group_name}.{task_name}'] = task_data
 
-    # Add dynamically cron commands to Typer app
-    if 'scheduler' in makim.global_data:
-        typer_cron = typer.Typer(
-            help='Tasks Scheduler',
-            invoke_without_command=True,
-        )
-
-        for schedule_name, schedule_params in makim.global_data.get(
-            'scheduler', {}
-        ).items():
-            create_dynamic_command_cron(
-                makim, typer_cron, schedule_name, schedule_params or {}
-            )
-
-        # Add cron command
-        app.add_typer(typer_cron, name='cron', rich_help_panel='Extensions')
-
     # Add dynamically commands to Typer app
+    # Add cron commands if scheduler is configured
+    typer_cron = _handle_cron_commands(makim)
+    app.add_typer(typer_cron, name='cron', rich_help_panel='Extensions')
+
+    # Add dynamic commands
     for name, args in tasks.items():
         create_dynamic_command(makim, app, name, args)
 
     try:
         app()
     except SystemExit as e:
-        # code 2 means code not found
+        # Code 2 means command not found
         error_code = 2
         if e.code != error_code:
             raise e
 
         command_used = _get_command_from_cli()
-
         available_cmds = [
             cmd.name for cmd in app.registered_commands if cmd.name is not None
         ]
@@ -165,7 +151,6 @@ def run_app() -> None:
             f"Command {command_used} not found. Did you mean '{suggestion}'?",
             fg='red',
         )
-
         raise e
 
 

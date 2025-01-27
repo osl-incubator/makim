@@ -88,6 +88,7 @@ groups:
             - task: smoke-tests.matrix
             - task: smoke-tests.shell-app
             - task: smoke-tests.ssh-remote-execution
+            - task: smoke-tests.scheduler
 
       ci:
         help: Run all tasks used on CI
@@ -429,6 +430,30 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
           makim $VERBOSE_FLAG --file $MAKIM_FILE remote_test.echo_test
+
+      scheduler:
+        help: Test makim with scheduler
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.scheduler.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron start test_basic_echo
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron start --all
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron stop test_basic_echo
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron stop --all
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
 
   error:
     help: This group helps tests failure tasks

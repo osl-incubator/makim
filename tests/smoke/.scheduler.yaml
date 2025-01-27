@@ -1,0 +1,29 @@
+groups:
+  test:
+    tasks:
+      test-echo:
+        run: echo "Basic echo test successful"
+
+      test-date:
+        run: |
+          echo "Testing date command..."
+          date
+
+      test-sleep:
+        run: |
+          echo "Starting sleep test..."
+          sleep 2
+          echo "Sleep test complete"
+
+scheduler:
+  test_basic_echo:
+    schedule: "*/5 * * * *"
+    task: test.test-echo
+
+  test_date_command:
+    schedule: "*/10 * * * *"
+    task: test.test-date
+
+  test_sleep_function:
+    schedule: "*/15 * * * *"
+    task: test.test-sleep
