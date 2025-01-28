@@ -1,6 +1,19 @@
 # Release Notes
 ---
 
+# [1.21.0](https://github.com/osl-incubator/makim/compare/1.20.0...1.21.0) (2025-01-28)
+
+
+### Bug Fixes
+
+* **pre-commit:** Add more tools for pre-commit hooks ([#127](https://github.com/osl-incubator/makim/issues/127)) ([268b1f5](https://github.com/osl-incubator/makim/commit/268b1f5bd572d9468d2500e40e160fd38f28c350))
+
+
+### Features
+
+* Add an initial support for cron/scheduler into CLI ([#128](https://github.com/osl-incubator/makim/issues/128)) ([b4f4d94](https://github.com/osl-incubator/makim/commit/b4f4d94dd5687115e8fc07278c7b42b2d4f1f6eb))
+* Add support for jobs using cron ([#126](https://github.com/osl-incubator/makim/issues/126)) ([6357391](https://github.com/osl-incubator/makim/commit/635739196dce24bf2bd24acf07de5b0983aa3c91))
+
 # [1.20.0](https://github.com/osl-incubator/makim/compare/1.19.0...1.20.0) (2024-11-04)
 
 
