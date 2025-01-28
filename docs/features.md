@@ -1,66 +1,29 @@
 # Features
 
-## Attribute: dir
+## Overview
 
-The dir feature in Makim allows users to define the directory from which
-commands associated with specific tasks or groups are executed. This provides
-greater flexibility and control over the execution environment.
+Makim is a task management tool inspired by `make`, designed to simplify
+defining and executing tasks with dependencies. It replaces traditional
+`Makefile` formats with a user-friendly `YAML` configuration system, offering
+flexibility, modularity, and better readability. Here are Makim's key features:
 
-The `dir` attribute can be specified at three different scopes: global, group,
-and task. It allows users to set the working directory for a specific task, a
-group of tasks, or globally.
+## Key Features
 
-### Syntax and Scopes
+### 1. Attribute: dir
 
-The dir attribute can be applied to three different scopes:
+The `dir` feature allows users to define the working directory for tasks,
+groups, or the entire configuration. This ensures commands run in the intended
+environment, providing control over execution contexts.
 
-- #### **Global Scope**
+**Syntax and Scopes**
 
-  Setting the global working directory impacts all tasks and groups in the Makim
-  configuration.
+- **Global Scope**: Applies to all tasks and groups.
 
-  ```yaml
-  version: 1.0
-  dir: /path/to/global/directory
-  # ... other configuration ...
-  ```
+- **Group Scope**: Overrides the global directory for specific groups.
 
-- #### Group Scope
+- **Task Scope**: Offers fine-grained control for individual tasks.
 
-  Setting the working directory at the group scope affects all tasks within that
-  group.
-
-  ```yaml
-  version: 1.0
-
-  groups:
-    my-group:
-      dir: /path/to/group/directory
-      tasks:
-        task-1:
-          run: |
-          # This task will run with the working directory set to
-          # /path/to/group/directory
-  ```
-
-- #### Task Scope
-
-  Setting the working directory at the task scope allows for fine grained
-  control over individual tasks.
-
-  ```yaml
-  version: 1.0
-  groups:
-    my-group:
-      tasks:
-        my-task:
-          dir: /path/to/task/directory
-          run: |
-          # This task will run with the working directory set to
-          # /path/to/task/directory
-  ```
-
-## Example
+**Example**
 
 ```yaml
 version: 1.0
@@ -71,16 +34,131 @@ groups:
     dir: backend
     tasks:
       build:
-        help: Build the backend services
         dir: services
         run: |
           echo "Building backend services..."
-          # Additional build commands specific to the backend
 
       test:
-        help: Run backend tests
         dir: tests
         run: |
           echo "Running backend tests..."
-          # Additional test commands specific to the backend
 ```
+
+### 2. Scoped Environment Variables
+
+Environment variables can be defined at global, group, or task levels, ensuring
+modular configurations.
+
+**Example**
+
+```yaml
+groups:
+  my-group:
+    env:
+      NODE_ENV: production
+    tasks:
+      start:
+        env:
+          DEBUG: true
+        run: |
+          echo $NODE_ENV
+          echo $DEBUG
+```
+
+### 3. Matrix Configuration
+
+Define and run tasks with multiple parameter combinations. Perfect for CI/CD
+pipelines or testing scenarios.
+
+**Example**
+
+```yaml
+groups:
+  test-group:
+    tasks:
+      test-matrix:
+        matrix:
+          env:
+            - dev
+            - staging
+            - prod
+        run: |
+          echo "Testing in $env"
+```
+
+### 4. Hooks (pre-run and post-run)
+
+Run additional tasks before or after a primary task to set up or clean up
+resources.
+
+**Example**
+
+```yaml
+groups:
+  build-group:
+    tasks:
+      build:
+        hooks:
+          pre-run:
+            - task: setup-environment
+          post-run:
+            - task: cleanup
+        run: |
+          echo "Building project..."
+```
+
+### 5. Scheduler
+
+Makim integrates with APScheduler for cron-like task scheduling. Define tasks to
+run at specified intervals using cron expressions.
+
+**Example**
+
+```yaml
+scheduler:
+  daily-backup:
+    task: backup
+    schedule: "0 3 * * *" # Runs daily at 3 AM
+    args:
+      path: /backup
+```
+
+### 6. Dynamic Command Generation
+
+Makim dynamically generates CLI commands from the `.makim.yaml` configuration,
+enabling streamlined task execution.
+
+**Example**
+
+```yaml
+makim build # Executes the build task as defined in .makim.yaml
+```
+
+### 7. Remote Command Execution
+
+Makim supports executing tasks on remote servers via SSH with customizable
+configurations.
+
+**Example**
+
+```yaml
+groups:
+  remote-group:
+    tasks:
+      deploy:
+        remote: my-server
+        run: |
+          echo "Deploying application..."
+
+hosts:
+  my-server:
+    username: user
+    host: example.com
+    port: 22
+    password: pass
+```
+
+### 8. Configuration Validation
+
+Makim validates `.makim.yaml` against a predefined JSON schema to catch errors
+early and ensure correctness.
