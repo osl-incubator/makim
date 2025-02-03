@@ -7,6 +7,8 @@ defining and executing tasks with dependencies. It replaces traditional
 `Makefile` formats with a user-friendly `YAML` configuration system, offering
 flexibility, modularity, and better readability. Here are Makim's key features:
 
+---
+
 ## Key Features
 
 ### 1. Attribute: dir

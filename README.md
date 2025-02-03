@@ -50,7 +50,6 @@ First you need to place the config file `.makim.yaml` in the root of your
 project. This is an example of a configuration file:
 
 ```yaml
-version: 1.0.0
 groups:
   build:
     env:
