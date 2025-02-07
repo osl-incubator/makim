@@ -1,4 +1,4 @@
-# Features
+# Overview
 
 Makim is a task automation tool that enhances the way tasks and dependencies are
 defined using YAML instead of Makefile syntax. This document explains Makim's
@@ -7,7 +7,9 @@ looking to simplify and automate workflows efficiently.
 
 ---
 
-## 1. Help Text as First-Class Citizen
+# Features
+
+## 1. Help Text
 
 ### What It Does
 
