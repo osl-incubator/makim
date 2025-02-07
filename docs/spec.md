@@ -1,176 +1,264 @@
-# Makim Configuration Specification
-
-This document provides a comprehensive specification for the Makim configuration
-file (`.makim.yaml`), detailing the structure, groups, tasks, and their
-functionalities.
+# Makim Specification
 
 ## Overview
 
-The `.makim.yaml` file defines task groups and their associated tasks. Each task
-specifies a command to be executed, often using Bash or other tools. It includes
-groups for cleaning temporary files, building documentation, releasing software,
-running tests, and performing smoke tests.
+Makim uses a YAML-based configuration file (`.makim.yaml`) to define tasks,
+dependencies, and execution environments. This document provides a detailed
+specification of all components available in a Makim configuration file.
+
+## 1. File Structure
+
+A `.makim.yaml` file consists of the following top-level sections:
+
+- `groups`
+- `scheduler`
+- `hosts`
+- `vars`
+- `env`
+- `env-file`
+
+Each section is explained below in detail.
 
 ---
 
-## Groups and Tasks
+## 2. Groups
 
-### 1. Clean Group
+### Description
 
-The `clean` group is responsible for removing temporary and unnecessary files
-generated during development.
+Defines collections of related tasks. Each group contains tasks and environment
+variables specific to that group.
 
-#### Tasks:
+### Structure
 
-- `tmp`: Cleans up various build artifacts and temporary files
-  - Removes directories:
-    - `build/`
-    - `dist/`
-    - `.eggs/`
-    - `.pytest_cache`
-    - `.ruff_cache`
-    - `.mypy_cache`
-  - Deletes specific file types:
-    - `*.egg`
-    - `*.egg-info`
-    - `*.pyc`
-    - `*.pyo`
-    - `__pycache__`
-    - Temporary files (`*~`)
-
-### 2. Documentation Group
-
-The `docs` group manages documentation-related tasks.
-
-#### Tasks:
-
-- `build`: Generates documentation using MkDocs
-
-  - Builds documentation with `mkdocs build`
-  - Uses configuration from `mkdocs.yaml`
-
-- `preview`: Locally serves documentation
-  - Starts MkDocs development server
-  - Watches `docs` directory for changes
-  - Uses configuration from `mkdocs.yaml`
-
-### 3. Release Group
-
-The `release` group handles software release processes using semantic-release.
-
-#### Variables:
-
-- `app`: A complex NPX command that sets up semantic-release with multiple
-  plugins
-  - Includes plugins for:
-    - Conventional commits
-    - Commit analysis
-    - Release notes generation
-    - Changelog management
-    - GitHub integration
-    - Git operations
-
-#### Tasks:
-
-- `ci`: Runs semantic-release in continuous integration mode
-- `dry`: Performs a dry run of the release process
-  - Executes semantic-release without actual publishing
-  - Builds the package using Poetry
-  - Simulates package publication
-
-### 4. Tests Group
-
-The `tests` group manages various testing and validation tasks.
-
-#### Tasks:
-
-- `linter`: Runs pre-commit hooks to enforce coding standards
-- `unittest`: Executes unit tests using pytest
-- `smoke`: Runs a comprehensive suite of smoke tests
-  - Includes multiple predefined smoke tests to validate different aspects of
-    the system
-- `ci`: Comprehensive CI/CD validation task
-  - Runs linter
-  - Executes unit tests
-  - Runs smoke tests
-  - Builds documentation
-
-### 5. Smoke Tests Group
-
-The `smoke-tests` group contains an extensive collection of tests to validate
-Makim's functionality across various scenarios.
-
-#### Tests Include:
-
-1. Simple configuration tests
-2. Complex configuration tests
-3. Container integration tests
-4. Shell application tests
-5. Unit tests
-6. Environment variable handling
-7. Variable processing
-8. Bash shell testing
-9. Directory path handling (absolute, relative, no-path)
-10. Interactive argument processing
-11. Hook execution
-12. Matrix strategy testing
-13. Remote SSH execution
-14. Scheduler functionality
-
-### 6. Error Group
-
-The `error` group is designed to test failure scenarios and error handling.
-
-#### Tasks:
-
-- `python-assert`: Demonstrates Python assertion failure
-- `code-3`: Shows bash script exit with error code 3
-
-### 7. Docker Group
-
-The `docker` group manages Docker-related tasks for testing SSH connections.
-
-#### Tasks:
-
-- `build`: Builds a Docker image for SSH testing
-  - Uses Dockerfile in the `containers` directory
-- `start`: Launches a Docker container for SSH testing
-  - Runs container with port mapping
-  - Includes pre-run hook to build the image
-- `stop`: Stops the SSH test container
-- `test`: Verifies SSH connection to the Docker service
-  - Removes previous SSH host key
-  - Connects to localhost on port 2222
-
-## Task Execution
-
-To run a specific task, use the following command:
-
-```bash
-makim <group>.<task>
+```yaml
+groups:
+  <group_name>:
+    env:
+      <key>: <value>
+    tasks:
+      <task_name>: <task_definition>
 ```
 
-### Examples:
+### Example
 
-- Run unit tests: `makim tests.unittest`
-- Build documentation: `makim docs.build`
-- Clean temporary files: `makim clean.tmp`
+```yaml
+groups:
+  build:
+    env:
+      BUILD_DIR: dist
+    tasks:
+      clean:
+        help: Clean build artifacts
+        run: rm -rf ${{ env.BUILD_DIR }}
+      compile:
+        help: Compile the project
+        run: echo "Compiling..."
+```
 
-## Additional Features
+---
 
-- Support for environment variables
-- Pre-run and post-run hooks
-- Interactive arguments
-- Verbose mode options
-- Matrix strategy testing
+## 3. Tasks
 
-## Best Practices
+### Description
 
-1. Always use verbose mode (`--verbose`) for detailed output during testing
-2. Utilize hooks for complex task dependencies
-3. Leverage environment-specific configurations
-4. Regularly clean up temporary files
-5. Use matrix strategies for comprehensive testing
+Tasks define executable commands with optional arguments, dependencies, and
+hooks.
 
-This document serves as a reference for understanding and maintaining the
-`.makim.yaml` file.
+### Structure
+
+```yaml
+tasks:
+  <task_name>:
+    help: <description>
+    args: <arguments>
+    env: <environment_variables>
+    hooks: <pre/post-run_hooks>
+    matrix: <parameter_combinations>
+    run: <command>
+```
+
+### Example
+
+```yaml
+tasks:
+  test:
+    help: Run tests
+    args:
+      verbose:
+        type: bool
+        action: store_true
+    run: pytest --verbose=${{ args.verbose }}
+```
+
+---
+
+## 4. Arguments
+
+### Description
+
+Defines arguments that tasks can accept with types, defaults, and help
+descriptions.
+
+### Structure
+
+```yaml
+args:
+  <arg_name>:
+    type: <type>
+    default: <default_value>
+    interactive: <true/false>
+    help: <description>
+```
+
+### Example
+
+```yaml
+args:
+  env:
+    type: str
+    default: "dev"
+    help: Environment setting
+```
+
+---
+
+## 5. Hooks
+
+### Description
+
+Hooks define tasks that run before (`pre-run`) or after (`post-run`) a task
+executes.
+
+### Structure
+
+```yaml
+hooks:
+  pre-run:
+    - task: <task_name>
+  post-run:
+    - task: <task_name>
+```
+
+### Example
+
+```yaml
+hooks:
+  pre-run:
+    - task: clean
+```
+
+---
+
+## 6. Environment Variables
+
+### Description
+
+Defines global, group, or task-specific environment variables.
+
+### Structure
+
+```yaml
+env:
+  <key>: <value>
+```
+
+### Example
+
+```yaml
+env:
+  API_KEY: abc123
+```
+
+---
+
+## 7. Matrix Configuration
+
+### Description
+
+Defines multiple combinations of parameters for running a task.
+
+### Structure
+
+```yaml
+matrix:
+  <param_name>:
+    - <value1>
+    - <value2>
+```
+
+### Example
+
+```yaml
+matrix:
+  python_version:
+    - 3.8
+    - 3.9
+    - 3.10
+  os:
+    - ubuntu
+    - macos]
+```
+
+---
+
+## 8. Scheduler
+
+### Description
+
+Defines scheduled tasks using cron syntax.
+
+### Structure
+
+```yaml
+scheduler:
+  <schedule_name>:
+    task: <task_name>
+    schedule: <cron_expression>
+```
+
+### Example
+
+```yaml
+scheduler:
+  daily-clean:
+    task: build.clean
+    schedule: "0 0 * * *"
+```
+
+---
+
+## 9. Remote Hosts
+
+### Description
+
+Defines SSH configuration for executing tasks on remote servers.
+
+### Structure
+
+```yaml
+hosts:
+  <host_name>:
+    username: <user>
+    host: <hostname>
+    port: <port>
+    password: <password>
+```
+
+### Example
+
+```yaml
+hosts:
+  my_server:
+    username: user
+    host: example.com
+    port: 22
+```
+
+---
+
+## Conclusion
+
+This document outlines the complete specification for `.makim.yaml`, covering
+all components, their syntax, and usage examples. Understanding these elements
+enables users to define efficient and scalable task automation workflows using
+Makim.

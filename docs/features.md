@@ -1,166 +1,276 @@
 # Features
 
-## Overview
-
-Makim is a task management tool inspired by `make`, designed to simplify
-defining and executing tasks with dependencies. It replaces traditional
-`Makefile` formats with a user-friendly `YAML` configuration system, offering
-flexibility, modularity, and better readability. Here are Makim's key features:
+Makim is a task automation tool that enhances the way tasks and dependencies are
+defined using YAML instead of Makefile syntax. This document explains Makim's
+features in detail, providing use cases and benefits for developers and teams
+looking to simplify and automate workflows efficiently.
 
 ---
 
-## Key Features
+## 1. Help Text as First-Class Citizen
 
-### 1. Attribute: dir
+### What It Does
 
-The `dir` feature allows users to define the working directory for tasks,
-groups, or the entire configuration. This ensures commands run in the intended
-environment, providing control over execution contexts.
+Makim allows you to add detailed `help` text to tasks and their arguments. This
+improves documentation and makes it easier for users to understand how to use
+each task.
 
-**Syntax and Scopes**
+### Use Case
 
-- **Global Scope**: Applies to all tasks and groups.
+Developers often forget how a certain script works. With Makim, they can simply
+run:
 
-- **Group Scope**: Overrides the global directory for specific groups.
-
-- **Task Scope**: Offers fine-grained control for individual tasks.
-
-**Example**
-
-```yaml
-version: 1.0
-dir: /project-root
-
-groups:
-  backend:
-    dir: backend
-    tasks:
-      build:
-        dir: services
-        run: |
-          echo "Building backend services..."
-
-      test:
-        dir: tests
-        run: |
-          echo "Running backend tests..."
+```sh
+makim --help
 ```
 
-### 2. Scoped Environment Variables
+And get an automatically generated help menu with clear descriptions for tasks
+and arguments.
 
-Environment variables can be defined at global, group, or task levels, ensuring
-modular configurations.
+---
 
-**Example**
+## 2. Task Arguments
+
+### What It Does
+
+Makim allows tasks to accept arguments with predefined types, default values,
+and descriptions.
+
+### Use Case
+
+Suppose you have a task that clears the cache but also wants an option to remove
+all build artifacts:
+
+```yaml
+tasks:
+  clean:
+    help: Clean build artifacts
+    args:
+      cache:
+        type: bool
+        action: store_true
+        help: Remove all cache files
+    run: rm -rf build/
+```
+
+You can run:
+
+```sh
+makim clean --cache
+```
+
+### Benefit
+
+- Prevents hardcoded parameters in scripts.
+- Offers a flexible way to pass arguments dynamically.
+
+---
+
+### Benefit
+
+- Reduces redundant execution.
+- Ensures dependencies are met before running a task.
+
+---
+
+## 3. Environment Variables
+
+### What It Does
+
+Makim allows scoping environment variables globally, at the group level, or at
+the task level.
+
+### Use Case
+
+If different tasks need different environment variables, you can define:
 
 ```yaml
 groups:
-  my-group:
+  build:
     env:
-      NODE_ENV: production
-    tasks:
-      start:
-        env:
-          DEBUG: true
-        run: |
-          echo $NODE_ENV
-          echo $DEBUG
+      GROUP_ENV: group_value
 ```
 
-### 3. Matrix Configuration
+### Benefit
 
-Define and run tasks with multiple parameter combinations. Perfect for CI/CD
-pipelines or testing scenarios.
+- Avoids redundant variable definitions.
+- Increases modularity in task execution.
 
-**Example**
+---
+
+## 4. Jinja2 Templating
+
+### What It Does
+
+Makim integrates with Jinja2 templating, allowing dynamic access to arguments
+and environment variables.
+
+### Use Case
+
+You can use Jinja2 to dynamically insert values:
 
 ```yaml
-groups:
-  test-group:
-    tasks:
-      test-matrix:
-        matrix:
-          env:
-            - dev
-            - staging
-            - prod
-        run: |
-          echo "Testing in $env"
+tasks:
+  greet:
+    help: Print a greeting
+    run: echo "Hello, ${{ args.name }}!"
 ```
 
-### 4. Hooks (pre-run and post-run)
+Running:
 
-Run additional tasks before or after a primary task to set up or clean up
-resources.
+```sh
+makim greet --name John
+```
 
-**Example**
+Outputs:
+
+```
+Hello, John!
+```
+
+### Benefit
+
+- Adds flexibility in command execution.
+- Reduces the need for complex shell scripting.
+
+---
+
+## 5. Matrix Configuration
+
+### What It Does
+
+Makim allows running tasks across multiple parameter combinations, making it
+useful for CI/CD workflows.
+
+### Use Case
+
+If you need to test across multiple environments:
 
 ```yaml
-groups:
-  build-group:
-    tasks:
-      build:
-        hooks:
-          pre-run:
-            - task: setup-environment
-          post-run:
-            - task: cleanup
-        run: |
-          echo "Building project..."
+tasks:
+  test:
+    matrix:
+      python_version:
+        - 3.8
+        - 3.9
+        - 3.10
+      os:
+        - ubuntu
+        - macos
+    run:
+      echo "Running test on Python ${{ matrix.python_version }} and OS ${{
+      matrix.os }}"
 ```
 
-### 5. Scheduler
+Makim automatically expands this into multiple runs for each combination.
 
-Makim integrates with APScheduler for cron-like task scheduling. Define tasks to
-run at specified intervals using cron expressions.
+### Benefit
 
-**Example**
+- Automates testing across configurations.
+- Reduces manual setup in CI/CD pipelines.
+
+---
+
+## 6. Hooks
+
+### What It Does
+
+Makim provides `pre-run` and `post-run` hooks to execute tasks before or after
+another task runs.
+
+### Use Case
+
+If you need to clean before compiling:
+
+```yaml
+tasks:
+  compile:
+    hooks:
+      pre-run:
+        - task: clean
+```
+
+### Benefit
+
+- Automates task chaining.
+- Reduces duplication of logic.
+
+---
+
+## 7. Scheduler (Cron-like Automation)
+
+### What It Does
+
+Makim integrates with APScheduler to allow periodic execution of tasks using
+cron syntax.
+
+### Use Case
+
+If you need to run a cleanup task daily at midnight:
 
 ```yaml
 scheduler:
-  daily-backup:
-    task: backup
-    schedule: "0 3 * * *" # Runs daily at 3 AM
-    args:
-      path: /backup
+  daily-clean:
+    task: build.clean
+    schedule: "0 0 * * *"
 ```
 
-### 6. Dynamic Command Generation
+### Benefit
 
-Makim dynamically generates CLI commands from the `.makim.yaml` configuration,
-enabling streamlined task execution.
+- Automates repetitive tasks.
+- Reduces manual intervention.
 
-**Example**
+---
 
-```yaml
-makim build # Executes the build task as defined in .makim.yaml
-```
+## 8. Remote Execution
 
-### 7. Remote Command Execution
+### What It Does
 
-Makim supports executing tasks on remote servers via SSH with customizable
+Makim allows running tasks on remote servers via SSH with flexible
 configurations.
 
-**Example**
+### Use Case
+
+If you need to deploy a project to a remote server:
 
 ```yaml
-groups:
-  remote-group:
-    tasks:
-      deploy:
-        remote: my-server
-        run: |
-          echo "Deploying application..."
-
-hosts:
-  my-server:
-    username: user
-    host: example.com
-    port: 22
-    password: pass
+tasks:
+  deploy:
+    remote: my_server
+    run: echo "Deploying application..."
 ```
 
-### 8. Configuration Validation
+### Benefit
 
-Makim validates `.makim.yaml` against a predefined JSON schema to catch errors
-early and ensure correctness.
+- Automates remote deployments.
+- Eliminates the need for manual SSH logins.
+
+---
+
+## 9. Validation
+
+### What It Does
+
+Makim ensures that `.makim.yaml` configurations are correctly formatted using
+schema validation.
+
+### Use Case
+
+Before running any tasks, Makim checks for syntax errors and missing fields,
+preventing misconfigurations.
+
+### Benefit
+
+- Reduces runtime errors.
+- Improves reliability of task execution.
+
+---
+
+## Conclusion
+
+Makim is an all-in-one task automation tool that simplifies workflows, enhances
+documentation, and integrates seamlessly with modern development practices. By
+using YAML instead of Makefiles, it makes task definition more readable and
+maintainable, improving developer productivity and CI/CD efficiency.
+
+Start using Makim today to streamline your project automation!
