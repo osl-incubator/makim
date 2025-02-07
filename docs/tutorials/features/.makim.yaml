@@ -1,0 +1,12 @@
+hosts:
+  my_server:
+    user: deploy_user
+    host: example.com
+    port: "22"
+
+groups:
+  deploy:
+    tasks:
+      deploy:
+        remote: my_server
+        run: echo "Deploying application..."
