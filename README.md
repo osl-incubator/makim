@@ -1,6 +1,12 @@
-# Get Started
+# Makim
 
-`Makim` (or `makim`) is based on `make` and focus on improve the way to define
+![CI](https://img.shields.io/github/actions/workflow/status/osl-incubator/makim/main.yaml?logo=github&label=CI)
+[![Python Versions](https://img.shields.io/pypi/pyversions/makim)](https://pypi.org/project/makim/)
+[![Package Version](https://img.shields.io/pypi/v/containers-sugar?color=blue)](https://pypi.org/project/makim/)
+![License](https://img.shields.io/pypi/l/makim?color=blue)
+![Discord](https://img.shields.io/discord/796786891798085652?logo=discord&color=blue)
+
+`Makim` is based on `make` and focus on improve the way to define
 tasks and dependencies. Instead of using the `Makefile` format, it uses `yaml`
 format.
 
