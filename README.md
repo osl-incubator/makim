@@ -6,9 +6,8 @@
 ![License](https://img.shields.io/pypi/l/makim?color=blue)
 ![Discord](https://img.shields.io/discord/796786891798085652?logo=discord&color=blue)
 
-`Makim` is based on `make` and focus on improve the way to define
-tasks and dependencies. Instead of using the `Makefile` format, it uses `yaml`
-format.
+`Makim` is based on `make` and focus on improve the way to define tasks and
+dependencies. Instead of using the `Makefile` format, it uses `yaml` format.
 
 The idea of this project is to offer a way to define tasks and dependencies with
 some control options, like conditionals `if`.
