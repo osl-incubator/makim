@@ -379,10 +379,3 @@ env-file: .env
 ```
 
 This will automatically load the environment variables defined in `.env`.
-
-## Conclusion
-
-This document outlines the complete specification for `.makim.yaml`, covering
-all components, their syntax, and usage examples. Understanding these elements
-enables users to define efficient and scalable task automation workflows using
-Makim.
