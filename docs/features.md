@@ -68,13 +68,6 @@ makim clean --cache
 
 ---
 
-### Benefit
-
-- Reduces redundant execution.
-- Ensures dependencies are met before running a task.
-
----
-
 ## 3. Environment Variables
 
 ### What It Does
@@ -115,6 +108,10 @@ You can use Jinja2 to dynamically insert values:
 tasks:
   greet:
     help: Print a greeting
+    args:
+      name:
+        type: str
+        help: Name of the person to greet
     run: echo "Hello, ${{ args.name }}!"
 ```
 
@@ -185,11 +182,24 @@ another task runs.
 If you need to clean before compiling:
 
 ```yaml
-tasks:
-  compile:
-    hooks:
-      pre-run:
-        - task: clean
+groups:
+  build:
+    tasks:
+      compile:
+        hooks:
+          pre-run:
+            - task: build.clean
+          post-run:
+            - task: build.notify
+        run: echo "Compiling source code..."
+
+      clean:
+        help: Clean build artifacts
+        run: rm -rf build/
+
+      notify:
+        help: Notify team about successful compilation
+        run: echo "Build completed successfully!"
 ```
 
 ### Benefit
@@ -217,6 +227,20 @@ scheduler:
     schedule: "0 0 * * *"
 ```
 
+### How to run?
+
+To start the scheduler, run:
+
+```
+makim cron start daily-clean
+```
+
+To stop the scheduler, run:
+
+```
+makim cron stop daily-clean
+```
+
 ### Benefit
 
 - Automates repetitive tasks.
@@ -231,16 +255,17 @@ scheduler:
 Makim allows running tasks on remote servers via SSH with flexible
 configurations.
 
-### Use Case
+### More Details
 
-If you need to deploy a project to a remote server:
+For detailed specifications on Remote Execution, please refer to the
+[**Makim spec documentation**](./spec.md).
 
-```yaml
-tasks:
-  deploy:
-    remote: my_server
-    run: echo "Deploying application..."
-```
+Makim’s remote execution capabilities are similar to tools like:
+
+- [Ansible](https://docs.ansible.com) – Automates IT infrastructure and
+  application deployment.
+- [Fabric](https://www.fabfile.org/) – A Python library for executing remote
+  shell commands over SSH.
 
 ### Benefit
 
@@ -274,5 +299,3 @@ Makim is an all-in-one task automation tool that simplifies workflows, enhances
 documentation, and integrates seamlessly with modern development practices. By
 using YAML instead of Makefiles, it makes task definition more readable and
 maintainable, improving developer productivity and CI/CD efficiency.
-
-Start using Makim today to streamline your project automation!
