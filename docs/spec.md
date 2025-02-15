@@ -127,7 +127,8 @@ args:
 ### Description
 
 Hooks define tasks that run before (`pre-run`) or after (`post-run`) a task
-executes.
+executes. They can also include an `if` condition to control when the hook
+should be triggered.
 
 ### Structure
 
@@ -135,16 +136,24 @@ executes.
 hooks:
   pre-run:
     - task: <task_name>
+      if: <condition>
   post-run:
     - task: <task_name>
+      if: <condition>
 ```
 
 ### Example
 
 ```yaml
-hooks:
-  pre-run:
-    - task: clean
+tasks:
+  build:
+    hooks:
+      pre-run:
+        - task: clean
+          if: ${{ vars.REBUILD == "true" }}
+      post-run:
+        - task: notify
+    run: echo "Building project..."
 ```
 
 ---
@@ -166,8 +175,14 @@ env:
 
 ```yaml
 env:
-  API_KEY: abc123
+  API_KEY: abc
+  RETRY_COUNT: "3"
 ```
+
+### Note:
+
+⚠️ The value of an environment variable should always be a string. If you need
+to pass an integer, wrap it in quotes (`""`) to avoid type issues.
 
 ---
 
@@ -196,7 +211,7 @@ matrix:
     - 3.10
   os:
     - ubuntu
-    - macos]
+    - macos
 ```
 
 ---
@@ -205,7 +220,8 @@ matrix:
 
 ### Description
 
-Defines scheduled tasks using cron syntax.
+Defines scheduled tasks using **cron syntax**, allowing periodic execution of
+tasks.
 
 ### Structure
 
@@ -225,13 +241,33 @@ scheduler:
     schedule: "0 0 * * *"
 ```
 
----
+### Understanding Cron Syntax
+
+A cron expression consists of **five fields**, each representing a time unit:
+
+| Field            | Value Range        | Example | Meaning                           |
+| ---------------- | ------------------ | ------- | --------------------------------- |
+| **Minute**       | `0-59`             | `30`    | Runs at 30th minute               |
+| **Hour**         | `0-23`             | `2`     | Runs at 2 AM                      |
+| **Day of Month** | `1-31`             | `15`    | Runs on the 15th day of the month |
+| **Month**        | `1-12`             | `6`     | Runs in June                      |
+| **Day of Week**  | `0-6` (Sunday = 0) | `1`     | Runs on Monday                    |
+
+### Common Cron Examples
+
+- `0 0 * * *` → Runs **daily at midnight**
+- `30 14 * * 5` → Runs **every Friday at 2:30 PM**
+
+For a detailed guide on cron syntax, visit:
+
+📌 [Cron Syntax Guide](https://crontab.guru/)
 
 ## 9. Remote Hosts
 
 ### Description
 
-Defines SSH configuration for executing tasks on remote servers.
+Defines SSH configurations for executing tasks on remote servers. Additionally,
+tasks can specify a `remote` entry to execute commands on a defined host.
 
 ### Structure
 
@@ -244,17 +280,105 @@ hosts:
     password: <password>
 ```
 
+Using Remote Execution Inside a Task
+
+```
+tasks:
+  <task_name>:
+    remote: <host_name>
+    run: <command>
+```
+
 ### Example
+
+#### 1. Define Remote Host
 
 ```yaml
 hosts:
-  my_server:
+  production:
     username: user
     host: example.com
     port: 22
 ```
 
+#### 2. 2. Execute Task on Remote Server
+
+```
+tasks:
+  deploy:
+    remote: production
+    run: echo "Deploying application..."
+```
+
+**Explanation:**
+
+- The `hosts` section defines the `production` remote server.
+- The `deploy` task specifies `remote: production`, ensuring it runs on
+  `example.com` via SSH.
+
 ---
+
+## 10. Variables
+
+### Description
+
+Defines reusable variables that can be referenced throughout the configuration.
+
+### Supported Scopes:
+
+- **Global** – Available everywhere.
+- **Group** – Available within a specific group.
+- **Task** – Available only within a task.
+
+### Structure
+
+```
+vars:
+  <var_name>: <value>
+```
+
+### Example
+
+```
+vars:
+  PROJECT_NAME: MyApp
+  TIMEOUT: 30
+```
+
+This can be used in tasks as:
+
+```
+tasks:
+  deploy:
+    run: echo "Deploying ${{ vars.PROJECT_NAME }} with timeout ${{ vars.TIMEOUT }}s"
+```
+
+## 11. Environment Variables
+
+### Description
+
+Loads environment variables from an external `.env` file. This is useful for
+managing secrets and configurations separately.
+
+### Supported Scopes:
+
+- **Global** – Available everywhere.
+- **Group** – Available within a specific group.
+- **Task** – Available only within a task.
+
+### Structure
+
+```
+env-file: <path_to_env_file>
+```
+
+### Example
+
+```
+env-file: .env
+```
+
+This will automatically load the environment variables defined in `.env`.
 
 ## Conclusion
 
