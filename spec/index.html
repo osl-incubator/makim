@@ -22,7 +22,7 @@
     
     
       
-        <title>Macro Rendering Error - Makim</title>
+        <title>Makim Specification - Makim</title>
       
     
     
@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#macro-rendering-error" class="md-skip">
+        <a href="#makim-specification" class="md-skip">
           Skip to content
         </a>
       
@@ -111,7 +111,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Macro Rendering Error
+              Makim Specification
             
           </span>
         </div>
@@ -324,7 +324,7 @@
         
   
   <span class="md-ellipsis">
-    Macro Rendering Error
+    Overview
   </span>
   
 
@@ -369,15 +369,552 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Makim Specification
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
-    Macro Rendering Error
+    Makim Specification
   </span>
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-file-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. File Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Groups
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Groups">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Tasks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Arguments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Arguments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Hooks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Hooks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Environment Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#note" class="md-nav__link">
+    <span class="md-ellipsis">
+      Note:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-matrix-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Matrix Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Matrix Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Scheduler
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Scheduler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-cron-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Cron Syntax
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-cron-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Cron Examples
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-remote-hosts" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Remote Hosts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Remote Hosts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-define-remote-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Define Remote Host
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-2-execute-task-on-remote-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. 2. Execute Task on Remote Server
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      10. Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Scopes:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      11. Environment Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-scopes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Scopes:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -669,6 +1206,521 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-file-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. File Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Groups
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Groups">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Tasks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Tasks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      4. Arguments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Arguments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      5. Hooks
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Hooks">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      6. Environment Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#note" class="md-nav__link">
+    <span class="md-ellipsis">
+      Note:
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-matrix-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      7. Matrix Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Matrix Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-scheduler" class="md-nav__link">
+    <span class="md-ellipsis">
+      8. Scheduler
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Scheduler">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#understanding-cron-syntax" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding Cron Syntax
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#common-cron-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Cron Examples
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-remote-hosts" class="md-nav__link">
+    <span class="md-ellipsis">
+      9. Remote Hosts
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Remote Hosts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Example">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-define-remote-host" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Define Remote Host
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-2-execute-task-on-remote-server" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. 2. Execute Task on Remote Server
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      10. Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-scopes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Scopes:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      11. Environment Variables
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#description_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Description
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supported-scopes_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supported Scopes:
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#structure_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -685,21 +1737,302 @@
   
 
 
-<h1 id="macro-rendering-error"><em>Macro Rendering Error</em><a class="headerlink" href="#macro-rendering-error" title="Permanent link">&para;</a></h1>
-<p><em>File</em>: <code>spec.md</code></p>
-<p><em>UndefinedError</em>: 'env' is undefined</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Traceback (most recent call last):
-<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  File &quot;/home/runner/miniconda3/envs/makim/lib/python3.9/site-packages/mkdocs_macros/plugin.py&quot;, line 688, in render
-<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    return md_template.render(**page_variables)
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>  File &quot;/home/runner/miniconda3/envs/makim/lib/python3.9/site-packages/jinja2/environment.py&quot;, line 1295, in render
-<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    self.environment.handle_exception()
-<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>  File &quot;/home/runner/miniconda3/envs/makim/lib/python3.9/site-packages/jinja2/environment.py&quot;, line 942, in handle_exception
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    raise rewrite_traceback_stack(source=source)
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>  File &quot;&lt;template&gt;&quot;, line 52, in top-level template code
-<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>  File &quot;/home/runner/miniconda3/envs/makim/lib/python3.9/site-packages/jinja2/environment.py&quot;, line 490, in getattr
-<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    return getattr(obj, attribute)
-<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>jinja2.exceptions.UndefinedError: &#39;env&#39; is undefined
+<h1 id="makim-specification">Makim Specification<a class="headerlink" href="#makim-specification" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Makim uses a YAML-based configuration file (<code>.makim.yaml</code>) to define tasks,
+dependencies, and execution environments. This document provides a detailed
+specification of all components available in a Makim configuration file.</p>
+<h2 id="1-file-structure">1. File Structure<a class="headerlink" href="#1-file-structure" title="Permanent link">&para;</a></h2>
+<p>A <code>.makim.yaml</code> file consists of the following top-level sections:</p>
+<ul>
+<li><code>groups</code></li>
+<li><code>scheduler</code></li>
+<li><code>hosts</code></li>
+<li><code>vars</code></li>
+<li><code>env</code></li>
+<li><code>env-file</code></li>
+</ul>
+<p>Each section is explained below in detail.</p>
+<hr />
+<h2 id="2-groups">2. Groups<a class="headerlink" href="#2-groups" title="Permanent link">&para;</a></h2>
+<h3 id="description">Description<a class="headerlink" href="#description" title="Permanent link">&para;</a></h3>
+<p>Defines collections of related tasks. Each group contains tasks and environment
+variables specific to that group.</p>
+<h3 id="structure">Structure<a class="headerlink" href="#structure" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nt">groups</span><span class="p">:</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="w">  </span><span class="nt">&lt;group_name&gt;</span><span class="p">:</span>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="w">    </span><span class="nt">env</span><span class="p">:</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="w">      </span><span class="nt">&lt;key&gt;</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;value&gt;</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="w">    </span><span class="nt">tasks</span><span class="p">:</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="w">      </span><span class="nt">&lt;task_name&gt;</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;task_definition&gt;</span>
 </code></pre></div>
+<h3 id="example">Example<a class="headerlink" href="#example" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nt">groups</span><span class="p">:</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">  </span><span class="nt">build</span><span class="p">:</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">env</span><span class="p">:</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">      </span><span class="nt">BUILD_DIR</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dist</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="nt">tasks</span><span class="p">:</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">      </span><span class="nt">clean</span><span class="p">:</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">        </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Clean build artifacts</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">rm -rf ${{ env.BUILD_DIR }}</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">      </span><span class="nt">compile</span><span class="p">:</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">        </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Compile the project</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">echo &quot;Compiling...&quot;</span>
+</code></pre></div>
+<hr />
+<h2 id="3-tasks">3. Tasks<a class="headerlink" href="#3-tasks" title="Permanent link">&para;</a></h2>
+<h3 id="description_1">Description<a class="headerlink" href="#description_1" title="Permanent link">&para;</a></h3>
+<p>Tasks define executable commands with optional arguments, dependencies, and
+hooks.</p>
+<h3 id="structure_1">Structure<a class="headerlink" href="#structure_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nt">tasks</span><span class="p">:</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="w">  </span><span class="nt">&lt;task_name&gt;</span><span class="p">:</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">    </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;description&gt;</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">    </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;arguments&gt;</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="nt">env</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;environment_variables&gt;</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;pre/post-run_hooks&gt;</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">    </span><span class="nt">matrix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;parameter_combinations&gt;</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">    </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;command&gt;</span>
+</code></pre></div>
+<h3 id="example_1">Example<a class="headerlink" href="#example_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nt">tasks</span><span class="p">:</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">test</span><span class="p">:</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run tests</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">args</span><span class="p">:</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">      </span><span class="nt">verbose</span><span class="p">:</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">bool</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">        </span><span class="nt">action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">store_true</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">    </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pytest --verbose=${{ args.verbose }}</span>
+</code></pre></div>
+<hr />
+<h2 id="4-arguments">4. Arguments<a class="headerlink" href="#4-arguments" title="Permanent link">&para;</a></h2>
+<h3 id="description_2">Description<a class="headerlink" href="#description_2" title="Permanent link">&para;</a></h3>
+<p>Defines arguments that tasks can accept with types, defaults, and help
+descriptions.</p>
+<h3 id="structure_2">Structure<a class="headerlink" href="#structure_2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="nt">args</span><span class="p">:</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span><span class="nt">&lt;arg_name&gt;</span><span class="p">:</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;type&gt;</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;default_value&gt;</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="nt">interactive</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;true/false&gt;</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">    </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;description&gt;</span>
+</code></pre></div>
+<h3 id="example_2">Example<a class="headerlink" href="#example_2" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="nt">args</span><span class="p">:</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span><span class="nt">env</span><span class="p">:</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">str</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;dev&quot;</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="w">    </span><span class="nt">help</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Environment setting</span>
+</code></pre></div>
+<hr />
+<h2 id="5-hooks">5. Hooks<a class="headerlink" href="#5-hooks" title="Permanent link">&para;</a></h2>
+<h3 id="description_3">Description<a class="headerlink" href="#description_3" title="Permanent link">&para;</a></h3>
+<p>Hooks define tasks that run before (<code>pre-run</code>) or after (<code>post-run</code>) a task
+executes. They can also include an <code>if</code> condition to control when the hook
+should be triggered.</p>
+<h3 id="structure_3">Structure<a class="headerlink" href="#structure_3" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="nt">hooks</span><span class="p">:</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">pre-run</span><span class="p">:</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;task_name&gt;</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">      </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;condition&gt;</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">post-run</span><span class="p">:</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;task_name&gt;</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">      </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;condition&gt;</span>
+</code></pre></div>
+<h3 id="example_3">Example<a class="headerlink" href="#example_3" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nt">tasks</span><span class="p">:</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="w">  </span><span class="nt">build</span><span class="p">:</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">    </span><span class="nt">hooks</span><span class="p">:</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">      </span><span class="nt">pre-run</span><span class="p">:</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">clean</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">          </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ vars.REBUILD == &quot;true&quot; }}</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">      </span><span class="nt">post-run</span><span class="p">:</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">notify</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">echo &quot;Building project...&quot;</span>
+</code></pre></div>
+<hr />
+<h2 id="6-environment-variables">6. Environment Variables<a class="headerlink" href="#6-environment-variables" title="Permanent link">&para;</a></h2>
+<h3 id="description_4">Description<a class="headerlink" href="#description_4" title="Permanent link">&para;</a></h3>
+<p>Defines global, group, or task-specific environment variables.</p>
+<h3 id="structure_4">Structure<a class="headerlink" href="#structure_4" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="nt">env</span><span class="p">:</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">&lt;key&gt;</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;value&gt;</span>
+</code></pre></div>
+<h3 id="example_4">Example<a class="headerlink" href="#example_4" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="nt">env</span><span class="p">:</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">API_KEY</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">abc</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nt">RETRY_COUNT</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;3&quot;</span>
+</code></pre></div>
+<h3 id="note">Note:<a class="headerlink" href="#note" title="Permanent link">&para;</a></h3>
+<p>⚠️ The value of an environment variable should always be a string. If you need
+to pass an integer, wrap it in quotes (<code>""</code>) to avoid type issues.</p>
+<hr />
+<h2 id="7-matrix-configuration">7. Matrix Configuration<a class="headerlink" href="#7-matrix-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="description_5">Description<a class="headerlink" href="#description_5" title="Permanent link">&para;</a></h3>
+<p>Defines multiple combinations of parameters for running a task.</p>
+<h3 id="structure_5">Structure<a class="headerlink" href="#structure_5" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="nt">matrix</span><span class="p">:</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span><span class="nt">&lt;param_name&gt;</span><span class="p">:</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;value1&gt;</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;value2&gt;</span>
+</code></pre></div>
+<h3 id="example_5">Example<a class="headerlink" href="#example_5" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="nt">matrix</span><span class="p">:</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">python_version</span><span class="p">:</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.8</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.9</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3.10</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">  </span><span class="nt">os</span><span class="p">:</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">macos</span>
+</code></pre></div>
+<hr />
+<h2 id="8-scheduler">8. Scheduler<a class="headerlink" href="#8-scheduler" title="Permanent link">&para;</a></h2>
+<h3 id="description_6">Description<a class="headerlink" href="#description_6" title="Permanent link">&para;</a></h3>
+<p>Defines scheduled tasks using <strong>cron syntax</strong>, allowing periodic execution of
+tasks.</p>
+<h3 id="structure_6">Structure<a class="headerlink" href="#structure_6" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="nt">scheduler</span><span class="p">:</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="w">  </span><span class="nt">&lt;schedule_name&gt;</span><span class="p">:</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">    </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;task_name&gt;</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cron_expression&gt;</span>
+</code></pre></div>
+<h3 id="example_6">Example<a class="headerlink" href="#example_6" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="nt">scheduler</span><span class="p">:</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nt">daily-clean</span><span class="p">:</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">    </span><span class="nt">task</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">build.clean</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">    </span><span class="nt">schedule</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;0</span><span class="nv"> </span><span class="s">0</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*&quot;</span>
+</code></pre></div>
+<h3 id="understanding-cron-syntax">Understanding Cron Syntax<a class="headerlink" href="#understanding-cron-syntax" title="Permanent link">&para;</a></h3>
+<p>A cron expression consists of <strong>five fields</strong>, each representing a time unit:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value Range</th>
+<th>Example</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Minute</strong></td>
+<td><code>0-59</code></td>
+<td><code>30</code></td>
+<td>Runs at 30th minute</td>
+</tr>
+<tr>
+<td><strong>Hour</strong></td>
+<td><code>0-23</code></td>
+<td><code>2</code></td>
+<td>Runs at 2 AM</td>
+</tr>
+<tr>
+<td><strong>Day of Month</strong></td>
+<td><code>1-31</code></td>
+<td><code>15</code></td>
+<td>Runs on the 15th day of the month</td>
+</tr>
+<tr>
+<td><strong>Month</strong></td>
+<td><code>1-12</code></td>
+<td><code>6</code></td>
+<td>Runs in June</td>
+</tr>
+<tr>
+<td><strong>Day of Week</strong></td>
+<td><code>0-6</code> (Sunday = 0)</td>
+<td><code>1</code></td>
+<td>Runs on Monday</td>
+</tr>
+</tbody>
+</table>
+<h3 id="common-cron-examples">Common Cron Examples<a class="headerlink" href="#common-cron-examples" title="Permanent link">&para;</a></h3>
+<ul>
+<li><code>0 0 * * *</code> → Runs <strong>daily at midnight</strong></li>
+<li><code>30 14 * * 5</code> → Runs <strong>every Friday at 2:30 PM</strong></li>
+</ul>
+<p>For a detailed guide on cron syntax, visit:</p>
+<p>📌 <a href="https://crontab.guru/">Cron Syntax Guide</a></p>
+<h2 id="9-remote-hosts">9. Remote Hosts<a class="headerlink" href="#9-remote-hosts" title="Permanent link">&para;</a></h2>
+<h3 id="description_7">Description<a class="headerlink" href="#description_7" title="Permanent link">&para;</a></h3>
+<p>Defines SSH configurations for executing tasks on remote servers. Additionally,
+tasks can specify a <code>remote</code> entry to execute commands on a defined host.</p>
+<h3 id="structure_7">Structure<a class="headerlink" href="#structure_7" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="nt">hosts</span><span class="p">:</span>
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="w">  </span><span class="nt">&lt;host_name&gt;</span><span class="p">:</span>
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;user&gt;</span>
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;hostname&gt;</span>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;port&gt;</span>
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a><span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;password&gt;</span>
+</code></pre></div>
+<p>Using Remote Execution Inside a Task</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>tasks:
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>  &lt;task_name&gt;:
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>    remote: &lt;host_name&gt;
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>    run: &lt;command&gt;
+</code></pre></div>
+<h3 id="example_7">Example<a class="headerlink" href="#example_7" title="Permanent link">&para;</a></h3>
+<h4 id="1-define-remote-host">1. Define Remote Host<a class="headerlink" href="#1-define-remote-host" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a><span class="nt">hosts</span><span class="p">:</span>
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a><span class="w">  </span><span class="nt">production</span><span class="p">:</span>
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a><span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user</span>
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a><span class="w">    </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example.com</span>
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a><span class="w">    </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">22</span>
+</code></pre></div>
+<h4 id="2-2-execute-task-on-remote-server">2. 2. Execute Task on Remote Server<a class="headerlink" href="#2-2-execute-task-on-remote-server" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>tasks:
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>  deploy:
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>    remote: production
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>    run: echo &quot;Deploying application...&quot;
+</code></pre></div>
+<p><strong>Explanation:</strong></p>
+<ul>
+<li>The <code>hosts</code> section defines the <code>production</code> remote server.</li>
+<li>The <code>deploy</code> task specifies <code>remote: production</code>, ensuring it runs on
+  <code>example.com</code> via SSH.</li>
+</ul>
+<hr />
+<h2 id="10-variables">10. Variables<a class="headerlink" href="#10-variables" title="Permanent link">&para;</a></h2>
+<h3 id="description_8">Description<a class="headerlink" href="#description_8" title="Permanent link">&para;</a></h3>
+<p>Defines reusable variables that can be referenced throughout the configuration.</p>
+<h3 id="supported-scopes">Supported Scopes:<a class="headerlink" href="#supported-scopes" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Global</strong> – Available everywhere.</li>
+<li><strong>Group</strong> – Available within a specific group.</li>
+<li><strong>Task</strong> – Available only within a task.</li>
+</ul>
+<h3 id="structure_8">Structure<a class="headerlink" href="#structure_8" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a>vars:
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a>  &lt;var_name&gt;: &lt;value&gt;
+</code></pre></div>
+<h3 id="example_8">Example<a class="headerlink" href="#example_8" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a>vars:
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a>  PROJECT_NAME: MyApp
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a>  TIMEOUT: 30
+</code></pre></div>
+<p>This can be used in tasks as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a><span class="nt">tasks</span><span class="p">:</span>
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a><span class="w">  </span><span class="nt">deploy</span><span class="p">:</span>
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a><span class="w">    </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">echo &quot;Deploying ${{ vars.PROJECT_NAME }} with timeout ${{ vars.TIMEOUT }}s&quot;</span>
+</code></pre></div>
+<h2 id="11-environment-variables">11. Environment Variables<a class="headerlink" href="#11-environment-variables" title="Permanent link">&para;</a></h2>
+<h3 id="description_9">Description<a class="headerlink" href="#description_9" title="Permanent link">&para;</a></h3>
+<p>Loads environment variables from an external <code>.env</code> file. This is useful for
+managing secrets and configurations separately.</p>
+<h3 id="supported-scopes_1">Supported Scopes:<a class="headerlink" href="#supported-scopes_1" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Global</strong> – Available everywhere.</li>
+<li><strong>Group</strong> – Available within a specific group.</li>
+<li><strong>Task</strong> – Available only within a task.</li>
+</ul>
+<h3 id="structure_9">Structure<a class="headerlink" href="#structure_9" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>env-file: &lt;path_to_env_file&gt;
+</code></pre></div>
+<h3 id="example_9">Example<a class="headerlink" href="#example_9" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a>env-file: .env
+</code></pre></div>
+<p>This will automatically load the environment variables defined in <code>.env</code>.</p>
 
 
 
@@ -731,7 +2064,7 @@
       <div class="md-copyright">
   
     <div class="md-copyright__highlight">
-      Copyright &copy; 2022, Makim Team
+      Copyright &copy; 2025, Makim Team
     </div>
   
   
