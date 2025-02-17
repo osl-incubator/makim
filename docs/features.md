@@ -105,6 +105,7 @@ and environment variables.
 You can use Jinja2 to dynamically insert values:
 
 ```yaml
+{% raw %}
 tasks:
   greet:
     help: Print a greeting
@@ -113,6 +114,7 @@ tasks:
         type: str
         help: Name of the person to greet
     run: echo "Hello, ${{ args.name }}!"
+{% endraw %}
 ```
 
 Running:
@@ -146,6 +148,7 @@ useful for CI/CD workflows.
 If you need to test across multiple environments:
 
 ```yaml
+{% raw %}
 tasks:
   test:
     matrix:
@@ -159,6 +162,7 @@ tasks:
     run:
       echo "Running test on Python ${{ matrix.python_version }} and OS ${{
       matrix.os }}"
+{% endraw %}
 ```
 
 Makim automatically expands this into multiple runs for each combination.
