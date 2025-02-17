@@ -42,6 +42,7 @@ groups:
 ### Example
 
 ```yaml
+{% raw %}
 groups:
   build:
     env:
@@ -53,6 +54,7 @@ groups:
       compile:
         help: Compile the project
         run: echo "Compiling..."
+{% endraw %}
 ```
 
 ---
@@ -67,6 +69,7 @@ hooks.
 ### Structure
 
 ```yaml
+{% raw %}
 tasks:
   <task_name>:
     help: <description>
@@ -75,11 +78,13 @@ tasks:
     hooks: <pre/post-run_hooks>
     matrix: <parameter_combinations>
     run: <command>
+{% endraw %}
 ```
 
 ### Example
 
 ```yaml
+{% raw %}
 tasks:
   test:
     help: Run tests
@@ -88,6 +93,7 @@ tasks:
         type: bool
         action: store_true
     run: pytest --verbose=${{ args.verbose }}
+{% endraw %}
 ```
 
 ---
@@ -145,6 +151,7 @@ hooks:
 ### Example
 
 ```yaml
+{% raw %}
 tasks:
   build:
     hooks:
@@ -154,6 +161,7 @@ tasks:
       post-run:
         - task: notify
     run: echo "Building project..."
+{% endraw %}
 ```
 
 ---
@@ -347,10 +355,12 @@ vars:
 
 This can be used in tasks as:
 
-```
+```yaml
+{% raw %}
 tasks:
   deploy:
     run: echo "Deploying ${{ vars.PROJECT_NAME }} with timeout ${{ vars.TIMEOUT }}s"
+{% endraw %}
 ```
 
 ## 11. Environment Variables
