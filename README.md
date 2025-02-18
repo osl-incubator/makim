@@ -117,3 +117,14 @@ $ makim --help
 
 As you can see, the help menu automatically adds information defined by all the
 `help` key, inside the `.makim.yaml` file.
+
+## Playground
+
+Experience **makim** directly in your browser using Google Colab! Google Colab is an 
+online platform that allows you to write, run, and share Python code through your 
+browser. It is especially useful for machine learning, data analysis, and education.
+
+To try makim, simply click the following link, make a copy of the notebook to your 
+drive, and then you can modify and execute the code as needed:
+
+[Experiment with makim on Google Colab](https://colab.research.google.com/drive/1m131pqi6Bjq8Hp8YN_Cbuyezn61f19lB?usp=sharing)
