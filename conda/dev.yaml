@@ -3,6 +3,7 @@ channels:
   - nodefaults
   - conda-forge
 dependencies:
+  - constructor
   - bash
   - python
   - poetry >=1.5
