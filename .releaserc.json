@@ -39,20 +39,6 @@
               }
             ],
             "countMatches": true
-          },
-          {
-            "files": ["conda/constructor/construct.yaml"],
-            "from": "version: \".*\"  # semantic-release",
-            "to": "version: \"${nextRelease.version}\"  # semantic-release",
-            "results": [
-              {
-                "file": "conda/constructor/construct.yaml",
-                "hasChanged": true,
-                "numMatches": 1,
-                "numReplacements": 1
-              }
-            ],
-            "countMatches": true
           }
         ]
       }
@@ -70,13 +56,13 @@
       {
         "prepareCmd": "poetry build",
         "publishCmd": "poetry publish",
-        "successCmd": "cd conda/constructor/ && constructor ."
+        "successCmd": "pyinstaller --onefile -n makim --add-data 'src/makim/schema.json:.' src/makim/__main__.py "
       }
     ],
     [
       "@semantic-release/github",
       {
-        "assets": ["dist/*.whl", "dist/*.tar.gz", "conda/constructor/*.sh"]
+        "assets": ["dist/*.whl", "dist/*.tar.gz", "dist/makim"]
       }
     ],
     [
@@ -85,8 +71,7 @@
         "assets": [
           "pyproject.toml",
           "docs/changelog.md",
-          "src/makim/__init__.py",
-          "conda/constructor/construct.yaml"
+          "src/makim/__init__.py"
         ],
         "message": "chore(release): ${nextRelease.version}"
       }

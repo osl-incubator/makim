@@ -1,8 +1,0 @@
-name: makim
-version: "1.21.0" # semantic-release
-channels:
-  - conda-forge
-specs:
-  - makim
-license_file: LICENSE.txt
-welcome_image: logo.png
