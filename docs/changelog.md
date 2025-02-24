@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.23.0](https://github.com/osl-incubator/makim/compare/1.22.0...1.23.0) (2025-02-24)
+
+
+### Features
+
+* Fix github step in the semantic release workflow ([#139](https://github.com/osl-incubator/makim/issues/139)) ([cd1ff7d](https://github.com/osl-incubator/makim/commit/cd1ff7db3420d4c795be4032b92013a8704eafe6))
+
 # [1.22.0](https://github.com/osl-incubator/makim/compare/1.21.0...1.22.0) (2025-02-24)
 
 

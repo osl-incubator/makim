@@ -1,6 +1,6 @@
 [project]
 name = "makim"
-version = "1.22.0"  # semantic-release
+version = "1.23.0"  # semantic-release
 description = "Simplify the usage of containers"
 authors = [
   {name = "Ivan Ogasawara", email = "ivan.ogasawara@gmail.com"}
