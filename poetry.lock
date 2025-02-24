@@ -614,14 +614,14 @@ test = ["pytest"]
 
 [[package]]
 name = "compose-go"
-version = "2.30.3"
+version = "2.33.1"
 description = "Docker Compose v2 (GoLang) wrapped in a Python Package"
 optional = false
-python-versions = "<4.0.0,>=3.7.0"
+python-versions = "<4,>=3.9"
 groups = ["dev"]
 files = [
-    {file = "compose_go-2.30.3-cp313-cp313-manylinux_2_35_x86_64.whl", hash = "sha256:88092fa4be8dfee423049f71a5f8c463e6d303771e0e0af6f8ad134bfa35d436"},
-    {file = "compose_go-2.30.3.tar.gz", hash = "sha256:9a19d454ec3c97379773aab6043660cd07c3ed94da9993770d43485d65fd1f1f"},
+    {file = "compose_go-2.33.1-cp311-cp311-manylinux_2_39_x86_64.whl", hash = "sha256:e4b95ca1a9c1b1d48d355a9d92d06ffecd4ada16c5ec8cf4a015a2d714f1ada2"},
+    {file = "compose_go-2.33.1.tar.gz", hash = "sha256:52193d3bb9d6d44f4b95755536b0e76682207a7c0c457623400dc4d4393f7c4b"},
 ]
 
 [[package]]
@@ -4298,4 +4298,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4"
-content-hash = "17e810904bc767285afa4c87070d1a2d7ba2d814993c3231f613a93f286ef973"
+content-hash = "15137c7145beb5560bf8330093304898aa11fb15a83a624e85beaed3f917a438"
