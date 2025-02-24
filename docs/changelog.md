@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+# [1.22.0](https://github.com/osl-incubator/makim/compare/1.21.0...1.22.0) (2025-02-24)
+
+
+### Features
+
+* Add pyinstaller into the release pipeline ([#138](https://github.com/osl-incubator/makim/issues/138)) ([cba558c](https://github.com/osl-incubator/makim/commit/cba558ceb9bacc753bcd053b56003d1950eb9482))
+
 # [1.21.0](https://github.com/osl-incubator/makim/compare/1.20.0...1.21.0) (2025-01-28)
 
 
