@@ -69,6 +69,7 @@ jupyterlab = ">=4.1.5"
 nox = ">=2024.3.2"
 nbconvert = ">=7.16.3"
 pymdown-extensions = ">=10.7.1"
+pyinstaller = {version = ">=6.12.0", python = "<3.14"}
 
 [tool.pytest.ini_options]
 testpaths = [
