@@ -62,7 +62,7 @@
     [
       "@semantic-release/github",
       {
-        "assets": ["dist/*.whl", "dist/*.tar.gz", "dist/makim"]
+        "assets": ["dist/**"]
       }
     ],
     [
