@@ -35,7 +35,10 @@ from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
 from makim.scheduler import MakimScheduler
 
-MAKIM_CURRENT_PATH = Path(__file__).parent
+if getattr(sys, 'frozen', False):
+    MAKIM_CURRENT_PATH = Path(sys._MEIPASS)  # type: ignore
+else:
+    MAKIM_CURRENT_PATH = Path(__file__).parent
 
 AppConfigType: TypeAlias = Dict[str, Union[str, List[str]]]
 
@@ -148,6 +151,7 @@ class Makim:
         self.shell_args: list[str] = []
         self.tmp_suffix: str = '.makim'
         self.scheduler = None
+        # os.chdir(os.getcwd())
 
     def _call_shell_app(self, cmd: str) -> None:
         self._load_shell_app()
@@ -269,7 +273,7 @@ class Makim:
         )
 
     def _check_makim_file(self, file_path: str = '') -> bool:
-        return Path(file_path or self.file).exists()
+        return Path(file_path or self.file).absolute().exists()
 
     def _validate_config(self) -> None:
         """
@@ -305,9 +309,9 @@ class Makim:
                 error_message, MakimError.JSON_SCHEMA_DECODING_ERROR
             )
         except FileNotFoundError:
-            error_message = f'Configuration file {self.file} not found.'
+            error_message = 'Vaidation schema file not found.'
             MakimLogs.raise_error(
-                error_message, MakimError.MAKIM_CONFIG_FILE_NOT_FOUND
+                error_message, MakimError.MAKIM_SCHEMA_FILE_NOT_FOUND
             )
         except Exception as e:
             error_message = (
@@ -379,7 +383,7 @@ class Makim:
                 MakimError.MAKIM_CONFIG_FILE_NOT_FOUND,
             )
 
-        with open(self.file, 'r') as f:
+        with open(Path(self.file).absolute(), 'r') as f:
             # escape template tags
             content = f.read()
             content_io = io.StringIO(content)

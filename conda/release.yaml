@@ -8,5 +8,6 @@ dependencies:
   - nodejs >=18.17 # used by semantic-release
   - pip
   - pip:
+      - pyinstaller
       # fix the distlib issue
       - paginate >=0.5

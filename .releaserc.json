@@ -55,13 +55,14 @@
       "@semantic-release/exec",
       {
         "prepareCmd": "poetry build",
-        "publishCmd": "poetry publish"
+        "publishCmd": "poetry publish",
+        "successCmd": "pyinstaller --onefile -n makim --add-data 'src/makim/schema.json:.' src/makim/__main__.py "
       }
     ],
     [
       "@semantic-release/github",
       {
-        "assets": ["dist/*.whl", "dist/*.tar.gz"]
+        "assets": ["dist/*.whl", "dist/*.tar.gz", "dist/makim"]
       }
     ],
     [

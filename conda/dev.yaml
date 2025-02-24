@@ -12,6 +12,7 @@ dependencies:
   - sh
   - pip
   - pip:
+      - pyinstaller
       # note: workaround ci issue for macos
       - setuptools >= 40.8.0
       - wheel >=0.42.0
