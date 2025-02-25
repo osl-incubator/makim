@@ -1,6 +1,13 @@
 # Release Notes
 ---
 
+## [1.23.1](https://github.com/osl-incubator/makim/compare/1.23.0...1.23.1) (2025-02-25)
+
+
+### Bug Fixes
+
+* Fix and improve the PyInstaller executable output ([#140](https://github.com/osl-incubator/makim/issues/140)) ([29f8a48](https://github.com/osl-incubator/makim/commit/29f8a485eee86be324a045b7cd6924f6dace08ad))
+
 # [1.23.0](https://github.com/osl-incubator/makim/compare/1.22.0...1.23.0) (2025-02-24)
 
 
