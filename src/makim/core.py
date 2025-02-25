@@ -1,10 +1,4 @@
-"""
-Makim main class.
-
-Makim is inspired by tools like Make and Ansible, focusing on improving task
-definition and dependency management. Instead of using the Makefile format,
-it utilizes YAML for defining tasks.
-"""
+"""Makim core module."""
 
 from __future__ import annotations
 

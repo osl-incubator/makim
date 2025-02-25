@@ -22,8 +22,8 @@ from makim.core import Makim
 
 app = typer.Typer(
     help=(
-        'Makim is an automation tools focused on improving task definition '
-        'and dependency management using YAML format.'
+        'Makim is an automation tool focused on improving task management '
+        'using YAML format.'
     ),
     epilog=(
         'If you have any problem, open an issue at: '
