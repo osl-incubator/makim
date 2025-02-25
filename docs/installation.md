@@ -1,8 +1,8 @@
 # Installation
 
-## Stable release
+## Stable Release
 
-To install makim, run this command in your terminal:
+To install Makim, run the following command in your terminal:
 
 ```bash
 $ pip install makim
@@ -14,8 +14,13 @@ Makim is also available on conda-forge:
 $ conda install -c conda-forge makim
 ```
 
-This is the preferred method to install makim, as it will always install the
-most recent stable release.
+These installation methods will always provide you with the most recent stable
+release.
+
+Additionally, an executable version of Makim is available for Linux x86-64. The
+download links for the executables are provided with each new GitHub Release,
+for example:
+[makim-linux-x86-64 v1.23.1](https://github.com/osl-incubator/makim/releases/download/1.23.1/makim-linux-x86-64).
 
 ## From sources
 
