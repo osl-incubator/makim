@@ -54,7 +54,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "poetry build && pyinstaller --onefile -n makim --add-data 'src/makim/schema.json:.' src/makim/__main__.py",
+        "prepareCmd": "poetry build && pyinstaller --onefile -n makim-linux-x86-64 --add-data 'src/makim/schema.json:.' src/makim/__main__.py",
         "publishCmd": "poetry publish"
       }
     ],
