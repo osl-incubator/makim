@@ -10,3 +10,5 @@ dependencies:
   - pip:
       # fix the distlib issue
       - paginate >=0.5
+      # compose-go fails sometimes when installed by poetry
+      - compose-go==2.33.1
