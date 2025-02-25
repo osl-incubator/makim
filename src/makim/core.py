@@ -1,10 +1,4 @@
-"""
-Makim main class.
-
-`Makim` or just `makim` is based on `make` and focus on improve
-the way to define tasks and dependencies. Instead of using the
-`Makefile` format, it uses `yaml` format.
-"""
+"""Makim core module."""
 
 from __future__ import annotations
 
@@ -13,6 +7,7 @@ import io
 import json
 import os
 import pprint
+import shutil
 import sys
 import tempfile
 import warnings
@@ -35,6 +30,12 @@ from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
 from makim.scheduler import MakimScheduler
 
+
+def command_exists(command: str) -> bool:
+    """Check if a system command exists in PATH."""
+    return shutil.which(command) is not None
+
+
 if getattr(sys, 'frozen', False):
     MAKIM_CURRENT_PATH = Path(sys._MEIPASS)  # type: ignore
 else:
@@ -46,6 +47,27 @@ SCOPE_GLOBAL = 0
 SCOPE_GROUP = 1
 SCOPE_TARGET = 2
 
+# note: this is necessary for the executable version (pyinstaller)
+DEFAULT_SHELL_NAME = (
+    'xonsh'
+    if command_exists('xonsh')
+    else 'bash'
+    if command_exists('bash')
+    else 'zsh'
+    if command_exists('zsh')
+    else 'sh'
+    if command_exists('sh')
+    else ''
+)
+
+if not DEFAULT_SHELL_NAME:
+    MakimLogs.raise_error(
+        'No backend found (xonsh, bash, zsh, sh).',
+        MakimError.MAKIM_NO_BACKEND_FOUND,
+    )
+
+MakimLogs.print_info(f' DEFAULT SHELL: {DEFAULT_SHELL_NAME}')
+DEFAULT_SHELL_APP = getattr(sh, DEFAULT_SHELL_NAME)
 
 KNOWN_SHELL_APP_ARGS = {
     'bash': ['-e'],
@@ -119,7 +141,7 @@ class Makim:
     dry_run: bool = False
     verbose: bool = False
     global_data: dict[str, Any] = {}
-    shell_app: sh.Command = sh.xonsh
+    shell_app: sh.Command = DEFAULT_SHELL_APP
     shell_args: list[str] = []
     tmp_suffix: str = '.makim'
 
@@ -147,7 +169,7 @@ class Makim:
         self.file = '.makim.yaml'
         self.dry_run = False
         self.verbose = False
-        self.shell_app = sh.xonsh
+        self.shell_app = DEFAULT_SHELL_APP
         self.shell_args: list[str] = []
         self.tmp_suffix: str = '.makim'
         self.scheduler = None
@@ -439,7 +461,7 @@ class Makim:
         if not shell_app_data:
             return {}
 
-        shell_app_default = 'xonsh'
+        shell_app_default = DEFAULT_SHELL_NAME
         tmp_suffix_default = '.makim'
 
         shell_config: AppConfigType = {}
@@ -468,7 +490,7 @@ class Makim:
     def _load_shell_app(self) -> None:
         """Load the shell app."""
         shell_config: AppConfigType = {
-            'app': 'xonsh',
+            'app': DEFAULT_SHELL_NAME,
             'args': [],
             'suffix': '.makim',
         }
