@@ -14,6 +14,12 @@ groups:
           echo "Starting sleep test..."
           sleep 2
           echo "Sleep test complete"
+      test-all:
+        hooks:
+          pre-run:
+            - task: test-echo
+            - task: test-date
+            - task: test-sleep
 
 scheduler:
   test_basic_echo:

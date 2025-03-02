@@ -64,7 +64,7 @@ groups:
         help: Compile the project
         hooks:
           pre-run:
-            - task: clean # Run 'clean' before 'compile'
+            - task: build.clean # Run 'clean' before 'compile'
         run: |
           echo "Compiling the project..."
 
