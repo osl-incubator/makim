@@ -1,33 +1,503 @@
 groups:
-  default:  # Required by current implementation
+  clean:
     tasks:
-      dummy:  # Minimal required task
-        help: Default group requirement
-        run: echo "Default group exists"
-
-  build:
-    env:
-      GROUP_ENV: group_value
-    tasks:
-      clean:
-        help: Clean build artifacts
-        args:
-          cache:
-            type: bool
-            action: store_true
-            help: Remove all cache files
+      tmp:
+        help: Clean unnecessary temporary files
+        backend: bash
         run: |
-          echo "Cleaning build directory..."
-          rm -rf build/
-      compile:
-        help: Compile the project
+          rm -fr build/
+          rm -fr dist/
+          rm -fr .eggs/
+          rm -f .coverage
+          rm -fr htmlcov/
+          rm -fr .pytest_cache
+          rm -fr .ruff_cache
+          rm -fr .mypy_cache
+          find . -name '*.egg-info' -exec rm -fr {} +
+          find . -name '*.egg' -exec rm -f {} +
+          find . -name '*.pyc' -exec rm -f {} +
+          find . -name '__pycache__' -exec rm -fr {} +
+          find . -name '*.pyo' -exec rm -f {} +
+          find . -name '*~' -exec rm -f {} +
+
+  docs:
+    tasks:
+      build:
+        help: Build documentation
+        run: |
+          mkdocs build --config-file mkdocs.yaml
+
+      preview:
+        help: Preview documentation page locally
+        run: |
+          mkdocs serve --watch docs --config-file mkdocs.yaml
+
+  release:
+    vars:
+      app: |
+        npx --yes \
+        -p semantic-release \
+        -p conventional-changelog-conventionalcommits@7.0.2 \
+        -p "@semantic-release/commit-analyzer" \
+        -p "@semantic-release/release-notes-generator" \
+        -p "@semantic-release/changelog" \
+        -p "@semantic-release/exec" \
+        -p "@semantic-release/github" \
+        -p "@semantic-release/git" \
+        -p "semantic-release-replace-plugin" \
+        semantic-release
+
+    tasks:
+      ci:
+        help: Run semantic release on CI
+        run: ${{ vars.app }} --ci
+
+      dry:
+        help: Run semantic release in dry-run mode
+        run: |
+          ${{ vars.app }} --dry-run
+          poetry build
+          poetry publish --dry-run
+
+  tests:
+    tasks:
+      linter:
+        help: Run linter tools
+        run: pre-commit run --all-files
+
+      unittest:
+        help: Run tests
+        run: pytest -s -vv tests
+
+      smoke:
+        help: Run smoke tests
         hooks:
           pre-run:
-            - task: build.clean
-        run: |
-          echo "Compiling the project..."
+            - task: smoke-tests.simple
+            - task: smoke-tests.complex
+            - task: smoke-tests.containers
+            - task: smoke-tests.unittest
+            - task: smoke-tests.vars-env
+            - task: smoke-tests.test-vars
+            - task: smoke-tests.bash
+            - task: smoke-tests.dir-absolute-path
+            - task: smoke-tests.dir-no-path
+            - task: smoke-tests.dir-relative-path
+            - task: smoke-tests.interactive-args
+            - task: smoke-tests.run-hooks
+            - task: smoke-tests.matrix
+            - task: smoke-tests.shell-app
+            - task: smoke-tests.ssh-remote-execution
+            - task: smoke-tests.scheduler
 
-scheduler:
-  daily-clean:
-    task: build.clean
-    schedule: "0 0 * * *"
+      ci:
+        help: Run all tasks used on CI
+        hooks:
+          pre-run:
+            - task: tests.linter
+            - task: tests.unittest
+            - task: tests.smoke
+            - task: docs.build
+
+  smoke-tests:
+    tasks:
+      simple:
+        help: Test makim using a simple makimfile
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: ./tests/smoke/.makim-simple.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE default.clean
+          makim $VERBOSE_FLAG --file $MAKIM_FILE default.build
+
+      complex:
+        help: Test makim using a complex makimfile
+        env:
+          MAKIM_FILE: ./tests/smoke/.makim-complex.yaml
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE default.lint
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.clean-gcda
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.clean
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.install
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --build-type debug
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --extras '-D'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.release --clean
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.dev
+          makim $VERBOSE_FLAG --file $MAKIM_FILE env.create-file
+          makim $VERBOSE_FLAG --file $MAKIM_FILE conda.build
+          makim $VERBOSE_FLAG --file $MAKIM_FILE release.ci
+          makim $VERBOSE_FLAG --file $MAKIM_FILE release.dry
+          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.api
+          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.build
+          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.clean
+          makim $VERBOSE_FLAG --file $MAKIM_FILE docs.preview
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.sanitizer
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.code-coverage
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.gen-object
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.gen-ast
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.gen-llvm-ir
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.examples
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.all
+          makim $VERBOSE_FLAG --file $MAKIM_FILE debug.fibonacci
+          makim $VERBOSE_FLAG --file $MAKIM_FILE print.local-env-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE print.makim-env-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE print.dotenv-var
+          makim $VERBOSE_FLAG --file $MAKIM_FILE print.nested
+
+      containers:
+        help: Test makim with containers-sugar
+        env:
+          # it change the directory first to tests/smoke
+          MAKIM_FILE: .makim-sugar.yaml
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          cd ./tests/smoke
+          makim $VERBOSE_FLAG --file $MAKIM_FILE containers.run
+
+      shell-app:
+        help: |
+          Test makim with dir for global no-path and its various
+          combinations with group and task dir
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-interpreters.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          export MAKIM_FILE="$(pwd)/${MAKIM_FILE}"
+          makim $VERBOSE_FLAG --file $MAKIM_FILE main.all
+
+      unittest:
+        help: Test makim using a unittest makimfile
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: ./tests/smoke/.makim-unittest.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-1
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-2 --all
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-3-a
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-3-b
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-4
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-4 --trigger-dep
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-5
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-6
+
+      vars-env:
+        help: Test makim using env makimfile
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: ./tests/smoke/.makim-env.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE global-scope.test-var-env-file
+          makim $VERBOSE_FLAG --file $MAKIM_FILE global-scope.test-var-env
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-scope.test-var-env-file
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-scope.test-var-env
+          makim $VERBOSE_FLAG --file $MAKIM_FILE task-scope.test-var-env-file
+          makim $VERBOSE_FLAG --file $MAKIM_FILE task-scope.test-var-env
+          makim $VERBOSE_FLAG --file $MAKIM_FILE rerender-env.from-global
+          makim $VERBOSE_FLAG --file $MAKIM_FILE rerender-env.from-group
+          makim $VERBOSE_FLAG --file $MAKIM_FILE rerender-env.from-task
+
+      test-vars:
+        help: Test makim using a vars makim file
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: ./tests/smoke/.makim-vars.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE vars-group.vars-task
+
+      bash:
+        help: Test makim shell attribute with bash
+        backend: bash
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file tests/smoke/.makim-bash-main-scope.yaml main-scope.test
+          makim $VERBOSE_FLAG --file tests/smoke/.makim-bash-group-scope.yaml group-scope.test
+          makim $VERBOSE_FLAG --file tests/smoke/.makim-bash-task-scope.yaml task-scope.test
+
+      dir-absolute-path:
+        help: |
+          Test makim with dir absolute for global path and its various
+          combinations with group and task dir
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-dir-absolute-path.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-relative
+
+      dir-no-path:
+        help: |
+          Test makim with dir for global no-path and its
+          various combinations with group and task dir
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-dir-no-path.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          export MAKIM_FILE="$(pwd)/${MAKIM_FILE}"
+          cd /tmp
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-relative
+
+      dir-relative-path:
+        help: |
+          Test makim with dir for global no-path and its various
+          combinations with group and task dir
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-dir-relative-path.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          export MAKIM_FILE="$(pwd)/${MAKIM_FILE}"
+          mkdir -p /tmp/global-relative
+          cd /tmp
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-no-path.task-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-absolute.task-relative
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-no-path
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-absolute
+          makim $VERBOSE_FLAG --file $MAKIM_FILE group-relative.task-relative
+
+      interactive-args:
+        help: Test makim with interactive-args
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-interactive-args.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE user.create --username johndoe --email johndoe@gmail.com --password johndoe
+          makim $VERBOSE_FLAG --file $MAKIM_FILE weather.forecast --city Delhi --country India
+
+          RESULT=$(echo mycity | makim $VERBOSE_FLAG --file $MAKIM_FILE weather.forecast --country mycountry)
+          STRING_VALIDATION="Fetching weather forecast for mycity, mycountry..."
+          # Check if RESULT contains SUBSTRING
+          if [[ "$RESULT" != *"$STRING_VALIDATION"* ]]; then
+              echo "STRING_VALIDATION not found in RESULT."
+              exit 1
+          fi
+
+      run-hooks:
+        help: Test makim with pre-run and post-run hooks
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-hooks.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.compile
+
+      matrix:
+        help: Test makim with matrix combination
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-matrix-strategy.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.setup
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.lint
+          makim $VERBOSE_FLAG --file $MAKIM_FILE build.lint --fix
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.unit
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.browser
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.browser --headless
+
+      ssh-remote-execution:
+        help: Test makim with remote execution
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-ssh.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE remote_test.echo_test
+
+      scheduler:
+        help: Test makim with scheduler
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.scheduler.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron start test_basic_echo
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron start --all
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron stop test_basic_echo
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron stop --all
+          makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
+
+  error:
+    help: This group helps tests failure tasks
+    tasks:
+      python-assert:
+        help: Raise an system error
+        backend: python
+        run: assert False, "Failed"
+      code-3:
+        help: Raise an system error
+        backend: bash
+        run: exit 3
+
+  docker:
+    help: Tasks with docker
+    tasks:
+      build:
+        help: Build the dockerfile for ssh tests
+        dir: containers
+        env:
+          DOCKER_BUILDKIT: "0"
+        run: docker build -t ssh-test .
+
+      start:
+        help: Start a service from the dockerfile for ssh tests
+        dir: containers
+        env:
+          DOCKER_BUILDKIT: "0"
+        hooks:
+          pre-run:
+            - task: docker.build
+        run: docker run -d -p 2222:22 --rm --name ssh-test ssh-test
+
+      stop:
+        help: Start a service from the dockerfile for ssh tests
+        dir: containers
+        env:
+          DOCKER_BUILDKIT: "0"
+        run: docker stop ssh-test
+
+      test:
+        help: Test ssh connection with the docker service
+        dir: containers
+        run: |
+          # it requires the password manually
+          ssh-keygen -R "[localhost]:2222" || true
+          ssh -o StrictHostKeyChecking=no testuser@localhost -p 2222 'pwd'
