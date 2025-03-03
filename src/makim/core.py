@@ -175,6 +175,13 @@ class Makim:
         self.scheduler = None
         # os.chdir(os.getcwd())
 
+    def __getstate__(self) -> Dict[str, Any]:
+        """Return a serializable state of the Makim instance."""
+        state: Dict[str, Any] = self.__dict__.copy()
+        if 'scheduler' in state:
+            state['scheduler'] = None
+        return state
+
     def _call_shell_app(self, cmd: str) -> None:
         self._load_shell_app()
 
@@ -386,6 +393,9 @@ class Makim:
 
         if group_name is not None:
             self.group_name = group_name
+
+        if self.group_name not in groups and len(groups) == 1:
+            self.group_name = next(iter(groups))
 
         for group in groups:
             if group == self.group_name:
