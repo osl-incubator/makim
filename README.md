@@ -46,12 +46,6 @@ project. This is an example of a configuration file:
 
 ```yaml
 groups:
-  default:  # Required by current implementation
-    tasks:
-      dummy:  # Minimal required task
-        help: Default group requirement
-        run: echo "Default group exists"
-
   build:
     env:
       GROUP_ENV: group_value
@@ -70,14 +64,15 @@ groups:
         help: Compile the project
         hooks:
           pre-run:
-            - task: build.clean
+            - task: build.clean # Run 'clean' before 'compile'
         run: |
           echo "Compiling the project..."
 
+# Scheduler for automated tasks
 scheduler:
   daily-clean:
     task: build.clean
-    schedule: "0 0 * * *"
+    schedule: "0 0 * * *" # Every day at midnight
 ```
 
 Some examples of how to use it:
