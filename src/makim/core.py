@@ -174,17 +174,17 @@ class Makim:
         self.tmp_suffix: str = '.makim'
         self.scheduler = None
         # os.chdir(os.getcwd())
-    @property
-    def scheduler(self) -> Optional[MakimScheduler]:
-        """Lazy-initialize the scheduler."""
-        if self._scheduler is None:
-            self._scheduler = MakimScheduler(makim_instance=self)
-        return self._scheduler
+    # @property
+    # def scheduler(self) -> Optional[MakimScheduler]:
+    #     """Lazy-initialize the scheduler."""
+    #     if self._scheduler is None:
+    #         self._scheduler = MakimScheduler(makim_instance=self)
+    #     return self._scheduler
 
-    @scheduler.setter
-    def scheduler(self, value: Optional[MakimScheduler]):
-        """Setter for scheduler."""
-        self._scheduler = value
+    # @scheduler.setter
+    # def scheduler(self, value: Optional[MakimScheduler]):
+    #     """Setter for scheduler."""
+    #     self._scheduler = value
 
     def __getstate__(self):
         """Exclude the scheduler during serialization."""
