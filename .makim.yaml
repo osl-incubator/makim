@@ -439,12 +439,16 @@ groups:
             type: bool
             action: store_true
         env:
-          MAKIM_FILE: tests/smoke/.scheduler.yaml
+          MAKIM_FILE: tests/smoke/.makim-scheduler.yaml
         backend: bash
         run: |
           export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.test-date
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.test-echo
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.test-sleep
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.test-all
           makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
           makim $VERBOSE_FLAG --file $MAKIM_FILE cron start test_basic_echo
           makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
