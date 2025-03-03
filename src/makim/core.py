@@ -172,7 +172,7 @@ class Makim:
         self.shell_app = DEFAULT_SHELL_APP
         self.shell_args: list[str] = []
         self.tmp_suffix: str = '.makim'
-        self._scheduler = None
+        self.scheduler = None
         # os.chdir(os.getcwd())
     @property
     def scheduler(self) -> Optional[MakimScheduler]:

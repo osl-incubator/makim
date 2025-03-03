@@ -197,7 +197,7 @@ class MakimScheduler:
             Instance containing configuration details.
         """
         self.config_file = makim_instance.file
-        # self.scheduler = None
+        self.scheduler = None
         self.job_store_path = Path.home() / '.makim' / 'jobs.sqlite'
         self.job_history_path = Path.home() / '.makim' / 'history.json'
         self._setup_directories()
