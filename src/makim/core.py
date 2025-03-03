@@ -395,6 +395,9 @@ class Makim:
         if group_name is not None:
             self.group_name = group_name
 
+        if self.group_name not in groups and len(groups) == 1:
+            self.group_name = next(iter(groups))
+
         for group in groups:
             if group == self.group_name:
                 self.group_data = groups[group]
