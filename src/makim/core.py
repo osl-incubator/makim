@@ -172,9 +172,32 @@ class Makim:
         self.shell_app = DEFAULT_SHELL_APP
         self.shell_args: list[str] = []
         self.tmp_suffix: str = '.makim'
-        self.scheduler = None
+        self._scheduler = None
         # os.chdir(os.getcwd())
+    @property
+    def scheduler(self) -> Optional[MakimScheduler]:
+        """Lazy-initialize the scheduler."""
+        if self._scheduler is None:
+            self._scheduler = MakimScheduler(makim_instance=self)
+        return self._scheduler
 
+    @scheduler.setter
+    def scheduler(self, value: Optional[MakimScheduler]):
+        """Setter for scheduler."""
+        self._scheduler = value
+
+    def __getstate__(self):
+        """Exclude the scheduler during serialization."""
+        state = self.__dict__.copy()
+        if '_scheduler' in state:  # ✅ Target the private attribute
+            del state['_scheduler']
+        return state
+
+    def __setstate__(self, state):
+        """Restore state and reset the scheduler."""
+        self.__dict__.update(state)
+        self.scheduler = None  # ✅ Uses the setter
+        
     def _call_shell_app(self, cmd: str) -> None:
         self._load_shell_app()
 
