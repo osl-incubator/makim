@@ -174,14 +174,13 @@ class Makim:
         self.tmp_suffix: str = '.makim'
         self.scheduler = None
         # os.chdir(os.getcwd())
-    
-    def __getstate__(self):
-        """Return a serializable state of the Makim instance for deep copying and pickling."""
-        state = self.__dict__.copy()
+
+    def __getstate__(self) -> Dict[str, Any]:
+        """Return a serializable state of the Makim instance."""
+        state: Dict[str, Any] = self.__dict__.copy()
         if 'scheduler' in state:
             state['scheduler'] = None
         return state
-
 
     def _call_shell_app(self, cmd: str) -> None:
         self._load_shell_app()
