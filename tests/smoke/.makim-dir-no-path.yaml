@@ -28,7 +28,7 @@ groups:
             - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/task1"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp/task1")
           echo "dir-no-path [II] Done!"
 
       task-relative:
@@ -39,7 +39,7 @@ groups:
             - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/task2"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp/task2")
           echo "dir-no-path [III] Done!"
 
   group-absolute:
@@ -52,7 +52,7 @@ groups:
             - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group-absolute"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp/group-absolute")
           echo "dir-no-path [IV] Done!"
 
       task-absolute:
@@ -63,7 +63,7 @@ groups:
             - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/task1"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp/task1")
           echo "dir-no-path [V] Done!"
 
       task-relative:
@@ -74,7 +74,7 @@ groups:
             - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group-absolute/task1"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp/group-absolute/task1")
           echo "dir-no-path [VI] Done!"
 
   group-relative:
@@ -87,7 +87,7 @@ groups:
             - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group-relative"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp/group-relative")
           echo "dir-no-path [VII] Done!"
 
       task-absolute:
@@ -98,7 +98,7 @@ groups:
             - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/task2"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp/task2")
           echo "dir-no-path [VIII] Done!"
 
       task-relative:
@@ -109,5 +109,5 @@ groups:
             - task: setup.create-folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group-relative/task1"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp/group-relative/task1")
           echo "dir-no-path [IX] Done!"
