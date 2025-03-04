@@ -22,7 +22,7 @@ groups:
         run: |
           import os
           print(os.getcwd())
-          assert os.getcwd() == "/tmp"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp")
           echo "dir-absolute-path [I] Done!"
 
       task-absolute:
@@ -33,7 +33,7 @@ groups:
             - task: setup.folders
         run: |
           import os
-          assert os.getcwd() == "/tmp"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp")
           echo "dir-absolute-path [II] Done!"
 
       task-relative:
@@ -44,7 +44,7 @@ groups:
             - task: setup.folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group1/task4"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp/group1/task4")
           echo "dir-absolute-path [III] Done!"
 
   group-relative:
@@ -57,7 +57,7 @@ groups:
             - task: setup.folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group1"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp/group1")
           echo "dir-absolute-path [IV] Done!"
 
       task-absolute:
@@ -68,7 +68,7 @@ groups:
             - task: setup.folders
         run: |
           import os
-          assert os.getcwd() == "/tmp"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp")
           echo "dir-absolute-path [V] Done!"
 
       task-relative:
@@ -79,7 +79,7 @@ groups:
             - task: setup.folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group1/task3"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp/group1/task3")
           echo "dir-absolute-path [VI] Done!"
 
   group-absolute:
@@ -92,7 +92,7 @@ groups:
             - task: setup.folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group2"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp/group2")
           echo "dir-absolute-path [VII] Done!"
 
       task-absolute:
@@ -103,7 +103,7 @@ groups:
             - task: setup.folders
         run: |
           import os
-          assert os.getcwd() == "/tmp"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp")
           echo "dir-absolute-path [VIII] Done!"
 
       task-relative:
@@ -115,5 +115,5 @@ groups:
             - task: setup.folders
         run: |
           import os
-          assert os.getcwd() == "/tmp/group2/task-relative"
+          assert os.path.realpath(os.getcwd()) == os.path.realpath("/tmp/group2/task-relative")
           echo "dir-absolute-path [IX] Done!"
