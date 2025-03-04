@@ -144,6 +144,7 @@ class Makim:
     shell_app: sh.Command = DEFAULT_SHELL_APP
     shell_args: list[str] = []
     tmp_suffix: str = '.makim'
+    skip_hooks: bool = False
 
     # temporary variables
     env: dict[str, Any] = {}  # initial env
@@ -174,6 +175,7 @@ class Makim:
         self.tmp_suffix: str = '.makim'
         self.scheduler = None
         # os.chdir(os.getcwd())
+        self.skip_hooks = False
 
     def __getstate__(self) -> Dict[str, Any]:
         """Return a serializable state of the Makim instance."""
@@ -704,6 +706,8 @@ class Makim:
 
     # run commands
     def _run_hooks(self, args: dict[str, Any], hook_type: str) -> None:
+        if self.skip_hooks:
+            return
         if not self.task_data.get('hooks', {}).get(hook_type):
             return
         makim_hook = deepcopy(self)
@@ -874,12 +878,17 @@ class Makim:
 
     # public methods
     def load(
-        self, file: str, dry_run: bool = False, verbose: bool = False
+        self,
+        file: str,
+        dry_run: bool = False,
+        verbose: bool = False,
+        skip_hooks: bool = False,
     ) -> None:
         """Load makim configuration."""
         self.file = file
         self.dry_run = dry_run
         self.verbose = verbose
+        self.skip_hooks = skip_hooks
 
         self._load_config_data()
         self._verify_config()
