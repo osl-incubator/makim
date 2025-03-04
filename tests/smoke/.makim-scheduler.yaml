@@ -17,9 +17,9 @@ groups:
       test-all:
         hooks:
           pre-run:
-            - task: test.test-echo  
-            - task: test.test-date  
-            - task: test.test-sleep  
+            - task: test.test-echo
+            - task: test.test-date
+            - task: test.test-sleep
 
 scheduler:
   test_basic_echo:
