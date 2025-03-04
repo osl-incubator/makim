@@ -20,7 +20,7 @@ from typing import Any, Dict, List, Optional, TypedDict, Union, cast
 import dotenv
 import paramiko
 import sh
-import yaml
+import yaml  # type: ignore
 
 from jinja2 import Environment
 from jsonschema import ValidationError, validate
