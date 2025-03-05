@@ -393,6 +393,9 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
           makim $VERBOSE_FLAG --file $MAKIM_FILE build.compile
+          makim $VERBOSE_FLAG --skip-hooks --file $MAKIM_FILE skip-hooks.skip_pre_hooks
+          makim $VERBOSE_FLAG --skip-hooks --file $MAKIM_FILE skip-hooks.skip_post_hooks
+          makim $VERBOSE_FLAG --skip-hooks --file $MAKIM_FILE skip-hooks.skip_both_hooks
 
       matrix:
         help: Test makim with matrix combination
