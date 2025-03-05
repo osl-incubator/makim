@@ -35,7 +35,7 @@ makim: Makim = Makim()
 
 
 @app.callback(invoke_without_command=True)
-def main(
+def main(  # noqa: PLR0913
     ctx: typer.Context,
     version: bool = typer.Option(
         None,
@@ -60,6 +60,12 @@ def main(
         '--verbose',
         is_flag=True,
         help='Execute the command in verbose mode',
+    ),
+    skip_hooks: bool = typer.Option(
+        None,
+        '--skip-hooks',
+        is_flag=True,
+        help='Skip hooks while executing the command',
     ),
 ) -> None:
     """Process top-level flags; otherwise, show the help menu."""
@@ -117,6 +123,7 @@ def run_app() -> None:
         file=config_file_path,
         dry_run=cast(bool, root_config.get('dry_run', False)),
         verbose=cast(bool, root_config.get('verbose', False)),
+        skip_hooks=cast(bool, root_config.get('skip_hooks', False)),
     )
 
     tasks: dict[str, Any] = {}
