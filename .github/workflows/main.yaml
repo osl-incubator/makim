@@ -100,15 +100,12 @@ jobs:
         run: makim smoke-tests.test-vars
 
       - name: Run smoke test for dir-absolute-path
-        if: ${{ matrix.os != 'macos' }}
         run: makim smoke-tests.dir-absolute-path
 
       - name: Run smoke test for dir-no-path
-        if: ${{ matrix.os != 'macos' }}
         run: makim smoke-tests.dir-no-path
 
       - name: Run smoke test for dir-relative-path
-        if: ${{ matrix.os != 'macos' }}
         run: makim smoke-tests.dir-relative-path
 
       - name: Run unit tests
