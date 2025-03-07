@@ -1,6 +1,18 @@
 # Release Notes
 ---
 
+# [1.24.0](https://github.com/osl-incubator/makim/compare/1.23.1...1.24.0) (2025-03-07)
+
+
+### Bug Fixes
+
+* **test:** schedulers cannot be serialized resulting to scheduler test failure ([#149](https://github.com/osl-incubator/makim/issues/149)) ([ab5c6b0](https://github.com/osl-incubator/makim/commit/ab5c6b08a9a3e2cdde712f539f44432e6f28a7bb))
+
+
+### Features
+
+* Implement --skip-hooks flag to bypass hook execution ([#159](https://github.com/osl-incubator/makim/issues/159)) ([66ffaf8](https://github.com/osl-incubator/makim/commit/66ffaf8d53eda39fd27ef2ffe5c64e83c2bb9e54))
+
 ## [1.23.1](https://github.com/osl-incubator/makim/compare/1.23.0...1.23.1) (2025-02-25)
 
 
