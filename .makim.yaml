@@ -90,7 +90,7 @@ groups:
             - task: smoke-tests.shell-app
             - task: smoke-tests.ssh-remote-execution
             - task: smoke-tests.scheduler
-            - task: smoke-tests.task-logger.
+            - task: smoke-tests.task-logger
 
       ci:
         help: Run all tasks used on CI
