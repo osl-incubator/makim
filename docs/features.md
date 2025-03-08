@@ -206,6 +206,18 @@ groups:
         run: echo "Build completed successfully!"
 ```
 
+### Skipping Hooks
+
+Makim allows you to skip hooks during execution using the `--skip-hooks` flag.
+This is useful when you want to run a task without executing its associated
+hooks.
+
+For example, to run the `compile` task while skipping all hooks:
+
+```sh
+makim --skip-hooks compile
+```
+
 ### Benefit
 
 - Automates task chaining.
