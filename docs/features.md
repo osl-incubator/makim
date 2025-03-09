@@ -215,7 +215,7 @@ hooks.
 For example, to run the `compile` task while skipping all hooks:
 
 ```sh
-makim --skip-hooks compile
+makim --skip-hooks build.compile
 ```
 
 ### Benefit
