@@ -13,7 +13,7 @@ groups:
           rm -fr .pytest_cache
           rm -fr .ruff_cache
           rm -fr .mypy_cache
-          rm ./tests/smoke/makim_log.txt
+          rm -f ./tests/smoke/makim_log.txt
           find . -name '*.egg-info' -exec rm -fr {} +
           find . -name '*.egg' -exec rm -f {} +
           find . -name '*.pyc' -exec rm -f {} +
