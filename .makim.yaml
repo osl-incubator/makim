@@ -1,5 +1,5 @@
 groups:
-  main:  # ✅ Correct placement of `main`
+  main:
     help: "Main group containing file processing tasks"
     tasks:
       read:
