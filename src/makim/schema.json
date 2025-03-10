@@ -271,46 +271,6 @@
       },
       "additionalProperties": false
     },
-
-    "pipelines": {
-      "type": "object",
-      "description": "Defines pipelines using a DAG structure.",
-      "patternProperties": {
-        "^[a-zA-Z0-9_-]+$": {
-          "type": "object",
-          "required": ["help", "tasks"],
-          "properties": {
-            "help": {
-              "type": "string",
-              "description": "Description of the pipeline."
-            },
-            "tasks": {
-              "type": "array",
-              "description": "Ordered list of tasks forming a DAG.",
-              "items": {
-                "type": "object",
-                "required": ["target"],
-                "properties": {
-                  "target": {
-                    "type": "string",
-                    "description": "Must reference an existing target from groups.tasks."
-                  },
-                  "depends_on": {
-                    "type": "array",
-                    "description": "List of tasks that must complete before this step runs.",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                }
-              },
-              "uniqueItems": true
-            }
-          }
-        }
-      }
-    },
-
     "scheduler": {
       "type": "object",
       "description": "Scheduler configuration for tasks",
