@@ -1,6 +1,7 @@
 """Makim core module."""
 
 from __future__ import annotations
+import concurrent.futures
 
 import copy
 import io
@@ -11,11 +12,13 @@ import shutil
 import sys
 import tempfile
 import warnings
+import makim.pipelines
 
 from copy import deepcopy
 from itertools import product
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TypedDict, Union, cast
+from makim.logs import MakimLogs, MakimError
 
 import dotenv
 import paramiko
@@ -29,6 +32,127 @@ from typing_extensions import TypeAlias
 from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
 from makim.scheduler import MakimScheduler
+
+
+def run_pipeline(self, pipeline_name: str) -> None:
+    """Executes a pipeline, processing tasks in the correct order and supporting parallel execution."""
+    if "pipelines" not in self.global_data:
+        MakimLogs.raise_error(f"No pipelines found in configuration.", MakimError.MAKIM_CONFIG_FILE_INVALID)
+
+    pipeline = self.global_data["pipelines"].get(pipeline_name)
+    if not pipeline:
+        MakimLogs.raise_error(f"Pipeline '{pipeline_name}' not found.", MakimError.MAKIM_TARGET_NOT_FOUND)
+
+    tasks = pipeline.get("tasks", [])
+    if not tasks:
+        MakimLogs.raise_error(f"Pipeline '{pipeline_name}' has no tasks defined.", MakimError.MAKIM_CONFIG_FILE_INVALID)
+
+    # Dependency graph for task execution
+    task_graph = {}
+    pending_tasks = set()
+
+    for step in tasks:
+        task_name = step["target"]
+        depends_on = step.get("depends_on", [])
+        parallel = step.get("parallel", False)
+
+        task_graph[task_name] = {
+            "depends_on": depends_on,
+            "executed": False,
+            "parallel": parallel
+        }
+        pending_tasks.add(task_name)
+
+    executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
+
+    while pending_tasks:
+        executable_tasks = []
+
+        for task_name in list(pending_tasks):
+            dependencies = task_graph[task_name]["depends_on"]
+            if all(task_graph[dep]["executed"] for dep in dependencies):
+                executable_tasks.append(task_name)
+
+        if not executable_tasks:
+            MakimLogs.raise_error(f"Pipeline '{pipeline_name}' has circular dependencies or missing tasks.", MakimError.CONFIG_VALIDATION_ERROR)
+            return
+
+        futures = []
+        for task_name in executable_tasks:
+            task_data = {"task": task_name}
+            MakimLogs.print_info(f"Running task: {task_name}")
+
+            if task_graph[task_name]["parallel"]:
+                futures.append(executor.submit(self.run, task_data))
+            else:
+                try:
+                    self.run(task_data)
+                except Exception as e:
+                    MakimLogs.raise_error(f"Task '{task_name}' failed: {e}", MakimError.MAKIM_TARGET_NOT_FOUND)
+                    return  # Stop execution if a sequential task fails
+
+            task_graph[task_name]["executed"] = True
+            pending_tasks.remove(task_name)
+
+        concurrent.futures.wait(futures)  # Ensure all parallel tasks finish before proceeding
+
+    executor.shutdown()
+    MakimLogs.print_info(f"Pipeline '{pipeline_name}' completed successfully.")
+
+
+def validate_pipeline(self, pipeline_name: str) -> None:
+    """Validates a pipeline for correctness before execution."""
+    if "pipelines" not in self.global_data:
+        MakimLogs.raise_error(f"No pipelines found in configuration.", MakimError.MAKIM_CONFIG_FILE_INVALID)
+
+    pipeline = self.global_data["pipelines"].get(pipeline_name)
+    if not pipeline:
+        MakimLogs.raise_error(f"Pipeline '{pipeline_name}' not found.", MakimError.MAKIM_TARGET_NOT_FOUND)
+
+    tasks = pipeline.get("tasks", [])
+    if not tasks:
+        MakimLogs.raise_error(f"Pipeline '{pipeline_name}' has no tasks defined.", MakimError.MAKIM_CONFIG_FILE_INVALID)
+
+    # Collect all task names and dependencies
+    task_names = set()
+    dependencies = {}
+
+    for step in tasks:
+        task_name = step["target"]
+        task_names.add(task_name)
+
+        if "depends_on" in step:
+            dependencies[task_name] = step["depends_on"]
+
+    # Check for missing tasks
+    for task in dependencies.keys():
+        for dep in dependencies[task]:
+            if dep not in task_names:
+                MakimLogs.raise_error(f"Task '{dep}' in pipeline '{pipeline_name}' is missing.", MakimError.MAKIM_TARGET_NOT_FOUND)
+
+    # Check for circular dependencies using DFS
+    def has_cycle(task, visited, rec_stack):
+        visited.add(task)
+        rec_stack.add(task)
+
+        for dep in dependencies.get(task, []):
+            if dep not in visited:
+                if has_cycle(dep, visited, rec_stack):
+                    return True
+            elif dep in rec_stack:
+                return True  # Cycle detected
+
+        rec_stack.remove(task)
+        return False
+
+    visited = set()
+    rec_stack = set()
+    for task in dependencies.keys():
+        if task not in visited:
+            if has_cycle(task, visited, rec_stack):
+                MakimLogs.raise_error(f"Pipeline '{pipeline_name}' contains a circular dependency.", MakimError.CONFIG_VALIDATION_ERROR)
+
+    MakimLogs.print_info(f"Pipeline '{pipeline_name}' validation passed.")
 
 
 def command_exists(command: str) -> bool:
@@ -161,10 +285,12 @@ class Makim:
     ssh_config: dict[str, Any] = {}
     scheduler: Optional[MakimScheduler] = None
 
-    def __init__(self) -> None:
+    def __init__(self, debug=False):
         """Prepare the Makim class with the default configuration."""
         os.environ['RAISE_SUBPROC_ERROR'] = '1'
         os.environ['XONSH_SHOW_TRACEBACK'] = '0'
+        from makim.pipelines import PipelineExecutor
+        self.pipeline_executor = PipelineExecutor(self)
 
         # default
         self.file = '.makim.yaml'
@@ -174,8 +300,26 @@ class Makim:
         self.shell_args: list[str] = []
         self.tmp_suffix: str = '.makim'
         self.scheduler = None
+        self.config = self._load_config()
         # os.chdir(os.getcwd())
         self.skip_hooks = False
+        self.debug = debug
+        self.pipeline_executor = PipelineExecutor(self)
+        self.pipeline_executor = PipelineExecutor(self)  # Initialize pipeline executor
+        self.pipelines = self.load_pipelines()  # Load pipeline definitions
+        self.debug = debug
+        self.pipeline_executor = PipelineExecutor(self)
+    def _load_config(self):
+        """Loads the Makim configuration file."""
+        import yaml
+
+        config_file = ".makim.yaml"
+        try:
+            with open(config_file, "r") as file:
+                config = yaml.safe_load(file)
+                return config
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Configuration file '{config_file}' not found.")
 
     def __getstate__(self) -> Dict[str, Any]:
         """Return a serializable state of the Makim instance."""
@@ -914,3 +1058,62 @@ class Makim:
         self._run_hooks(args, 'pre-run')
         self._run_command(args)
         self._run_hooks(args, 'post-run')
+
+    def load_pipelines(self):
+        """Loads all defined pipelines from the Makim configuration."""
+        if "pipelines" not in self.global_data:
+            return {}
+
+        return self.global_data["pipelines"]
+
+    def list_pipelines(self):
+        """Lists all available pipelines in the system."""
+        if not self.pipelines:
+            MakimLogs.print_info("No pipelines found in the configuration.")
+            return
+
+        MakimLogs.print_info("Available Pipelines:")
+        for pipeline_name in self.pipelines.keys():
+            MakimLogs.print_info(f"  - {pipeline_name}")
+
+    def start_pipeline(self, pipeline_name: str):
+        """Starts pipeline execution and logs status."""
+        if pipeline_name not in self.pipelines:
+            MakimLogs.raise_error(f"Pipeline '{pipeline_name}' not found.", MakimError.MAKIM_TARGET_NOT_FOUND)
+
+        MakimLogs.print_info(f"Starting pipeline: {pipeline_name}")
+        try:
+            self.pipeline_executor.execute_pipeline(pipeline_name)
+            MakimLogs.print_info(f"Pipeline '{pipeline_name}' completed successfully.")
+        except Exception as e:
+            MakimLogs.raise_error(f"Pipeline '{pipeline_name}' failed. Error: {e}", MakimError.MAKIM_TARGET_NOT_FOUND)
+
+    def monitor_pipeline(self, pipeline_name: str):
+        """Monitors the execution status of a running pipeline."""
+        if pipeline_name not in self.pipelines:
+            MakimLogs.raise_error(f"Pipeline '{pipeline_name}' not found.", MakimError.MAKIM_TARGET_NOT_FOUND)
+
+        pipeline_state = self.pipeline_executor.task_state
+        MakimLogs.print_info(f"Monitoring pipeline '{pipeline_name}' status:")
+        for task, status in pipeline_state.items():
+            MakimLogs.print_info(f"  - {task}: {status}")
+
+    def get_pipeline_structure(self, pipeline_name: str):
+        """Returns the structure of a pipeline for DAG visualization."""
+        if "pipelines" not in self.global_data:
+            return None
+
+        pipeline = self.global_data["pipelines"].get(pipeline_name)
+        if not pipeline:
+            return None
+
+        return pipeline["tasks"]
+
+    def start_pipeline(self, pipeline_name: str, parallel=False, dry_run=False):
+        """Starts pipeline execution with debug, parallel, and dry-run options."""
+        if self.debug:
+            print(f"[DEBUG] Starting pipeline: {pipeline_name}")
+            print(f"[DEBUG] Parallel execution: {'Enabled' if parallel else 'Disabled'}")
+            print(f"[DEBUG] Dry-run mode: {'Enabled' if dry_run else 'Disabled'}")
+
+        self.pipeline_executor.execute_pipeline(pipeline_name, parallel=parallel, dry_run=dry_run)

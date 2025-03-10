@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+"""Cli functions to define the arguments and to call Makim."""
+
+from __future__ import annotations
+
 from typing import Any, Callable, Dict, Optional, Type, Union, cast
 
 import click
@@ -286,3 +290,40 @@ def create_dynamic_command_cron(
 
     exec(function_code, global_vars, local_vars)
     decorator(local_vars['dynamic_command'])
+
+def create_dynamic_command_pipeline(
+    makim: Makim, app: Typer, name: str, args: dict[str, str]
+) -> None:
+    """
+    Dynamically create a Typer command for pipeline execution.
+
+    Parameters
+    ----------
+    makim : Makim
+        The Makim instance managing tasks and pipelines.
+    app : Typer
+        The Typer application instance.
+    name : str
+        The pipeline name.
+    args : dict
+        The pipeline arguments and options.
+    """
+    args_param_list = [f'"pipeline": "{name}"']
+    args_param_str = '{' + ','.join(args_param_list) + '}'
+    group_name = 'pipeline'
+
+    decorator = app.command(
+        name,
+        help=args.get('help', ''),
+        rich_help_panel=group_name,
+    )
+
+    function_code = 'def dynamic_pipeline_command():\n'
+    function_code += f'    makim.run_pipeline({args_param_str})\n'  # Ensure `run_pipeline` exists
+
+    local_vars: dict[str, Any] = {}
+    global_vars: dict[str, Any] = globals()
+    global_vars['makim'] = makim
+
+    exec(function_code, global_vars, local_vars)
+    decorator(local_vars['dynamic_pipeline_command'])

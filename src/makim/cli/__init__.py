@@ -18,6 +18,7 @@ from makim.cli.config import CLI_ROOT_FLAGS_VALUES_COUNT, extract_root_config
 from makim.cli.cron_handlers import (
     _handle_cron_commands,
 )
+from makim.cli.pipelines import run_pipeline, show_pipeline
 from makim.core import Makim
 
 app = typer.Typer(
@@ -161,5 +162,34 @@ def run_app() -> None:
         raise e
 
 
-if __name__ == '__main__':
+app = typer.Typer(help="Makim CLI")
+
+pipeline_app = typer.Typer(help="Manage pipelines.")  # Create a subcommand group
+
+
+@pipeline_app.command("run")
+def cli_run_pipeline(
+    pipeline_name: str,
+    parallel: bool = typer.Option(False, "--parallel", help="Enable parallel execution."),
+    debug: bool = typer.Option(False, "--debug", help="Enable debug logging."),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Simulate execution."),
+):
+    """Run a pipeline."""
+    run_pipeline(pipeline_name, parallel, debug, dry_run)
+
+
+@pipeline_app.command("show")
+def cli_show_pipeline(
+    pipeline_name: str,
+    graph: bool = typer.Option(False, "--graph", help="Render an ASCII graph."),
+):
+    """Show the pipeline structure."""
+    show_pipeline(pipeline_name, graph)
+
+
+app.add_typer(pipeline_app, name="pipeline")  # **Register the pipeline commands**
+
+if __name__ == "__main__":
+    app()
     run_app()
+    
