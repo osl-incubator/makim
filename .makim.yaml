@@ -1,4 +1,18 @@
 groups:
+  main:  # ✅ Correct placement of `main`
+    help: "Main group containing file processing tasks"
+    tasks:
+      read:
+        help: "Read a file"
+        args:
+          filepath:
+            type: string
+            default: /tmp/sample.txt
+        run: cat {{ args.filepath }}
+
+      count:
+        help: "Count lines in a file"
+        run: wc -l
   clean:
     tasks:
       tmp:
@@ -508,3 +522,9 @@ groups:
           # it requires the password manually
           ssh-keygen -R "[localhost]:2222" || true
           ssh -o StrictHostKeyChecking=no testuser@localhost -p 2222 'pwd'
+pipelines:
+  deploy_pipeline:
+    help: "Read and count lines in a file"
+    tasks:
+      - target: main.read
+      - target: main.count

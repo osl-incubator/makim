@@ -58,3 +58,50 @@ class MakimLogs:
         """Print warning message."""
         console = Console(style='yellow')
         console.print(message)
+
+    console = Console()
+
+    @staticmethod
+    def log_failure(task_name: str, error_message: str):
+        """Logs a task failure with detailed error information."""
+        MakimLogs.console.print(f"[bold red]Task '{task_name}' failed:[/bold red] {error_message}")
+
+    @staticmethod
+    def generate_error_report(failed_tasks):
+        """Generates a structured error report for pipeline failures."""
+        if not failed_tasks:
+            return
+
+        MakimLogs.console.print("\n[bold red]Pipeline Execution Failed[/bold red]")
+        MakimLogs.console.print("[bold]Error Summary:[/bold]")
+
+        for task, error in failed_tasks.items():
+            MakimLogs.console.print(f"  ❌ [red]Task: {task}[/red]")
+            MakimLogs.console.print(f"     [yellow]Error: {error}[/yellow]")
+
+    live_log = None
+
+    @staticmethod
+    def start_live_logging():
+        """Initialize live logging display."""
+        if MakimLogs.live_log is None:
+            table = Table(title="Pipeline Execution Status")
+            table.add_column("Task", justify="left")
+            table.add_column("Status", justify="left")
+            MakimLogs.live_log = Live(table, refresh_per_second=2)
+            MakimLogs.live_log.start()
+
+    @staticmethod
+    def update_live_log(task_name, status):
+        """Update the live logging display with task execution status."""
+        if MakimLogs.live_log:
+            table = MakimLogs.live_log.renderable
+            table.add_row(task_name, status)
+            MakimLogs.live_log.update(table)
+
+    @staticmethod
+    def stop_live_logging():
+        """Stop live logging display."""
+        if MakimLogs.live_log:
+            MakimLogs.live_log.stop()
+            MakimLogs.live_log = None

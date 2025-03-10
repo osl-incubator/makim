@@ -271,6 +271,46 @@
       },
       "additionalProperties": false
     },
+
+    "pipelines": {
+      "type": "object",
+      "description": "Defines pipelines using a DAG structure.",
+      "patternProperties": {
+        "^[a-zA-Z0-9_-]+$": {
+          "type": "object",
+          "required": ["help", "tasks"],
+          "properties": {
+            "help": {
+              "type": "string",
+              "description": "Description of the pipeline."
+            },
+            "tasks": {
+              "type": "array",
+              "description": "Ordered list of tasks forming a DAG.",
+              "items": {
+                "type": "object",
+                "required": ["target"],
+                "properties": {
+                  "target": {
+                    "type": "string",
+                    "description": "Must reference an existing target from groups.tasks."
+                  },
+                  "depends_on": {
+                    "type": "array",
+                    "description": "List of tasks that must complete before this step runs.",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "uniqueItems": true
+            }
+          }
+        }
+      }
+    },
+
     "scheduler": {
       "type": "object",
       "description": "Scheduler configuration for tasks",
@@ -281,7 +321,7 @@
           "properties": {
             "schedule": {
               "type": "string",
-              "description": "Cron-style schedule for the task (e.g., '* * * * *' for every minute)"
+              "description": "Cron-style schedule for the task (e.g., '*/5 * * * *' for every 5 minutes)"
             },
             "task": {
               "type": "string",
@@ -291,14 +331,18 @@
               "type": "object",
               "description": "Arguments to pass to the scheduled task",
               "additionalProperties": {
-                "type": ["string", "boolean"]
+                "type": ["string", "number", "boolean", "array", "object"]
               }
+            },
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether the scheduled task is enabled (default: true)",
+              "default": true
             }
           },
           "additionalProperties": false
         }
-      },
-      "additionalProperties": false
+      }
     }
   },
   "additionalProperties": false
