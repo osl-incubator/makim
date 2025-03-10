@@ -26,39 +26,6 @@ class PipelineExecutor:
 
         return pipeline
 
-    #def topological_sort(self, tasks):#
-        """Performs topological sorting to determine execution order."""
-        graph = {}
-        in_degree = {}
-        sorted_order = []
-
-        for step in tasks:
-            task_name = step["target"]
-            depends_on = step.get("depends_on", [])
-
-            graph[task_name] = depends_on
-            in_degree[task_name] = len(depends_on)
-
-            # Initialize task state
-            self.task_state[task_name] = "PENDING"
-            self.task_attempts[task_name] = 0  # Initialize retry count
-
-        queue = deque([task for task in in_degree if in_degree[task] == 0])
-
-        while queue:
-            task = queue.popleft()
-            sorted_order.append(task)
-
-            for dependent in graph:
-                if task in graph[dependent]:
-                    in_degree[dependent] -= 1
-                    if in_degree[dependent] == 0:
-                        queue.append(dependent)
-
-        if len(sorted_order) != len(tasks):
-            MakimLogs.raise_error("Pipeline has circular dependencies!", MakimError.CONFIG_VALIDATION_ERROR)
-
-        return sorted_order
 
     def execute_pipeline(self, pipeline_name: str, parallel=False, dry_run=False):
         """Executes a pipeline with optional debug logging."""
