@@ -873,7 +873,8 @@ class Makim:
                         current_cmd, cast(dict[str, Any], host_config)
                     )
                 else:
-                    self._execute_task_with_log(current_cmd)
+                    out_stream, err_stream = self._get_output_stream()
+                    self._call_shell_app(current_cmd, out_stream, err_stream)
 
         # Run command for each matrix combination
         for matrix_vars in matrix_combinations or [{}]:
@@ -883,94 +884,55 @@ class Makim:
         os.environ.clear()
         os.environ.update(self.env_scoped)
 
-    def _execute_task_with_log(self, current_cmd: Any) -> None:
-        """Execute task using the custom logging configuration."""
+    def _get_output_stream(self) -> tuple[TextIO, TextIO]:
+        """Set up logging streams based on task log configuration."""
         log_config = self.task_data.get('log')
-        if log_config:
-            log_path = log_config.get('path')
-            log_level = LogLevel(log_config.get('level', 'both'))
-            log_format = log_config.get('format')
 
-            # Ensure the directory for the log file exists.
-            log_dir = Path(log_path).parent
-            log_dir.mkdir(parents=True, exist_ok=True)
+        if not log_config:
+            return sys.stdout, sys.stderr
 
-            file_stream = open(log_path, 'a')
+        log_path = log_config.get('path')
+        log_level = LogLevel(log_config.get('level', 'both'))
+        log_format = log_config.get('format')
 
+        # Ensure log directory exists
+        log_dir = Path(log_path).parent
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        file_stream = open(log_path, 'a')
+
+        # Create default streams
+        stdout_stream = sys.stdout
+        stderr_stream = sys.stderr
+
+        def create_formatted_stream(level: LogLevel) -> FormattedLogStream:
+            return FormattedLogStream(
+                file_stream,
+                log_format,
+                level,
+                self.task_name,
+                self.file,
+            )
+
+        # Configure output stream based on log level
+        if log_level in (LogLevel.OUT, LogLevel.BOTH):
             if log_format:
-                # Write in format to the file stream
-                if log_level == LogLevel.OUT:
-                    file_stream_formatted = FormattedLogStream(
-                        file_stream,
-                        log_format,
-                        log_level,
-                        self.task_name,
-                        self.file,
-                    )
-                    out_stream = Tee(
-                        sys.stdout, cast(TextIO, file_stream_formatted)
-                    )
-                    err_stream = Tee(sys.stderr)
-                elif log_level == LogLevel.ERR:
-                    file_stream_formatted = FormattedLogStream(
-                        file_stream,
-                        log_format,
-                        log_level,
-                        self.task_name,
-                        self.file,
-                    )
-                    out_stream = Tee(sys.stdout)
-                    err_stream = Tee(
-                        sys.stderr, cast(TextIO, file_stream_formatted)
-                    )
-                elif log_level == LogLevel.BOTH:
-                    # For stdout, use level OUT;
-                    file_stream_out = FormattedLogStream(
-                        file_stream,
-                        log_format,
-                        LogLevel.OUT,
-                        self.task_name,
-                        self.file,
-                    )
-                    # For stderr, use level "ERROR".
-                    file_stream_err = FormattedLogStream(
-                        file_stream,
-                        log_format,
-                        LogLevel.ERR,
-                        self.task_name,
-                        self.file,
-                    )
-                    out_stream = Tee(sys.stdout, cast(TextIO, file_stream_out))
-                    err_stream = Tee(sys.stderr, cast(TextIO, file_stream_err))
-                else:
-                    out_stream = Tee(sys.stdout)
-                    err_stream = Tee(sys.stderr)
-
-            # Without a format string, just write in file streams.
-            elif log_level == LogLevel.OUT:
-                out_stream = Tee(sys.stdout, file_stream)
-                err_stream = Tee(sys.stderr)
-            elif log_level == LogLevel.ERR:
-                out_stream = Tee(sys.stdout)
-                err_stream = Tee(sys.stderr, file_stream)
-            elif log_level == LogLevel.BOTH:
-                out_stream = Tee(sys.stdout, file_stream)
-                err_stream = Tee(sys.stderr, file_stream)
+                stdout_stream = create_formatted_stream(LogLevel.OUT)
             else:
-                out_stream = Tee(sys.stdout)
-                err_stream = Tee(sys.stderr)
+                stdout_stream = file_stream
 
-            try:
-                self._call_shell_app(
-                    current_cmd,
-                    cast(TextIO, out_stream),
-                    cast(TextIO, err_stream),
-                )
-            finally:
-                file_stream.flush()
+        # Configure error stream based on log level
+        if log_level in (LogLevel.ERR, LogLevel.BOTH):
+            if log_format:
+                stderr_stream = create_formatted_stream(LogLevel.ERR)
+            else:
+                stderr_stream = file_stream
 
-        else:
-            self._call_shell_app(current_cmd)
+            # Wrap original streams with configured streams
+        return (
+            cast(TextIO, Tee(sys.stdout, stdout_stream)),
+            cast(TextIO, Tee(sys.stderr, stderr_stream)),
+        )
 
     # public methods
     def load(
