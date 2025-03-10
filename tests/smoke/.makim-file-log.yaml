@@ -250,7 +250,7 @@ groups:
           expected_task = "out-task-format"
           with open(file_path, 'r', encoding='utf-8') as file:
               log_lines = [line.strip() for line in file]
-              assert any(expected_task in line for line in log_lines), f"Task format logging failed. Log contents: {log_lines}"
+              assert any(expected_task in line for line in log_lines),"Task format logging failed."
 
       err-task-format:
         help: Test logging with task format for error level.
@@ -262,7 +262,7 @@ groups:
           expected_task = "err-task-format"
           with open(file_path, 'r', encoding='utf-8') as file:
               log_lines = [line.strip() for line in file]
-              assert any(expected_task in line for line in log_lines), f"Task format logging failed for error. Log contents: {log_lines}"
+              assert any(expected_task in line for line in log_lines), "Task format logging failed for error."
 
       both-task-format:
         help: Test logging with task format for both levels.

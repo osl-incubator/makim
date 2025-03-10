@@ -3,7 +3,7 @@
 import datetime
 
 from enum import Enum
-from typing import Any, TextIO, Tuple
+from typing import Any, TextIO
 
 
 class LogLevel(Enum):
@@ -26,7 +26,7 @@ class Tee:
         streams : TextIO
             Streams where data will be appended.
         """
-        self.streams: Tuple[TextIO, ...] = streams
+        self.streams: tuple[TextIO, ...] = streams
 
     def write(self, data: Any) -> None:
         """
