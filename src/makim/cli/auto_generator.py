@@ -2,10 +2,6 @@
 
 from __future__ import annotations
 
-"""Cli functions to define the arguments and to call Makim."""
-
-from __future__ import annotations
-
 from typing import Any, Callable, Dict, Optional, Type, Union, cast
 
 import click
