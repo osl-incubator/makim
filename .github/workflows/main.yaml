@@ -28,6 +28,9 @@ jobs:
           remote_branch: origin/main
           pr_sha: ${{ github.event.pull_request.head.sha }}
 
+      - name: Setup Docker on macOS
+        uses: douglascamata/setup-docker-macos-action@v1-alpha
+
   tests:
     strategy:
       fail-fast: false
@@ -81,7 +84,6 @@ jobs:
         run: makim smoke-tests.complex
 
       - name: Run smoke tests using makim and containers-sugar
-        if: ${{ matrix.os != 'macos' }}
         run: makim smoke-tests.containers
 
       - name: Run smoke tests using different interpreters
