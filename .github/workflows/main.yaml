@@ -28,11 +28,6 @@ jobs:
           remote_branch: origin/main
           pr_sha: ${{ github.event.pull_request.head.sha }}
 
-      - name: Setup Docker on macOS
-        uses: douglascamata/setup-docker-macos-action@v1-alpha
-        if: ${{ matrix.os == 'macos' }}
-        id: docker
-
   tests:
     strategy:
       fail-fast: false
@@ -70,6 +65,11 @@ jobs:
           auto-update-conda: true
           conda-solver: libmamba
           python-version: "${{ matrix.python_version }}"
+
+      - name: Setup Docker on macOS
+        uses: douglascamata/setup-docker-macos-action@v1-alpha
+        if: ${{ matrix.os == 'macos' }}
+        id: docker
 
       - name: Check Poetry lock
         run: poetry check
