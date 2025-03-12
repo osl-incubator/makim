@@ -177,13 +177,6 @@ class Makim:
         # os.chdir(os.getcwd())
         self.skip_hooks = False
 
-    def __getstate__(self) -> Dict[str, Any]:
-        """Return a serializable state of the Makim instance."""
-        state: Dict[str, Any] = self.__dict__.copy()
-        if 'scheduler' in state:
-            state['scheduler'] = None
-        return state
-
     def _call_shell_app(self, cmd: str) -> None:
         self._load_shell_app()
 
@@ -770,6 +763,8 @@ class Makim:
 
     def _run_command(self, args: dict[str, Any]) -> None:
         cmd = self.task_data.get('run', '').strip()
+        success_cmd = self.task_data.get('success', '').strip()
+        faliure_cmd = self.task_data.get('failure', '').strip()
         remote_host = self.task_data.get('remote')
 
         if not isinstance(self.group_data.get('vars', {}), dict):
@@ -837,6 +832,24 @@ class Makim:
                 args=args_input, env=env, vars=current_vars, matrix=matrix_vars
             )
 
+            current_success_cmd = ''
+            if success_cmd:
+                current_success_cmd = TEMPLATE.from_string(success_cmd).render(
+                    args=args_input,
+                    env=env,
+                    vars=current_vars,
+                    matrix=matrix_vars,
+                )
+
+            current_failure_cmd = ''
+            if faliure_cmd:
+                current_failure_cmd = TEMPLATE.from_string(faliure_cmd).render(
+                    args=args_input,
+                    env=env,
+                    vars=current_vars,
+                    matrix=matrix_vars,
+                )
+
             if self.verbose:
                 # Prepare execution context for logging
                 execution_context = {
@@ -852,22 +865,61 @@ class Makim:
                 )
                 MakimLogs.print_info('=' * width)
 
-            if not self.dry_run and current_cmd:
-                if remote_host:
-                    host_config = self.ssh_config.get(remote_host)
-                    if not host_config:
-                        MakimLogs.raise_error(
-                            f"""
-                            Remote host '{remote_host}' configuration
-                            not found.
-                            """,
-                            MakimError.REMOTE_HOST_NOT_FOUND,
-                        )
-                    self._call_shell_remote(
-                        current_cmd, cast(dict[str, Any], host_config)
+                if current_success_cmd:
+                    MakimLogs.print_info(
+                        '>>> ' + current_success_cmd.replace('\n', '\n>>> ')
                     )
-                else:
-                    self._call_shell_app(current_cmd)
+                    MakimLogs.print_info('=' * width)
+
+                if current_failure_cmd:
+                    MakimLogs.print_info(
+                        '>>> ' + current_failure_cmd.replace('\n', '\n>>> ')
+                    )
+                    MakimLogs.print_info('=' * width)
+
+            if not self.dry_run and current_cmd:
+                try:
+                    if remote_host:
+                        host_config = self.ssh_config.get(remote_host)
+                        if not host_config:
+                            MakimLogs.raise_error(
+                                f"""
+                                Remote host '{remote_host}' configuration
+                                not found.
+                                """,
+                                MakimError.REMOTE_HOST_NOT_FOUND,
+                            )
+                        self._call_shell_remote(
+                            current_cmd, cast(dict[str, Any], host_config)
+                        )
+
+                        if current_success_cmd:
+                            self._call_shell_remote(
+                                current_success_cmd,
+                                cast(dict[str, Any], host_config),
+                            )
+                    else:
+                        self._call_shell_app(current_cmd)
+
+                        if current_success_cmd:
+                            self._call_shell_app(current_success_cmd)
+                except Exception as e:
+                    if current_failure_cmd:
+                        try:
+                            if remote_host:
+                                self._call_shell_remote(
+                                    current_failure_cmd,
+                                    cast(dict[str, Any], host_config),
+                                )
+                            else:
+                                self._call_shell_app(current_failure_cmd)
+                        except Exception as failure_ex:
+                            MakimLogs.print_info(
+                                f'Failure command also failed: {failure_ex}'
+                            )
+
+                    # Re-raise original exception
+                    raise e
 
         # Run command for each matrix combination
         for matrix_vars in matrix_combinations or [{}]:
