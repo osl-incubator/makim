@@ -30,6 +30,7 @@ jobs:
 
       - name: Setup Docker on macOS
         uses: douglascamata/setup-docker-macos-action@v1-alpha
+        id: docker
 
   tests:
     strategy:
