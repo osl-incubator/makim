@@ -75,7 +75,7 @@ class FormattedLogStream:
         task : str
             The task from where logs are streamed.
         file : str
-            The file where task is defined
+            The file where task is defined.
         """
         self.stream = stream
         self.format = format
@@ -113,17 +113,17 @@ class FormattedLogStream:
 
     def flush(self) -> None:
         """Send any pending text to the given stream."""
-        if self._buffer:
-            record = {
-                'asctime': datetime.datetime.now().strftime(
-                    '%Y-%m-%d %H:%M:%S'
-                ),
-                'task': self.task,
-                'file': self.file,
-                'levelname': self.level,
-                'message': self._buffer,
-            }
-            formatted_line = self.format % record
-            self.stream.write(formatted_line + '\n')
-            self._buffer = ''
-        self.stream.flush()
+        if not self._buffer:
+            self.stream.flush()
+            return
+
+        record = {
+            'asctime': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'task': self.task,
+            'file': self.file,
+            'levelname': self.level,
+            'message': self._buffer,
+        }
+        formatted_line = self.format % record
+        self.stream.write(formatted_line + '\n')
+        self._buffer = ''
