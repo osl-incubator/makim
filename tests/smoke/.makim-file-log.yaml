@@ -1,0 +1,395 @@
+groups:
+  setup:
+    tasks:
+      out-no-format:
+        help: Logging with level "out".
+        log:
+          path: ./tests/smoke/logs/out-no-format.txt
+          level: out
+        run: |
+          echo "out"
+
+      err-no-format:
+        help: Logging with level "err".
+        log:
+          path: ./tests/smoke/logs/err-no-format.txt
+          level: err
+        run: |
+          import sys
+          sys.stderr.write("err")
+
+      both-no-format:
+        help: Logging with level "both".
+        log:
+          path: ./tests/smoke/logs/both-no-format.txt
+          level: both
+        run: |
+          import sys
+          echo both
+          sys.stderr.write("both")
+
+      out-file-format:
+        help: Logging with level "out" with file formatting.
+        log:
+          path: ./tests/smoke/logs/out-file-format.txt
+          level: out
+          format: "%(file)s"
+        run: |
+          echo "out"
+
+      err-file-format:
+        help: Logging with level "err" with file formatting.
+        log:
+          path: ./tests/smoke/logs/err-file-format.txt
+          level: err
+          format: "%(file)s"
+        run: |
+          import sys
+          sys.stderr.write("err")
+
+      both-file-format:
+        help: Logging with level "both" with file formatting.
+        log:
+          path: ./tests/smoke/logs/both-file-format.txt
+          level: both
+          format: "%(file)s"
+        run: |
+          import sys
+          echo both
+          sys.stderr.write("both")
+
+      out-task-format:
+        help: Logging with level "out" with task formatting.
+        log:
+          path: ./tests/smoke/logs/out-task-format.txt
+          level: out
+          format: "%(task)s"
+        run: |
+          echo "out"
+
+      err-task-format:
+        help: Logging with level "err" with task formatting.
+        log:
+          path: ./tests/smoke/logs/err-task-format.txt
+          level: err
+          format: "%(task)s"
+        run: |
+          import sys
+          sys.stderr.write("err")
+
+      both-task-format:
+        help: Logging with level "both" with task formatting.
+        log:
+          path: ./tests/smoke/logs/both-task-format.txt
+          level: both
+          format: "%(task)s"
+        run: |
+          import sys
+          echo both
+          sys.stderr.write("both")
+
+      out-level-format:
+        help: Logging with level "out" with level formatting.
+        log:
+          path: ./tests/smoke/logs/out-level-format.txt
+          level: out
+          format: "%(levelname)s"
+        run: |
+          echo "out"
+
+      err-level-format:
+        help: Logging with level "err" with level formatting.
+        log:
+          path: ./tests/smoke/logs/err-level-format.txt
+          level: err
+          format: "%(levelname)s"
+        run: |
+          import sys
+          sys.stderr.write("err")
+
+      both-level-format:
+        help: Logging with level "both" with level formatting.
+        log:
+          path: ./tests/smoke/logs/both-level-format.txt
+          level: both
+          format: "%(levelname)s"
+        run: |
+          import sys
+          echo both
+          sys.stderr.write("both")
+
+      out-message-format:
+        help: Logging with level "out" with message formatting.
+        log:
+          path: ./tests/smoke/logs/out-message-format.txt
+          level: out
+          format: "%(message)s"
+        run: |
+          echo "out"
+
+      err-message-format:
+        help: Logging with level "err" with message formatting.
+        log:
+          path: ./tests/smoke/logs/err-message-format.txt
+          level: err
+          format: "%(message)s"
+        run: |
+          import sys
+          sys.stderr.write("err")
+
+      both-message-format:
+        help: Logging with level "both" with message formatting.
+        log:
+          path: ./tests/smoke/logs/both-message-format.txt
+          level: both
+          format: "%(message)s"
+        run: |
+          import sys
+          echo both
+          sys.stderr.write("both")
+
+      out-time-format:
+        help: Logging with level "out" with time formatting.
+        log:
+          path: ./tests/smoke/logs/out-time-format.txt
+          level: out
+          format: "%(asctime)s"
+        run: |
+          echo "out"
+
+      err-time-format:
+        help: Logging with level "err" with time formatting.
+        log:
+          path: ./tests/smoke/logs/err-time-format.txt
+          level: err
+          format: "%(asctime)s"
+        run: |
+          import sys
+          sys.stderr.write("err")
+
+      both-time-format:
+        help: Logging with level "both" with time formatting.
+        log:
+          path: ./tests/smoke/logs/both-time-format.txt
+          level: both
+          format: "%(asctime)s"
+        run: |
+          import sys
+          echo both
+          sys.stderr.write("both")
+
+  test:
+    tasks:
+      out-no-format:
+        help: Test logging with level "out".
+        hooks:
+          pre-run:
+            - task: setup.out-no-format
+        run: |
+          file_path = "./tests/smoke/logs/out-no-format.txt"
+          word_to_search = "out"
+          with open(file_path, 'r', encoding='utf-8') as file:
+              assert any(word_to_search in line for line in file), "Log entry not found"
+
+      err-no-format:
+        help: Test logging with level "err".
+        hooks:
+          pre-run:
+            - task: setup.err-no-format
+        run: |
+          file_path = "./tests/smoke/logs/err-no-format.txt"
+          word_to_search = "err"
+          with open(file_path, 'r', encoding='utf-8') as file:
+              assert any(word_to_search in line for line in file), "Log entry not found"
+
+      both-no-format:
+        help: Test logging with level "both".
+        hooks:
+          pre-run:
+            - task: setup.both-no-format
+        run: |
+          file_path = "./tests/smoke/logs/both-no-format.txt"
+          with open(file_path, 'r', encoding='utf-8') as file:
+              contents = file.read()
+              assert "both" in contents, "Both logs not found"
+
+      out-file-format:
+        help: Test logging with file format.
+        hooks:
+          pre-run:
+            - task: setup.out-file-format
+        run: |
+          file_path = "./tests/smoke/logs/out-file-format.txt"
+          expected_format = "tests/smoke/.makim-file-log.yaml"
+          with open(file_path, 'r', encoding='utf-8') as file:
+              assert any(expected_format in line for line in file), "File format logging failed"
+
+      err-file-format:
+        help: Test logging with file format for error level.
+        hooks:
+          pre-run:
+            - task: setup.err-file-format
+        run: |
+          file_path = "./tests/smoke/logs/err-file-format.txt"
+          expected_format = "tests/smoke/.makim-file-log.yaml"
+          with open(file_path, 'r', encoding='utf-8') as file:
+              assert any(expected_format in line for line in file), "File format logging failed for error"
+
+      both-file-format:
+        help: Test logging with level "both" with file formatting.
+        hooks:
+          pre-run:
+            - task: setup.both-file-format
+        run: |
+          file_path = "./tests/smoke/logs/both-file-format.txt"
+          expected_format = "tests/smoke/.makim-file-log.yaml"
+          with open(file_path, 'r', encoding='utf-8') as file:
+            assert any(expected_format in line for line in file), "Expected file format log entry not found!"
+
+      out-task-format:
+        help: Test logging with task format.
+        hooks:
+          pre-run:
+            - task: setup.out-task-format
+        run: |
+          file_path = "./tests/smoke/logs/out-task-format.txt"
+          expected_task = "out-task-format"
+          with open(file_path, 'r', encoding='utf-8') as file:
+              log_lines = [line.strip() for line in file]
+              assert any(expected_task in line for line in log_lines),"Task format logging failed."
+
+      err-task-format:
+        help: Test logging with task format for error level.
+        hooks:
+          pre-run:
+            - task: setup.err-task-format
+        run: |
+          file_path = "./tests/smoke/logs/err-task-format.txt"
+          expected_task = "err-task-format"
+          with open(file_path, 'r', encoding='utf-8') as file:
+              log_lines = [line.strip() for line in file]
+              assert any(expected_task in line for line in log_lines), "Task format logging failed for error."
+
+      both-task-format:
+        help: Test logging with task format for both levels.
+        hooks:
+          pre-run:
+            - task: setup.both-task-format
+        run: |
+          file_path = "./tests/smoke/logs/both-task-format.txt"
+          expected_task = "both-task-format"
+          with open(file_path, 'r', encoding='utf-8') as file:
+              log_lines = [line.strip() for line in file]
+              assert any(expected_task in line for line in log_lines), f"Task format logging failed for both. Log contents: {log_lines}"
+
+      out-level-format:
+        help: Test logging with level format.
+        hooks:
+          pre-run:
+            - task: setup.out-level-format
+        run: |
+          file_path = "./tests/smoke/logs/out-level-format.txt"
+          expected_level = "OUT"
+          with open(file_path, 'r', encoding='utf-8') as file:
+              assert any(expected_level in line for line in file), "Level format logging failed"
+
+      err-level-format:
+        help: Test logging with level format for error level.
+        hooks:
+          pre-run:
+            - task: setup.err-level-format
+        run: |
+          file_path = "./tests/smoke/logs/err-level-format.txt"
+          expected_level = "ERR"
+          with open(file_path, 'r', encoding='utf-8') as file:
+              assert any(expected_level in line for line in file), "Level format logging failed for error"
+
+      both-level-format:
+        help: Test logging with level format for both levels.
+        hooks:
+          pre-run:
+            - task: setup.both-level-format
+        run: |
+          file_path = "./tests/smoke/logs/both-level-format.txt"
+          expected_levels = ["OUT", "ERR"]
+          with open(file_path, 'r', encoding='utf-8') as file:
+              contents = file.read()
+              assert all(level in contents for level in expected_levels), "Level format logging failed for both"
+
+      out-message-format:
+        help: Test logging with message format.
+        hooks:
+          pre-run:
+            - task: setup.out-message-format
+        run: |
+          file_path = "./tests/smoke/logs/out-message-format.txt"
+          expected_message = "out"
+          with open(file_path, 'r', encoding='utf-8') as file:
+              assert any(expected_message in line for line in file), "Message format logging failed"
+
+      err-message-format:
+        help: Test logging with message format for error level.
+        hooks:
+          pre-run:
+            - task: setup.err-message-format
+        run: |
+          file_path = "./tests/smoke/logs/err-message-format.txt"
+          expected_message = "err"
+          with open(file_path, 'r', encoding='utf-8') as file:
+              assert any(expected_message in line for line in file), "Message format logging failed for error"
+
+      both-message-format:
+        help: Test logging with message format for both levels.
+        hooks:
+          pre-run:
+            - task: setup.both-message-format
+        run: |
+          file_path = "./tests/smoke/logs/both-message-format.txt"
+          expected_message = "both"
+          with open(file_path, 'r', encoding='utf-8') as file:
+              assert any(expected_message in line for line in file), "Message format logging failed for both"
+
+      out-time-format:
+        help: Test logging with timestamp format.
+        hooks:
+          pre-run:
+            - task: setup.out-time-format
+        run: |
+          import datetime
+          import re
+          file_path = "./tests/smoke/logs/out-time-format.txt"
+
+          with open(file_path, 'r', encoding='utf-8') as file:
+              log_lines = [line.strip() for line in file if line.strip()]
+          timestamp_line = next((line for line in log_lines if re.match(r"^\d{4}-\d{2}-\d{2}", line)), None)
+          assert timestamp_line, "No timestamp found in the log file."
+
+      err-time-format:
+        help: Test logging with timestamp format for error level.
+        hooks:
+          pre-run:
+            - task: setup.err-time-format
+        run: |
+          import datetime
+          import re
+          file_path = "./tests/smoke/logs/err-time-format.txt"
+
+          with open(file_path, 'r', encoding='utf-8') as file:
+              log_lines = [line.strip() for line in file if line.strip()]
+          timestamp_line = next((line for line in log_lines if re.match(r"^\d{4}-\d{2}-\d{2}", line)), None)
+          assert timestamp_line, "No timestamp found in the log file."
+
+      both-time-format:
+        help: Test logging with timestamp format for both levels.
+        hooks:
+          pre-run:
+            - task: setup.both-time-format
+        run: |
+          import datetime
+          import re
+          file_path = "./tests/smoke/logs/both-time-format.txt"
+
+          with open(file_path, 'r', encoding='utf-8') as file:
+              log_lines = [line.strip() for line in file if line.strip()]
+          timestamp_line = next((line for line in log_lines if re.match(r"^\d{4}-\d{2}-\d{2}", line)), None)
+          assert timestamp_line, "No timestamp found in the log file."

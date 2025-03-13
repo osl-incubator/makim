@@ -15,7 +15,7 @@ import warnings
 from copy import deepcopy
 from itertools import product
 from pathlib import Path
-from typing import Any, Dict, List, Optional, TypedDict, Union, cast
+from typing import Any, Dict, List, Optional, TextIO, TypedDict, Union, cast
 
 import dotenv
 import paramiko
@@ -29,6 +29,7 @@ from typing_extensions import TypeAlias
 from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
 from makim.scheduler import MakimScheduler
+from makim.task_logging import FormattedLogStream, LogLevel, Tee
 
 
 def command_exists(command: str) -> bool:
@@ -184,7 +185,12 @@ class Makim:
             state['scheduler'] = None
         return state
 
-    def _call_shell_app(self, cmd: str) -> None:
+    def _call_shell_app(
+        self,
+        cmd: str,
+        out_stream: TextIO = sys.stdout,
+        err_stream: TextIO = sys.stderr,
+    ) -> None:
         self._load_shell_app()
 
         fd, filepath = tempfile.mkstemp(suffix=self.tmp_suffix, text=True)
@@ -196,8 +202,8 @@ class Makim:
             *self.shell_args,
             filepath,
             _in=sys.stdin,
-            _out=sys.stdout,
-            _err=sys.stderr,
+            _out=out_stream,
+            _err=err_stream,
             _bg=True,
             _bg_exc=False,
             _no_err=True,
@@ -867,7 +873,8 @@ class Makim:
                         current_cmd, cast(dict[str, Any], host_config)
                     )
                 else:
-                    self._call_shell_app(current_cmd)
+                    out_stream, err_stream = self._get_output_stream()
+                    self._call_shell_app(current_cmd, out_stream, err_stream)
 
         # Run command for each matrix combination
         for matrix_vars in matrix_combinations or [{}]:
@@ -876,6 +883,55 @@ class Makim:
         # move back the environment variable to the previous values
         os.environ.clear()
         os.environ.update(self.env_scoped)
+
+    def _get_output_stream(self) -> tuple[TextIO, TextIO]:
+        """Set up logging streams based on task log configuration."""
+        log_config = self.task_data.get('log')
+
+        if not log_config:
+            return sys.stdout, sys.stderr
+
+        log_path = log_config.get('path')
+        log_level = LogLevel(log_config.get('level', 'both'))
+        log_format = log_config.get('format')
+
+        # Ensure log directory exists
+        log_dir = Path(log_path).parent
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        file_stream = open(log_path, 'a')
+
+        # Create default streams
+        stdout_stream = sys.stdout
+        stderr_stream = sys.stderr
+
+        def create_formatted_stream(level: LogLevel) -> FormattedLogStream:
+            return FormattedLogStream(
+                file_stream,
+                log_format,
+                level,
+                self.task_name,
+                self.file,
+            )
+
+        # Configure output stream based on log level
+        if log_level in (LogLevel.OUT, LogLevel.BOTH):
+            if log_format:
+                stdout_stream = create_formatted_stream(LogLevel.OUT)
+            else:
+                stdout_stream = file_stream
+
+        # Configure error stream based on log level
+        if log_level in (LogLevel.ERR, LogLevel.BOTH):
+            if log_format:
+                stderr_stream = create_formatted_stream(LogLevel.ERR)
+            else:
+                stderr_stream = file_stream
+
+        return (
+            cast(TextIO, Tee(sys.stdout, stdout_stream)),
+            cast(TextIO, Tee(sys.stderr, stderr_stream)),
+        )
 
     # public methods
     def load(
