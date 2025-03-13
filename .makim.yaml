@@ -13,7 +13,7 @@ groups:
           rm -fr .pytest_cache
           rm -fr .ruff_cache
           rm -fr .mypy_cache
-          rm -f ./tests/smoke/makim_log.txt
+          rm -fr ./tests/smoke/logs/
           find . -name '*.egg-info' -exec rm -fr {} +
           find . -name '*.egg' -exec rm -f {} +
           find . -name '*.pyc' -exec rm -f {} +
@@ -474,9 +474,6 @@ groups:
         env:
           MAKIM_FILE: tests/smoke/.makim-file-log.yaml
         backend: bash
-        hooks:
-          post-run:
-            - task: clean.tmp
         run: |
           export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help

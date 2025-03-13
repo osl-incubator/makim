@@ -1,12 +1,10 @@
-env:
-  FILE_PATH: "./tests/smoke/makim_log.txt"
 groups:
   setup:
     tasks:
       out-no-format:
         help: Logging with level "out".
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/out-no-format.txt
           level: out
         run: |
           echo "out"
@@ -14,7 +12,7 @@ groups:
       err-no-format:
         help: Logging with level "err".
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/err-no-format.txt
           level: err
         run: |
           import sys
@@ -23,7 +21,7 @@ groups:
       both-no-format:
         help: Logging with level "both".
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/both-no-format.txt
           level: both
         run: |
           import sys
@@ -33,7 +31,7 @@ groups:
       out-file-format:
         help: Logging with level "out" with file formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/out-file-format.txt
           level: out
           format: "%(file)s"
         run: |
@@ -42,7 +40,7 @@ groups:
       err-file-format:
         help: Logging with level "err" with file formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/err-file-format.txt
           level: err
           format: "%(file)s"
         run: |
@@ -52,16 +50,18 @@ groups:
       both-file-format:
         help: Logging with level "both" with file formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/both-file-format.txt
           level: both
           format: "%(file)s"
         run: |
-          echo "both"
+          import sys
+          echo both
+          sys.stderr.write("both")
 
       out-task-format:
         help: Logging with level "out" with task formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/out-task-format.txt
           level: out
           format: "%(task)s"
         run: |
@@ -70,7 +70,7 @@ groups:
       err-task-format:
         help: Logging with level "err" with task formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/err-task-format.txt
           level: err
           format: "%(task)s"
         run: |
@@ -80,16 +80,18 @@ groups:
       both-task-format:
         help: Logging with level "both" with task formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/both-task-format.txt
           level: both
           format: "%(task)s"
         run: |
-          echo "both"
+          import sys
+          echo both
+          sys.stderr.write("both")
 
       out-level-format:
         help: Logging with level "out" with level formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/out-level-format.txt
           level: out
           format: "%(levelname)s"
         run: |
@@ -98,7 +100,7 @@ groups:
       err-level-format:
         help: Logging with level "err" with level formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/err-level-format.txt
           level: err
           format: "%(levelname)s"
         run: |
@@ -108,9 +110,9 @@ groups:
       both-level-format:
         help: Logging with level "both" with level formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/both-level-format.txt
           level: both
-          format: "%(file)s"
+          format: "%(levelname)s"
         run: |
           import sys
           echo both
@@ -119,7 +121,7 @@ groups:
       out-message-format:
         help: Logging with level "out" with message formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/out-message-format.txt
           level: out
           format: "%(message)s"
         run: |
@@ -128,7 +130,7 @@ groups:
       err-message-format:
         help: Logging with level "err" with message formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/err-message-format.txt
           level: err
           format: "%(message)s"
         run: |
@@ -138,16 +140,18 @@ groups:
       both-message-format:
         help: Logging with level "both" with message formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/both-message-format.txt
           level: both
           format: "%(message)s"
         run: |
-          echo "both"
+          import sys
+          echo both
+          sys.stderr.write("both")
 
       out-time-format:
         help: Logging with level "out" with time formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/out-time-format.txt
           level: out
           format: "%(asctime)s"
         run: |
@@ -156,7 +160,7 @@ groups:
       err-time-format:
         help: Logging with level "err" with time formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/err-time-format.txt
           level: err
           format: "%(asctime)s"
         run: |
@@ -166,11 +170,13 @@ groups:
       both-time-format:
         help: Logging with level "both" with time formatting.
         log:
-          path: ./tests/smoke/makim_log.txt
+          path: ./tests/smoke/logs/both-time-format.txt
           level: both
           format: "%(asctime)s"
         run: |
-          echo "both"
+          import sys
+          echo both
+          sys.stderr.write("both")
 
   test:
     tasks:
@@ -180,7 +186,7 @@ groups:
           pre-run:
             - task: setup.out-no-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/out-no-format.txt"
           word_to_search = "out"
           with open(file_path, 'r', encoding='utf-8') as file:
               assert any(word_to_search in line for line in file), "Log entry not found"
@@ -191,7 +197,7 @@ groups:
           pre-run:
             - task: setup.err-no-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/err-no-format.txt"
           word_to_search = "err"
           with open(file_path, 'r', encoding='utf-8') as file:
               assert any(word_to_search in line for line in file), "Log entry not found"
@@ -202,7 +208,7 @@ groups:
           pre-run:
             - task: setup.both-no-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/both-no-format.txt"
           with open(file_path, 'r', encoding='utf-8') as file:
               contents = file.read()
               assert "both" in contents, "Both logs not found"
@@ -213,7 +219,7 @@ groups:
           pre-run:
             - task: setup.out-file-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/out-file-format.txt"
           expected_format = "tests/smoke/.makim-file-log.yaml"
           with open(file_path, 'r', encoding='utf-8') as file:
               assert any(expected_format in line for line in file), "File format logging failed"
@@ -224,7 +230,7 @@ groups:
           pre-run:
             - task: setup.err-file-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/err-file-format.txt"
           expected_format = "tests/smoke/.makim-file-log.yaml"
           with open(file_path, 'r', encoding='utf-8') as file:
               assert any(expected_format in line for line in file), "File format logging failed for error"
@@ -235,7 +241,7 @@ groups:
           pre-run:
             - task: setup.both-file-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/both-file-format.txt"
           expected_format = "tests/smoke/.makim-file-log.yaml"
           with open(file_path, 'r', encoding='utf-8') as file:
             assert any(expected_format in line for line in file), "Expected file format log entry not found!"
@@ -246,7 +252,7 @@ groups:
           pre-run:
             - task: setup.out-task-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/out-task-format.txt"
           expected_task = "out-task-format"
           with open(file_path, 'r', encoding='utf-8') as file:
               log_lines = [line.strip() for line in file]
@@ -258,7 +264,7 @@ groups:
           pre-run:
             - task: setup.err-task-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/err-task-format.txt"
           expected_task = "err-task-format"
           with open(file_path, 'r', encoding='utf-8') as file:
               log_lines = [line.strip() for line in file]
@@ -270,7 +276,7 @@ groups:
           pre-run:
             - task: setup.both-task-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/both-task-format.txt"
           expected_task = "both-task-format"
           with open(file_path, 'r', encoding='utf-8') as file:
               log_lines = [line.strip() for line in file]
@@ -282,7 +288,7 @@ groups:
           pre-run:
             - task: setup.out-level-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/out-level-format.txt"
           expected_level = "OUT"
           with open(file_path, 'r', encoding='utf-8') as file:
               assert any(expected_level in line for line in file), "Level format logging failed"
@@ -293,7 +299,7 @@ groups:
           pre-run:
             - task: setup.err-level-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/err-level-format.txt"
           expected_level = "ERR"
           with open(file_path, 'r', encoding='utf-8') as file:
               assert any(expected_level in line for line in file), "Level format logging failed for error"
@@ -304,7 +310,7 @@ groups:
           pre-run:
             - task: setup.both-level-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/both-level-format.txt"
           expected_levels = ["OUT", "ERR"]
           with open(file_path, 'r', encoding='utf-8') as file:
               contents = file.read()
@@ -316,7 +322,7 @@ groups:
           pre-run:
             - task: setup.out-message-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/out-message-format.txt"
           expected_message = "out"
           with open(file_path, 'r', encoding='utf-8') as file:
               assert any(expected_message in line for line in file), "Message format logging failed"
@@ -327,7 +333,7 @@ groups:
           pre-run:
             - task: setup.err-message-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
+          file_path = "./tests/smoke/logs/err-message-format.txt"
           expected_message = "err"
           with open(file_path, 'r', encoding='utf-8') as file:
               assert any(expected_message in line for line in file), "Message format logging failed for error"
@@ -338,11 +344,10 @@ groups:
           pre-run:
             - task: setup.both-message-format
         run: |
-          file_path = "./tests/smoke/makim_log.txt"
-          expected_messages = ["out", "err"]
+          file_path = "./tests/smoke/logs/both-message-format.txt"
+          expected_message = "both"
           with open(file_path, 'r', encoding='utf-8') as file:
-              contents = file.read()
-              assert all(msg in contents for msg in expected_messages), "Message format logging failed for both"
+              assert any(expected_message in line for line in file), "Message format logging failed for both"
 
       out-time-format:
         help: Test logging with timestamp format.
@@ -352,8 +357,7 @@ groups:
         run: |
           import datetime
           import re
-          file_path = "./tests/smoke/makim_log.txt"
-          current_year = str(datetime.datetime.now().year)
+          file_path = "./tests/smoke/logs/out-time-format.txt"
 
           with open(file_path, 'r', encoding='utf-8') as file:
               log_lines = [line.strip() for line in file if line.strip()]
@@ -368,8 +372,8 @@ groups:
         run: |
           import datetime
           import re
-          file_path = "./tests/smoke/makim_log.txt"
-          current_year = str(datetime.datetime.now().year)
+          file_path = "./tests/smoke/logs/err-time-format.txt"
+
           with open(file_path, 'r', encoding='utf-8') as file:
               log_lines = [line.strip() for line in file if line.strip()]
           timestamp_line = next((line for line in log_lines if re.match(r"^\d{4}-\d{2}-\d{2}", line)), None)
@@ -383,8 +387,7 @@ groups:
         run: |
           import datetime
           import re
-          file_path = "./tests/smoke/makim_log.txt"
-          current_year = str(datetime.datetime.now().year)
+          file_path = "./tests/smoke/logs/both-time-format.txt"
 
           with open(file_path, 'r', encoding='utf-8') as file:
               log_lines = [line.strip() for line in file if line.strip()]
