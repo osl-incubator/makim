@@ -128,7 +128,7 @@ jobs:
         run: makim smoke-tests.shell-app
 
       - name: Run smoke test for ssh remote execution
-        if: ${{ matrix.os != 'macos' }}
+        if: ${{ matrix.os != 'macos-13' }}
         run: makim smoke-tests.ssh-remote-execution
 
       - name: Run smoke test for scheduler
