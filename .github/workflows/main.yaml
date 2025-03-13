@@ -68,7 +68,7 @@ jobs:
 
       - name: Setup Docker on macOS
         uses: douglascamata/setup-docker-macos-action@v1-alpha
-        if: ${{ matrix.os == 'macos' }}
+        if: ${{ matrix.os == 'macos-13' }}
         id: docker
 
       - name: Check Poetry lock
