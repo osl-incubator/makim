@@ -516,10 +516,14 @@ class Makim:
             )
 
     def _change_task(self, task_name: str) -> None:
-        group_name = 'default'
-        if '.' in task_name:
-            group_name, task_name = task_name.split('.')
+        if '.' not in task_name:
+            MakimLogs.raise_error(
+                f'Invalid task name "{task_name}". '
+                'Tasks must be defined with a group. Use "group.task-name".',
+                MakimError.MAKIM_TARGET_NOT_FOUND,
+            )
 
+        group_name, task_name = task_name.split('.', 1)
         self.task_name = task_name
         self._change_group_data(group_name)
 
@@ -539,9 +543,6 @@ class Makim:
 
         if group_name is not None:
             self.group_name = group_name
-
-        if self.group_name not in groups and len(groups) == 1:
-            self.group_name = next(iter(groups))
 
         for group in groups:
             if group == self.group_name:
