@@ -928,7 +928,6 @@ class Makim:
             else:
                 stderr_stream = file_stream
 
-            # Wrap original streams with configured streams
         return (
             cast(TextIO, Tee(sys.stdout, stdout_stream)),
             cast(TextIO, Tee(sys.stderr, stderr_stream)),
