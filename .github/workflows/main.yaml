@@ -132,6 +132,9 @@ jobs:
 
       - name: Run smoke test for pipelines
         run: makim pipeline run test.pipeline
+        
+      - name: Run smoke test for task logger
+        run: makim smoke-tests.task-logger
 
       - name: Semantic Release PR Title Check
         uses: osl-incubator/semantic-release-pr-title-check@v1.4.1

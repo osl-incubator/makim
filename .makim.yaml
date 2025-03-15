@@ -25,6 +25,7 @@ groups:
           rm -fr .pytest_cache
           rm -fr .ruff_cache
           rm -fr .mypy_cache
+          rm -fr ./tests/smoke/logs/
           find . -name '*.egg-info' -exec rm -fr {} +
           find . -name '*.egg' -exec rm -f {} +
           find . -name '*.pyc' -exec rm -f {} +
@@ -101,6 +102,7 @@ groups:
             - task: smoke-tests.shell-app
             - task: smoke-tests.ssh-remote-execution
             - task: smoke-tests.scheduler
+            - task: smoke-tests.task-logger
 
       ci:
         help: Run all tasks used on CI
@@ -473,6 +475,7 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
           makim $VERBOSE_FLAG --file $MAKIM_FILE cron stop --all
           makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
+<<<<<<< HEAD
           
       pipeline:
         help: Manage and run pipelines
@@ -510,6 +513,42 @@ groups:
           
           # View pipeline execution history
           makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline history
+=======
+
+      task-logger:
+        help: Test makim with file logs
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-file-log.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.out-no-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.err-no-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.both-no-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.out-file-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.err-file-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.both-file-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.out-task-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.err-task-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.both-task-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.out-level-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.err-level-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.both-level-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.out-message-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.err-message-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.both-message-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.out-time-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.err-time-format
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.both-time-format
+
+>>>>>>> origin
   error:
     help: This group helps tests failure tasks
     tasks:
