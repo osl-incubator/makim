@@ -11,6 +11,7 @@ from fuzzywuzzy import process
 from typer import Typer
 
 from makim.core import Makim
+from makim.pipelines import MakimPipelineEngine
 
 
 def suggest_command(user_input: str, available_commands: list[str]) -> str:
@@ -286,3 +287,48 @@ def create_dynamic_command_cron(
 
     exec(function_code, global_vars, local_vars)
     decorator(local_vars['dynamic_command'])
+
+def create_dynamic_command_pipeline(
+    makim: Makim, app: Typer, name: str, args: dict[str, Any]
+) -> None:
+    """
+    Dynamically create a Typer command for a pipeline with the specified name.
+
+    Parameters
+    ----------
+    makim : Makim
+        Makim instance with configuration details.
+    app : Typer
+        Typer app group to register the command under.
+    name : str
+        Name of the pipeline (used as command name).
+    args : dict
+        Dictionary of pipeline configuration (e.g., help, steps).
+    """
+    group_name = 'pipeline'
+
+    # Optional help text
+    help_text = args.get("help", f"Run pipeline '{name}'")
+
+    # Register the command with Typer
+    decorator = app.command(
+        name,
+        help=help_text,
+        rich_help_panel=group_name,
+    )
+
+    # Generate the function dynamically
+    function_code = 'def dynamic_command():\n'
+    function_code += f'    engine = MakimPipelineEngine(config_file=makim.file)\n'
+    function_code += f'    steps = {args.get("steps", [])!r}\n'
+    function_code += f'    engine.run_pipeline("{name}", steps)\n'
+
+    local_vars: dict[str, Any] = {}
+    global_vars: dict[str, Any] = globals()
+    global_vars['makim'] = makim
+    global_vars['MakimPipelineEngine'] = MakimPipelineEngine
+
+    exec(function_code, global_vars, local_vars)
+
+    decorator(local_vars['dynamic_command'])
+    

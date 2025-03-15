@@ -299,6 +299,46 @@
         }
       },
       "additionalProperties": false
+    },
+    "pipelines": {
+      "type": "object",
+      "description": "Pipeline definitions for sequential or branching task execution",
+      "patternProperties": {
+        "^[a-zA-Z0-9_-]+$": {
+          "type": "object",
+          "required": ["steps"],
+          "properties": {
+            "help": {
+              "type": "string",
+              "description": "Description of what this pipeline does"
+            },
+            "steps": {
+              "type": "array",
+              "description": "Ordered list of steps in the pipeline",
+              "items": {
+                "type": "object",
+                "required": ["target"],
+                "properties": {
+                  "target": {
+                    "type": "string",
+                    "description": "The full target name (e.g., 'group.task')"
+                  },
+                  "args": {
+                    "type": "object",
+                    "description": "Arguments to pass to this target",
+                    "additionalProperties": {
+                      "type": ["string", "boolean"]
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

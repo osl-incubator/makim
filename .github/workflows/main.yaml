@@ -130,6 +130,9 @@ jobs:
       - name: Run smoke test for scheduler
         run: makim smoke-tests.scheduler
 
+      - name: Run smoke test for pipelines
+        run: makim pipeline run test.pipeline
+
       - name: Semantic Release PR Title Check
         uses: osl-incubator/semantic-release-pr-title-check@v1.4.1
         if: success() || failure()

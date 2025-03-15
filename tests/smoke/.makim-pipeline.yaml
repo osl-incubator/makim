@@ -1,0 +1,22 @@
+version: 1.0.0
+groups:
+  main:
+    env-file: .env
+    targets:
+      read:
+        help: Read file
+        args:
+          filepath:
+            type: string
+            default:
+        run: cat {{ args.filepath }}
+      count:
+        help:  Counts the number of lines in the input.
+        run: wc -l
+
+pipelines:
+  build-pipeline:
+    help: Full build process
+    steps:
+      - target: main.build
+      - target: main.clean

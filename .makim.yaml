@@ -1,4 +1,16 @@
 groups:
+  main:
+    tasks:
+      clean:
+        help: Clean the project (minimal)
+        backend: bash
+        run: echo cleaning project...
+
+      build:
+        help: Build the project
+        backend: bash
+        run: echo building project...
+
   clean:
     tasks:
       tmp:
@@ -461,7 +473,43 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
           makim $VERBOSE_FLAG --file $MAKIM_FILE cron stop --all
           makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
-
+          
+      pipeline:
+        help: Manage and run pipelines
+        args:
+          verbose-mode:
+            help: Run pipeline commands in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: .makim.yaml  # Ensure it points to the correct config file
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          
+          # List all defined pipelines
+          makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline list
+          
+          # Show a pipeline's structure
+          makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline show build-pipeline
+          
+          # Run a pipeline manually
+          makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline run build-pipeline
+          
+          # Schedule a pipeline execution
+          makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline schedule build-pipeline --cron "0 9 * * *"
+          
+          # List scheduled pipelines
+          makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline scheduled
+          
+          # Remove a scheduled pipeline
+          makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline unschedule build-pipeline
+          
+          # Retry a failed pipeline execution
+          makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline retry build-pipeline
+          
+          # View pipeline execution history
+          makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline history
   error:
     help: This group helps tests failure tasks
     tasks:
@@ -508,3 +556,20 @@ groups:
           # it requires the password manually
           ssh-keygen -R "[localhost]:2222" || true
           ssh -o StrictHostKeyChecking=no testuser@localhost -p 2222 'pwd'
+
+scheduler:
+  build:
+    schedule: "* * * * *"  # Adjust as needed
+    task: main.build
+    args:  # Moved args to the correct level
+      clean: true
+  clean:
+    schedule: "* * * * *"
+    task: main.clean
+
+pipelines:
+  build-pipeline:
+    help: Full build process
+    steps:
+      - target: main.build
+      - target: main.clean
