@@ -475,8 +475,6 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
           makim $VERBOSE_FLAG --file $MAKIM_FILE cron stop --all
           makim $VERBOSE_FLAG --file $MAKIM_FILE cron list
-<<<<<<< HEAD
-          
       pipeline:
         help: Manage and run pipelines
         args:
@@ -513,7 +511,6 @@ groups:
           
           # View pipeline execution history
           makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline history
-=======
 
       task-logger:
         help: Test makim with file logs
@@ -547,8 +544,7 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.out-time-format
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.err-time-format
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.both-time-format
-
->>>>>>> origin
+  
   error:
     help: This group helps tests failure tasks
     tasks:
