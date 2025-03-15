@@ -16,6 +16,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 # 🚀 Fix Circular Import: Import `Makim` only for type checking
 if TYPE_CHECKING:
     from makim.core import Makim
+
 def run_scheduled_pipeline(name: str):
     """Global function to execute scheduled pipelines (used by APScheduler)."""
     from makim.pipelines import MakimPipelineEngine  # Import inside function to avoid circular imports
@@ -95,27 +96,23 @@ class MakimPipelineEngine:
         """
         Run a pipeline and log execution results.
         """
-        from makim.core import Makim  # 🚀 Fix Circular Import: Import inside function
+        from makim.core import Makim  # Fix Circular Import: Import inside function
 
         def run_task(task):
             retries = task.get("retries", 0)
-            last_exception = None  # ✅ Store last exception for logging
+            last_exception = None
 
             for attempt in range(retries + 1):
                 try:
                     makim_instance = Makim()
                     makim_instance.load(self.config_file)
                     output = makim_instance.run({"task": task["target"], **task.get("args", {})})
-
-                    # ✅ Log successful execution
                     self.log_pipeline_execution(name, task["target"], "success", output=output)
                     return
                 except Exception as e:
                     last_exception = str(e)
                     if attempt < retries:
                         print(f"Retrying {task['target']} (attempt {attempt + 1}/{retries})")
-
-            # ✅ Ensure logging even if all retries fail
             self.log_pipeline_execution(name, task["target"], "failed", error=last_exception)
 
         threads = []
@@ -135,12 +132,12 @@ class MakimPipelineEngine:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        print(f"🔍 LOGGING EXECUTION: {pipeline_name} - {step} - {status}")  # ✅ Debugging output
+        print(f"🔍 LOGGING EXECUTION: {pipeline_name} - {step} - {status}")
 
         cursor.execute("""
             INSERT INTO pipeline_runs (pipeline_name, step, status, output, error)
             VALUES (?, ?, ?, ?, ?)
-        """, (pipeline_name, step, status, output or "N/A", error or "N/A"))  # ✅ Ensure output is not None
+        """, (pipeline_name, step, status, output or "N/A", error or "N/A"))
 
         conn.commit()
         conn.close()
@@ -166,7 +163,7 @@ class MakimPipelineEngine:
 
     def list_pipelines(self) -> List[Dict[str, Any]]:
         """Retrieve the list of defined pipelines from the Makim configuration."""
-        from makim.core import Makim  # 🚀 Fix Circular Import: Import inside function
+        from makim.core import Makim  # Fix Circular Import: Import inside function
 
         makim_instance = Makim()
         makim_instance.load(self.config_file)
@@ -184,7 +181,7 @@ class MakimPipelineEngine:
 
     def get_pipeline_structure(self, name: str) -> List[str]:
         """Retrieve the structure of a pipeline as a list of tasks."""
-        from makim.core import Makim  # 🚀 Fix Circular Import: Import inside function
+        from makim.core import Makim  # Fix Circular Import: Import inside function
 
         makim_instance = Makim()
         makim_instance.load(self.config_file)
@@ -211,7 +208,7 @@ class MakimPipelineEngine:
     def schedule_pipeline(self, name: str, cron_expression: Optional[str] = None, interval_seconds: Optional[int] = None):
         """Schedule a pipeline using either a cron expression or an interval."""
         import makim.core  # ✅ Import inside function to prevent circular import
-        from makim.core import Makim  # ✅ Ensure Makim is properly referenced
+        from makim.core import Makim
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
@@ -237,7 +234,6 @@ class MakimPipelineEngine:
         else:
             raise ValueError("Either a cron expression or an interval must be provided.")
         from makim.pipelines import run_scheduled_pipeline
-        # ✅ Use global function instead of `self.run_scheduled_pipeline`
         self.scheduler.add_job(run_scheduled_pipeline, trigger, args=[name], id=name, replace_existing=True)
 
         print(f"✅ Scheduled pipeline '{name}' successfully.")
@@ -266,16 +262,14 @@ class MakimPipelineEngine:
                 raise ValueError(f"Pipeline '{name}' not found in config.")
 
             print(f"🔍 [CLASS] Running scheduled pipeline tasks: {pipeline['steps']}")
-            self.log_pipeline_execution(name, "scheduled-execution", "running")  # ✅ Log start
+            self.log_pipeline_execution(name, "scheduled-execution", "running")
             self.run_pipeline(name, pipeline["steps"])
-            self.log_pipeline_execution(name, "scheduled-execution", "success")  # ✅ Log success
+            self.log_pipeline_execution(name, "scheduled-execution", "success")
 
         except Exception as e:
             error_msg = str(e)
             print(f"❌ [CLASS] Scheduled pipeline '{name}' failed: {error_msg}")
             self.log_pipeline_execution(name, "scheduled-execution", "failed", error=error_msg)
-
-
 
     def list_scheduled_pipelines(self):
         """List all scheduled pipelines."""
@@ -377,13 +371,13 @@ class MakimPipelineEngine:
 
         # ✅ Run the failed step again
         typer.echo(f"🔄 Retrying failed step '{failed_step}' for pipeline '{name}'...")
-        self.run_pipeline(name, [{"target": failed_step}])  # ✅ Retry only the failed step
+        self.run_pipeline(name, [{"target": failed_step}])
 
 
     def cancel_pipeline(self, name: str):
         """Cancels a running pipeline in APScheduler."""
         try:
-            self.scheduler.remove_job(name)  # ✅ Remove from scheduler
+            self.scheduler.remove_job(name)
             typer.echo(f"❌ Pipeline '{name}' has been canceled.")
         except Exception:
             typer.echo(f"⚠️ No running job found for pipeline '{name}'.")

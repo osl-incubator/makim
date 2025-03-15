@@ -594,9 +594,9 @@ groups:
 
 scheduler:
   build:
-    schedule: "* * * * *"  # Adjust as needed
+    schedule: "* * * * *"
     task: main.build
-    args:  # Moved args to the correct level
+    args:
       clean: true
   clean:
     schedule: "* * * * *"
