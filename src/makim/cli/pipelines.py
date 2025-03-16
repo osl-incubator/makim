@@ -139,24 +139,26 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
     @typer_pipeline.command(help="Show recent pipeline logs or clear them")
     def logs(
         pipeline: Optional[str] = typer.Argument(None, help="Pipeline name to filter logs"),
-        last: int = typer.Option(10, help="Number of recent logs to display"),
-        clear: bool = typer.Option(False, "--clear", help="Clear all pipeline logs"),
-        follow: bool = typer.Option(False, "--follow", help="Follow logs in real-time"),
-        status: Optional[str] = typer.Option(None, "--status", help="Filter logs by status (e.g., 'failed', 'success')"),
+        named_pipeline: Optional[str] = typer.Option(None, "--pipeline", "-p", help="Pipeline name to filter logs"),
+        last: int = typer.Option(10, "--last", "-l", help="Number of recent logs to display"),
+        clear: bool = typer.Option(False, "--clear", "-c", help="Clear all pipeline logs"),
+        follow: bool = typer.Option(False, "--follow", "-f", help="Follow logs in real-time"),
+        status: Optional[str] = typer.Option(None, "--status", "-s", help="Filter logs by status (e.g., 'failed', 'success')"),
     ) -> None:
-        """Print, follow, or clear pipeline run logs from SQLite."""
 
+        """Print, follow, or clear pipeline run logs from SQLite."""
+        pipeline_name = named_pipeline or pipeline
         if clear:
-            _clear_pipeline_logs(pipeline)
+            _clear_pipeline_logs(pipeline_name)
             typer.echo("✅ Pipeline logs cleared successfully.")
             return
 
         if follow:
-            typer.echo(f"📡 Following logs for pipeline '{pipeline or 'ALL'}'... (Press Ctrl+C to stop)")
-            _follow_logs(pipeline)
+            typer.echo(f"📡 Following logs for pipeline '{pipeline_name or 'ALL'}'... (Press Ctrl+C to stop)")
+            _follow_logs(pipeline_name)
             return
 
-        logs = _get_pipeline_logs(pipeline, last, status)
+        logs = _get_pipeline_logs(pipeline_name, last, status)
         _display_logs(logs)
 
     @typer_pipeline.command(help="Schedule a pipeline for automatic execution.")

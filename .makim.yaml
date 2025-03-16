@@ -591,20 +591,3 @@ groups:
           # it requires the password manually
           ssh-keygen -R "[localhost]:2222" || true
           ssh -o StrictHostKeyChecking=no testuser@localhost -p 2222 'pwd'
-
-scheduler:
-  build:
-    schedule: "* * * * *"
-    task: main.build
-    args:
-      clean: true
-  clean:
-    schedule: "* * * * *"
-    task: main.clean
-
-pipelines:
-  build-pipeline:
-    help: Full build process
-    steps:
-      - target: main.build
-      - target: main.clean

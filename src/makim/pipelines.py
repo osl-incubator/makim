@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 def run_scheduled_pipeline(name: str):
     """Global function to execute scheduled pipelines (used by APScheduler)."""
-    from makim.pipelines import MakimPipelineEngine  # Import inside function to avoid circular imports
+    from makim.pipelines import MakimPipelineEngine
 
     print(f"🔍 [GLOBAL] Running scheduled pipeline: {name}")
 
@@ -30,9 +30,8 @@ def run_scheduled_pipeline(name: str):
         if not steps:
             raise ValueError(f"Pipeline '{name}' has no steps defined.")
 
-        engine.run_pipeline(name, steps)
+        engine.run_pipeline_sequential(name, steps)  # ✅ Use correct function
 
-        # Log execution
         engine.log_pipeline_execution(name, "scheduled-execution", "success")
         print(f"✅ [GLOBAL] Successfully ran scheduled pipeline: {name}")
 
@@ -40,6 +39,7 @@ def run_scheduled_pipeline(name: str):
         error_msg = str(e)
         print(f"❌ [GLOBAL] Scheduled pipeline '{name}' failed: {error_msg}")
         engine.log_pipeline_execution(name, "scheduled-execution", "failed", error=error_msg)
+
 
 class MakimPipelineEngine:
     """
@@ -427,14 +427,19 @@ class MakimPipelineEngine:
 
 
     def run_pipeline_sequential(
-        self, name: str, steps: List[Dict[str, Any]], debug: bool = False, dry_run: bool = False
+    self, name: str, steps: List[Dict[str, Any]], debug: bool = False, dry_run: bool = False, fail_fast: bool = False
     ) -> None:
-        """Execute pipeline steps sequentially with dry-run support."""
-        from makim.core import Makim  # Fix circular import
+        """Execute pipeline steps sequentially with proper validation and error handling."""
+        from makim.core import Makim
 
         for step in steps:
-            target = step["target"]
+            target = step.get("target")
             args = step.get("args", {})
+
+            # ✅ Ensure valid target
+            if not target or not target.startswith("main."):
+                typer.echo(f"❌ Invalid target '{target}'. Expected format: 'main.task-name'")
+                raise typer.Exit(1)
 
             if debug:
                 print(f"🔍 DEBUG: Running step '{target}' with args {args} (Sequential Mode)")
@@ -450,19 +455,28 @@ class MakimPipelineEngine:
                 output = makim_instance.run({"task": target, **args})
                 self.log_pipeline_execution(name, target, "success", output=output)
             except Exception as e:
+                error_message = f"❌ Error in step '{target}': {e}"
+                print(error_message)
                 self.log_pipeline_execution(name, target, "failed", error=str(e))
-                typer.echo(f"❌ Error in step '{target}': {e}")
+
+                if fail_fast:
+                    raise typer.Exit(1)  # ✅ Stop execution on first failure if `fail_fast` is enabled
+
 
     def run_pipeline_parallel(
-    self, name: str, steps: List[Dict[str, Any]], debug: bool = False, 
-    max_workers: Optional[int] = None, dry_run: bool = False
-) -> None:
-        """Execute pipeline steps in parallel with debug logging and worker limit."""
-        from makim.core import Makim  # Fix circular import
+        self, name: str, steps: List[Dict[str, Any]], debug: bool = False, max_workers: Optional[int] = None, dry_run: bool = False
+    ) -> None:
+        """Execute pipeline steps in parallel with worker limits, validation, and better error handling."""
+        from makim.core import Makim
 
         def run_task(step):
-            target = step["target"]
+            target = step.get("target")
             args = step.get("args", {})
+
+            # ✅ Ensure valid target
+            if not target or not target.startswith("main."):
+                print(f"❌ Invalid target '{target}'. Expected format: 'main.task-name'")
+                return
 
             if debug:
                 print(f"🔍 DEBUG: Running step '{target}' with args {args} (Parallel Mode)")
@@ -478,13 +492,14 @@ class MakimPipelineEngine:
                 output = makim_instance.run({"task": target, **args})
                 self.log_pipeline_execution(name, target, "success", output=output)
             except Exception as e:
+                print(f"❌ ERROR: Step '{target}' failed with error: {e}")
                 self.log_pipeline_execution(name, target, "failed", error=str(e))
-                typer.echo(f"❌ Error in step '{target}': {e}")
 
-        max_threads = max_workers if max_workers else len(steps)  # Default: run all in parallel
+        # ✅ Ensure proper worker limits
+        max_threads = max_workers if max_workers else len(steps)
 
         if debug:
-            print(f"🔍 [DEBUG] Running {len(steps)} steps in parallel with {max_threads} workers...")
+            print(f"🔍 DEBUG: Running {len(steps)} steps in parallel with {max_threads} workers...")
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
             executor.map(run_task, steps)
