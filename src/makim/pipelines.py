@@ -13,7 +13,7 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
-# 🚀 Fix Circular Import: Import `Makim` only for type checking
+# Fix Circular Import: Import `Makim` only for type checking
 if TYPE_CHECKING:
     from makim.core import Makim
 
@@ -32,7 +32,7 @@ def run_scheduled_pipeline(name: str):
 
         engine.run_pipeline(name, steps)
 
-        # ✅ Log execution
+        # Log execution
         engine.log_pipeline_execution(name, "scheduled-execution", "success")
         print(f"✅ [GLOBAL] Successfully ran scheduled pipeline: {name}")
 
@@ -207,7 +207,7 @@ class MakimPipelineEngine:
 
     def schedule_pipeline(self, name: str, cron_expression: Optional[str] = None, interval_seconds: Optional[int] = None):
         """Schedule a pipeline using either a cron expression or an interval."""
-        import makim.core  # ✅ Import inside function to prevent circular import
+        import makim.core
         from makim.core import Makim
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -325,14 +325,11 @@ class MakimPipelineEngine:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        # ✅ Get scheduled pipelines from SQLite
         cursor.execute("SELECT pipeline_name, cron_expression, interval_seconds FROM pipeline_schedules")
         scheduled_pipelines = cursor.fetchall()
 
-        # ✅ Get running jobs from APScheduler
         running_jobs = self.scheduler.get_jobs()
 
-        # ✅ Get last 5 pipeline executions
         cursor.execute("""
             SELECT pipeline_name, step, status, timestamp 
             FROM pipeline_runs 
@@ -353,7 +350,6 @@ class MakimPipelineEngine:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        # ✅ Find the last failed execution for this pipeline
         cursor.execute("""
             SELECT step FROM pipeline_runs 
             WHERE pipeline_name = ? AND status = 'failed' 
@@ -369,7 +365,6 @@ class MakimPipelineEngine:
         failed_step = row[0]
         conn.close()
 
-        # ✅ Run the failed step again
         typer.echo(f"🔄 Retrying failed step '{failed_step}' for pipeline '{name}'...")
         self.run_pipeline(name, [{"target": failed_step}])
 
@@ -387,7 +382,7 @@ class MakimPipelineEngine:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        # ✅ Get history for a specific pipeline or all pipelines
+        # Get history for a specific pipeline or all pipelines
         if name:
             cursor.execute("""
                 SELECT pipeline_name, step, status, timestamp 
@@ -411,7 +406,6 @@ class MakimPipelineEngine:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        # ✅ Find all failed steps for this pipeline
         cursor.execute("""
             SELECT step FROM pipeline_runs 
             WHERE pipeline_name = ? AND status = 'failed' 
@@ -427,7 +421,6 @@ class MakimPipelineEngine:
         failed_steps = [row[0] for row in rows]
         conn.close()
 
-        # ✅ Run all failed steps again
         typer.echo(f"🔄 Retrying {len(failed_steps)} failed steps for pipeline '{name}'...")
         steps_to_retry = [{"target": step} for step in failed_steps]
         self.run_pipeline(name, steps_to_retry)
@@ -488,12 +481,10 @@ class MakimPipelineEngine:
                 self.log_pipeline_execution(name, target, "failed", error=str(e))
                 typer.echo(f"❌ Error in step '{target}': {e}")
 
-        # ✅ Set max_workers (default: number of steps)
         max_threads = max_workers if max_workers else len(steps)  # Default: run all in parallel
 
         if debug:
             print(f"🔍 [DEBUG] Running {len(steps)} steps in parallel with {max_threads} workers...")
 
-        # ✅ Use ThreadPoolExecutor for better thread management
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
             executor.map(run_task, steps)

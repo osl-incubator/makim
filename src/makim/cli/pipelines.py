@@ -52,7 +52,7 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
         table = _create_pipeline_table()
 
         for name, config in pipelines.items():
-            step_count = len(config.get("steps", []))  # ✅ Changed from "tasks" to "steps"
+            step_count = len(config.get("steps", []))
             help_text = config.get("help", "—")
             table.add_row(name, f"{step_count} step(s)", help_text)
 
@@ -66,9 +66,9 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
             typer.echo(f"Pipeline '{name}' not found.")
             raise typer.Exit(1)
 
-        steps = pipeline.get("steps", [])  # ✅ Fetch steps correctly
+        steps = pipeline.get("steps", [])
 
-        # 🚀 Debugging: Print pipeline steps
+        # Debugging: Print pipeline steps
         typer.echo(f"DEBUG: Pipeline '{name}' has {len(steps)} steps.")
 
         if not steps:
@@ -119,7 +119,7 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
             for step in steps:
                 typer.echo(f"   - {step['target']} {step.get('args', {})}")
             typer.echo("✅ Dry run complete. No steps were executed.")
-            return  # 🚀 Exit without running anything
+            return
 
         if debug:
             typer.echo(f"🔍 DEBUG MODE ENABLED: Running pipeline '{name}' with detailed logs")
@@ -262,7 +262,7 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
 
         console = Console()
 
-        # ✅ Display Scheduled Pipelines
+        # Display Scheduled Pipelines
         if status_data["scheduled"]:
             table = Table(show_header=True, header_style="bold magenta")
             table.add_column("Pipeline", style="cyan")
@@ -274,7 +274,6 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
 
             console.print(Panel(table, title="📅 Scheduled Pipelines"))
 
-        # ✅ Display Running Pipelines
         if status_data["running"]:
             running_table = Table(show_header=True, header_style="bold green")
             running_table.add_column("Pipeline", style="cyan")
@@ -285,7 +284,6 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
 
             console.print(Panel(running_table, title="🚀 Running Pipelines"))
 
-        # ✅ Display Recent Executions
         if status_data["recent_executions"]:
             exec_table = Table(show_header=True, header_style="bold yellow")
             exec_table.add_column("Pipeline", style="cyan")
@@ -371,12 +369,12 @@ def _follow_logs(pipeline: Optional[str] = None):
             for log in logs[::-1]:  # Show logs in ascending order
                 pipeline_name, step, status, timestamp, output, error = log
                 if last_timestamp and timestamp <= last_timestamp:
-                    continue  # Skip already displayed logs
+                    continue
                 
                 last_timestamp = timestamp
                 typer.echo(f"📡 [{timestamp}] {pipeline_name} | {step} | {status} | {output or '-'} | {error or '-'}")
 
-            time.sleep(2)  # Polling interval
+            time.sleep(2)
 
     except KeyboardInterrupt:
         typer.echo("🛑 Stopped following logs.")
