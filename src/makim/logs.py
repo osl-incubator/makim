@@ -1,7 +1,5 @@
 """Classes and function for handling logs."""
 
-import os
-
 from enum import Enum
 
 from rich.console import Console
@@ -33,6 +31,14 @@ class MakimError(Enum):
     SCHEDULER_INVALID_SCHEDULE = 21
     MAKIM_SCHEMA_FILE_NOT_FOUND = 22
     MAKIM_NO_BACKEND_FOUND = 23
+    MAKIM_RETRY_EXHAUSTED = 24
+
+
+class MakimException(Exception):
+    """Custom exception class for Makim errors."""
+
+    def __init__(self, exit_code: int = 1):
+        self.exit_code = exit_code
 
 
 class MakimLogs:
@@ -45,7 +51,7 @@ class MakimLogs:
         """Print error message and exit with given error code."""
         console = Console(stderr=True, style='bold red')
         console.print(f'Makim Error #{message_type.value}: {message}')
-        raise os._exit(command_error)
+        raise MakimException(command_error)
 
     @staticmethod
     def print_info(message: str) -> None:

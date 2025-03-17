@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import copy
 import io
 import json
@@ -933,6 +934,38 @@ class Makim:
             cast(TextIO, Tee(sys.stderr, stderr_stream)),
         )
 
+    async def _run_with_retry(self, args: dict[str, Any]) -> None:
+        """Run a command with retry logic."""
+        retry_config = self.task_data.get('retry', {})
+        retry_count = retry_config.get('count')
+        delay = retry_config.get('delay', 0)
+
+        if not retry_config or retry_count == 1:
+            self._run_command(args)
+            return
+
+        attempt = 1
+        while attempt <= retry_count:
+            try:
+                MakimLogs.print_info(
+                    f'[Retry] Attempt {attempt}/{retry_count}'
+                )
+                self._run_command(args)
+                return
+            except Exception:
+                if attempt == retry_count:
+                    MakimLogs.raise_error(
+                        f'[Retry] All {retry_count} retries failed.',
+                        MakimError.MAKIM_RETRY_EXHAUSTED,
+                    )
+                    return
+                attempt += 1
+                MakimLogs.print_warning(
+                    f'[Retry] Attempt {attempt}/{retry_count}.'
+                    f'Retrying in {delay} seconds...'
+                )
+                await asyncio.sleep(delay)
+
     # public methods
     def load(
         self,
@@ -969,5 +1002,10 @@ class Makim:
             )
 
         self._run_hooks(args, 'pre-run')
-        self._run_command(args)
+
+        if self.task_data.get('retry'):
+            asyncio.run(self._run_with_retry(args))
+        else:
+            self._run_command(args)
+
         self._run_hooks(args, 'post-run')
