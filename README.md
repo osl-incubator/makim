@@ -36,6 +36,8 @@ improving task definition and dependency management. Instead of using the
   configurations.
 - **Validation:** Ensures `.makim.yaml` configurations are correct with schema
   validation.
+- **File-Based Logging:** Configure task output logging to files with customizable
+  levels and formats.
 
 ---
 

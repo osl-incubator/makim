@@ -276,7 +276,7 @@ configurations.
 For detailed specifications on Remote Execution, please refer to the
 [**Makim spec documentation**](./spec.md).
 
-Makim’s remote execution capabilities are similar to tools like:
+Makim's remote execution capabilities are similar to tools like:
 
 - [Ansible](https://docs.ansible.com) – Automates IT infrastructure and
   application deployment.
@@ -306,5 +306,47 @@ preventing misconfigurations.
 
 - Reduces runtime errors.
 - Improves reliability of task execution.
+
+## 10. File-Based Logging
+
+### What It Does
+
+Makim provides built-in support for file-based logging, allowing tasks to write their output to specified log files with configurable levels and formats.
+
+### Use Case
+
+You can configure logging for any task by adding a `log` section to its configuration:
+
+```yaml
+tasks:
+  build:
+    help: Build the project
+    log:
+      path: ./logs/build.log
+      level: both
+      format: "%(asctime)s - %(levelname)s - %(message)s"
+    run: echo "Building project..."
+```
+
+### Configuration Options
+
+- **path**: The file path where logs will be written
+- **level**: Specifies which output streams to log:
+  - `out`: Only log stdout
+  - `err`: Only log stderr
+  - `both`: Log both stdout and stderr
+- **format**: Optional format string for log messages. Available format specifiers:
+  - `%(asctime)s`: Timestamp
+  - `%(levelname)s`: Log level (OUT/ERR)
+  - `%(message)s`: The actual log message
+  - `%(task)s`: Name of the task
+  - `%(file)s`: Name of the Makim file
+
+### Benefit
+
+- Provides persistent logging for task execution
+- Helps with debugging and monitoring task outputs
+- Supports flexible log formatting and filtering
+- Automatically creates log directories if they don't exist
 
 ---
