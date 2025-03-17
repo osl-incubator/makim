@@ -290,7 +290,38 @@ Makim’s remote execution capabilities are similar to tools like:
 
 ---
 
-## 9. Validation
+## 9. File Logging
+
+### What It Does
+
+Makim allows tasks to log their outputs to a file with custom formatting. You
+can choose to log standard output, standard error, or both using `level`
+property
+
+### Use Case
+
+If you want to analyze build outputs
+
+```yaml
+tasks:
+  build:
+    help: Build source code
+    log:
+      path: ./logs/build.txt
+      level: both
+      format: "%(asctime)s - %(levelname)s - %(message)s"
+    run: |
+      echo "Compiling source code..."
+```
+
+### Benefit
+
+- Review logs for monitoring.
+- Capture errors for diagnosing issues.
+
+---
+
+## 10. Validation
 
 ### What It Does
 
