@@ -1,6 +1,6 @@
 """Minimal custom parser for Makim without external dependencies."""
 
-import sys  # Keep this import
+import sys
 
 from typing import Any, Dict, List, Optional
 
@@ -81,7 +81,53 @@ def parse_args(args: Optional[List[str]] = None) -> Dict[str, Any]:
     return result
 
 
-def show_help() -> int:
+def run_app() -> int:
+    """Run Makim with custom parser."""
+    try:
+        # Parse arguments
+        args = parse_args()
+
+        # Create Makim instance
+        makim = Makim()
+
+        # Get file path
+        file_path = args.get('file', '.makim.yaml')
+
+        # Process version flag before anything else
+        if args.get('version'):
+            print(f'Version: {__version__}')
+            return 0
+
+        # Print file info
+        print(f'Makim file: {file_path}')
+
+        # Process commands (or show help)
+        return _process_command(makim, args.get('command'), file_path, args)
+
+    except Exception as e:
+        print(f'Error: {e}', file=sys.stderr)
+        return 1
+
+
+def _process_command(
+    makim: Makim, cmd: Optional[str], file_path: str, args: Dict[str, Any]
+) -> int:
+    """Process the command (list, run, or help)."""
+    # No command or unknown command - show help
+    if not cmd or cmd not in ('list', 'run'):
+        return _show_help()
+
+    # Load makim configuration
+    makim.load(file=file_path)
+
+    # Execute the command
+    if cmd == 'list':
+        return _list_tasks(makim)
+    else:  # cmd == 'run'
+        return _run_task(makim, args)
+
+
+def _show_help() -> int:
     """Display help information."""
     print('Makim: Task execution system')
     print('\nUsage:')
@@ -98,7 +144,7 @@ def show_help() -> int:
     return 0
 
 
-def list_tasks(makim: Makim) -> int:
+def _list_tasks(makim: Makim) -> int:
     """List all available tasks."""
     if not hasattr(makim, 'global_data') or not makim.global_data:
         print('No tasks found.')
@@ -117,63 +163,24 @@ def list_tasks(makim: Makim) -> int:
     return 0
 
 
-def run_task(makim: Makim, task: str, options: Dict[str, Any]) -> int:
-    """Run a specific task with options."""
+def _run_task(makim: Makim, args: Dict[str, Any]) -> int:
+    """Run a specific task."""
+    task = args.get('task')
     if not task:
         print('Error: No task specified', file=sys.stderr)
         return 1
 
-    # Execute task
     try:
         task_options = {
             'task': task,
-            'dry_run': options.get('dry_run', False),
-            'verbose': options.get('verbose', False),
-            'skip_hooks': options.get('skip_hooks', False),
+            'dry_run': args.get('dry_run', False),
+            'verbose': args.get('verbose', False),
+            'skip_hooks': args.get('skip_hooks', False),
         }
         makim.run(task_options)
         return 0
     except Exception as e:
         print(f'Error running task: {e}', file=sys.stderr)
-        return 1
-
-
-def run_app() -> int:
-    """Run Makim with custom parser."""
-    try:
-        # Parse arguments
-        args = parse_args()
-
-        # Create Makim instance
-        makim = Makim()
-
-        # Handle --version
-        if args.get('version'):
-            print(f'Version: {__version__}')
-            return 0
-
-        # Get file path
-        file_path = args.get('file', '.makim.yaml')
-        print(f'Makim file: {file_path}')
-
-        # Handle commands
-        cmd = args.get('command')
-
-        # No command or unknown command - show help
-        if not cmd or cmd not in ('list', 'run'):
-            return show_help()
-
-        # Load makim configuration
-        makim.load(file=file_path)
-
-        # Execute the appropriate command
-        if cmd == 'list':
-            return list_tasks(makim)
-        else:  # cmd == 'run'
-            return run_task(makim, args.get('task', ''), args)
-
-    except Exception as e:
-        print(f'Error: {e}', file=sys.stderr)
         return 1
 
 
