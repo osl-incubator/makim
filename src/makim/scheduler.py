@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import json
 import shlex
-import subprocess  # nosec B404 - subprocess is required for task execution
+import subprocess
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional, cast
+import typer
+from typing import Any, Dict, List, Optional, cast
 
 from apscheduler.job import Job
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
@@ -21,6 +22,17 @@ class Config:
 
     config_file: Optional[str] = None
     job_history_path: Optional[Path] = None
+
+    @staticmethod
+    def get_pipelines() -> Dict[str, Any]:
+        """Retrieve the pipelines from the Makim configuration file."""
+        if Config.config_file is None:
+            raise RuntimeError("Config file not initialized.")
+
+        with open(Config.config_file, "r") as f:
+            data = json.load(f)
+
+        return data.get("pipelines", {})
 
 
 def init_globals(config_file: str, history_path: Path) -> None:
@@ -130,33 +142,38 @@ def log_execution(
         print(f'Failed to log execution: {e}')
 
 
-def run_makim_task(
-    task: str, scheduler_name: str, args: Optional[Dict[str, Any]] = None
-) -> None:
-    """
-    Execute a Makim task.
 
-    Parameters
-    ----------
-    task : str
-        The task to execute.
-    scheduler_name : str
-        The name of the scheduler that triggered this task.
-    args : Optional[Dict[str, Any]], optional
-        Optional arguments for the task, by default None.
-    """
+def run_makim_task(task: str, scheduler_name: str, args: Optional[Dict[str, Any]] = None) -> None:
+    """Execute a Makim task triggered by the scheduler."""
+    from makim.core import Makim
+
     if Config.config_file is None or Config.job_history_path is None:
-        raise RuntimeError('Global configuration not initialized')
+        config_file_path = ".makim.yaml"
+        history_path = Path.home() / ".makim" / "history.json"
+        init_globals(config_file_path, history_path)
+
+    makim_instance = Makim()
+    makim_instance.load(Config.config_file)
+
+    pipelines = makim_instance.global_data.get("pipelines", {})
+
+    pipeline_tasks = [step["target"] for pipeline in pipelines.values() for step in pipeline.get("steps", [])]
+
+    if task not in pipeline_tasks:
+        typer.echo(f"❌ Task '{task}' is not defined in any pipeline.")
+        return
 
     cmd = ['makim', '--file', Config.config_file, task]
+
     if args:
         for key, value in args.items():
             safe_key = str(key)
             if isinstance(value, bool):
                 if value:
                     cmd.append(f'--{safe_key}')
-            else:
+            elif value is not None:
                 cmd.extend([f'--{safe_key}', str(value)])
+
     safe_cmd = _sanitize_command(cmd)
 
     try:
@@ -166,13 +183,9 @@ def run_makim_task(
             text=True,
             check=True,
         )
-        log_execution(
-            scheduler_name, 'execution_completed', result=result.stdout
-        )
+        log_execution(scheduler_name, 'execution_completed', result=result.stdout)
     except subprocess.CalledProcessError as e:
-        error_msg = (
-            f'Job execution failed:\nSTDERR: {e.stderr}\nSTDOUT: {e.stdout}'
-        )
+        error_msg = f'Job execution failed:\nSTDERR: {e.stderr}\nSTDOUT: {e.stdout}'
         log_execution(scheduler_name, 'execution_failed', error=error_msg)
         raise
 
@@ -188,28 +201,20 @@ class MakimScheduler:
     """
 
     def __init__(self, makim_instance: Any):
-        """
-        Initialize the scheduler with configuration.
-
-        Parameters
-        ----------
-        makim_instance : Makim
-            Instance containing configuration details.
-        """
+        """Initialize the scheduler and load history."""
         self.config_file = makim_instance.file
         self.scheduler = None
-        self.job_store_path = Path.home() / '.makim' / 'jobs.sqlite'
-        self.job_history_path = Path.home() / '.makim' / 'history.json'
+        self.job_store_path = Path.home() / ".makim" / "jobs.sqlite"
+        self.job_history_path = Path.home() / ".makim" / "history.json"
         self._setup_directories()
         self._initialize_scheduler()
-        self.job_history: Dict[str, list[Dict[str, Any]]] = (
-            self._load_history()
-        )
+
+        self.job_history: Dict[str, list[Dict[str, Any]]] = self.load_history()
 
         init_globals(self.config_file, self.job_history_path)
 
         self._sync_jobs_with_config(
-            makim_instance.global_data.get('scheduler', {})
+            makim_instance.global_data.get("scheduler", {})
         )
 
     def _sync_jobs_with_config(self, config_jobs: Dict[str, Any]) -> None:
@@ -252,22 +257,31 @@ class MakimScheduler:
         if self.scheduler is not None:
             self.scheduler.start()
 
-    def _load_history(self) -> Dict[str, list[Dict[str, Any]]]:
-        """
-        Load job execution history from file.
+    def load_history(self) -> Dict[str, list[Dict[str, Any]]]:
+        """Load execution history from a JSON file, handling errors gracefully."""
+        if not self.job_history_path.exists():
+            return {}
 
-        Returns
-        -------
-        dict
-            Dictionary of job execution history.
-        """
-        if self.job_history_path.exists():
-            with open(self.job_history_path, 'r') as f:
-                loaded_history = json.load(f)
-                if not isinstance(loaded_history, dict):
+        try:
+            with open(self.job_history_path, "r") as f:
+                content = f.read().strip()
+
+                if not content:
+                    print("⚠️ Warning: history.json is empty. Resetting history...")
                     return {}
+
+                loaded_history = json.loads(content)
+
+                if not isinstance(loaded_history, dict):
+                    print("⚠️ Warning: Invalid JSON structure in history.json. Resetting history...")
+                    return {}
+
                 return cast(Dict[str, list[Dict[str, Any]]], loaded_history)
-        return {}
+
+        except json.JSONDecodeError:
+            print("❌ Error: Corrupt JSON in history.json. Resetting history...")
+            return {}
+
 
     def _save_history(self) -> None:
         """Save job execution history to file."""

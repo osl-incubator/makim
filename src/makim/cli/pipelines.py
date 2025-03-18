@@ -68,7 +68,6 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
 
         steps = pipeline.get("steps", [])
 
-        # Debugging: Print pipeline steps
         typer.echo(f"DEBUG: Pipeline '{name}' has {len(steps)} steps.")
 
         if not steps:
@@ -91,17 +90,21 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
         console = Console()
         console.print(Panel(ascii_graph, title=f"Pipeline: {name}", subtitle="Execution Order"))
 
-    @typer_pipeline.command(help="Run a pipeline manually with execution mode")
+    @typer_pipeline.command(help="Run a single pipeline with execution mode")
     def run(
-        name: str,
+        name: str = typer.Argument(..., help="Pipeline name to run"),
         parallel: bool = typer.Option(False, "--parallel", help="Run pipeline in parallel"),
         sequential: bool = typer.Option(False, "--sequential", help="Run pipeline sequentially"),
         dry_run: bool = typer.Option(False, "--dry-run", help="Simulate execution without running tasks"),
         debug: bool = typer.Option(False, "--debug", help="Enable detailed debug output"),
-        max_workers: Optional[int] = typer.Option(None, "--max-workers", help="Limit parallel execution workers")
+        max_workers: Optional[int] = typer.Option(None, "--max-workers", help="Limit parallel execution workers"),
     ) -> None:
-        """Execute a pipeline in sequential or parallel mode with debug and dry-run support."""
+        """Execute a single pipeline in sequential or parallel mode."""
         
+        if parallel and sequential:
+            typer.echo("❌ Conflicting options: --parallel and --sequential cannot be used together.")
+            raise typer.Exit(1)
+
         pipeline = pipelines.get(name)
         if not pipeline:
             typer.echo(f"❌ Pipeline '{name}' not found.")
@@ -110,7 +113,7 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
         steps = pipeline.get("steps", [])
         if not steps:
             typer.echo(f"⚠️ Pipeline '{name}' has no steps defined.")
-            raise typer.Exit(1)
+            return
 
         engine = MakimPipelineEngine(config_file=makim_instance.file)
 
@@ -127,13 +130,79 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
         if parallel:
             typer.echo(f"🚀 Running pipeline '{name}' in PARALLEL mode...")
             engine.run_pipeline_parallel(name, steps, debug=debug, max_workers=max_workers, dry_run=dry_run)
-        elif sequential:
+        else:
             typer.echo(f"🔄 Running pipeline '{name}' in SEQUENTIAL mode...")
             engine.run_pipeline_sequential(name, steps, debug=debug, dry_run=dry_run)
 
+        typer.echo(f"✅ Pipeline '{name}' executed successfully.")
+
+    def run_all(
+        parallel: bool = typer.Option(False, "--parallel", help="Run all pipelines in parallel"),
+        sequential: bool = typer.Option(False, "--sequential", help="Run all pipelines sequentially"),
+        max_workers: Optional[int] = typer.Option(None, "--max-workers", help="Limit parallel execution workers"),
+        dry_run: bool = typer.Option(False, "--dry-run", help="Simulate execution without running tasks"),
+        debug: bool = typer.Option(False, "--debug", help="Enable detailed debug output"),
+    ) -> None:
+        """Execute all pipelines in sequential or parallel mode with optional dry-run and debug mode."""
+
+        if parallel and sequential:
+            typer.echo("❌ Conflicting options: --parallel and --sequential cannot be used together.")
+            raise typer.Exit(1)
+
+        if not pipelines:
+            typer.echo("⚠️ No pipelines found in .makim.yaml.")
+            return
+
+        engine = MakimPipelineEngine(config_file=makim_instance.file)
+
+        if dry_run:
+            typer.echo("📝 DRY RUN: Listing all pipelines and their steps...")
+            for name, pipeline in pipelines.items():
+                typer.echo(f"▶ Pipeline: {name}")
+                for step in pipeline.get("steps", []):
+                    typer.echo(f"   - {step['target']} {step.get('args', {})}")
+            typer.echo("✅ Dry run complete. No steps were executed.")
+            return
+
+        if parallel:
+            typer.echo("🚀 Running ALL pipelines in PARALLEL mode...")
+            for name, pipeline in pipelines.items():
+                steps = pipeline.get("steps", [])
+                engine.run_pipeline_parallel(name, steps, debug=debug, max_workers=max_workers, dry_run=dry_run)
         else:
-            typer.echo(f"🔄 Running pipeline '{name}' in DEFAULT mode (Sequential)...")
-            engine.run_pipeline_sequential(name, steps, debug=debug)
+            typer.echo("🔄 Running ALL pipelines in SEQUENTIAL mode...")
+            for name, pipeline in pipelines.items():
+                steps = pipeline.get("steps", [])
+                engine.run_pipeline_sequential(name, steps, debug=debug, dry_run=dry_run)
+
+        typer.echo("✅ All pipelines executed successfully.")
+
+
+    def _execute_pipeline(name, pipeline_data, parallel, sequential, dry_run, debug, max_workers):
+        """Helper function to execute a single pipeline with the given options."""
+        steps = pipeline_data.get("steps", [])
+        if not steps:
+            typer.echo(f"⚠️ Pipeline '{name}' has no steps defined.")
+            return
+
+        engine = MakimPipelineEngine(config_file=makim_instance.file)
+
+        if dry_run:
+            typer.echo(f"📝 DRY RUN: Showing steps for pipeline '{name}':")
+            for step in steps:
+                typer.echo(f"   - {step['target']} {step.get('args', {})}")
+            typer.echo("✅ Dry run complete. No steps were executed.")
+            return
+
+        if debug:
+            typer.echo(f"🔍 DEBUG MODE ENABLED: Running pipeline '{name}' with detailed logs")
+
+        if parallel:
+            typer.echo(f"🚀 Running pipeline '{name}' in PARALLEL mode...")
+            engine.run_pipeline_parallel(name, steps, debug=debug, max_workers=max_workers, dry_run=dry_run)
+        elif sequential or not parallel:
+            typer.echo(f"🔄 Running pipeline '{name}' in SEQUENTIAL mode...")
+            engine.run_pipeline_sequential(name, steps, debug=debug, dry_run=dry_run)
 
 
     @typer_pipeline.command(help="Show recent pipeline logs or clear them")
@@ -256,6 +325,35 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
         else:
             engine.retry_pipeline(name)
 
+    @typer_pipeline.command(help="Start a scheduled pipeline manually via cron")
+    def start(
+        name: str = typer.Argument(..., help="Pipeline name to start"),
+    ) -> None:
+        """Manually start a pipeline through cron."""
+        engine = MakimPipelineEngine(config_file=makim_instance.file)
+        
+        if not engine.is_pipeline_scheduled(name):
+            typer.echo(f"❌ Pipeline '{name}' is not scheduled.")
+            raise typer.Exit(1)
+        
+        typer.echo(f"🚀 Starting scheduled pipeline: {name}")
+        engine.run_pipeline_sequential(name, engine.get_pipeline_steps(name))
+
+
+    @typer_pipeline.command(help="Stop a scheduled pipeline manually via cron")
+    def stop(
+        name: str = typer.Argument(..., help="Pipeline name to stop"),
+    ) -> None:
+        """Manually stop a pipeline through cron."""
+        engine = MakimPipelineEngine(config_file=makim_instance.file)
+        
+        if not engine.is_pipeline_scheduled(name):
+            typer.echo(f"❌ Pipeline '{name}' is not scheduled.")
+            raise typer.Exit(1)
+        
+        engine.unschedule_pipeline(name)
+        typer.echo(f"🛑 Stopped scheduled pipeline: {name}")
+
     @typer_pipeline.command(help="Show running and scheduled pipelines.")
     def status() -> None:
         """Displays the status of pipelines (Running, Scheduled, Recent Executions)."""
@@ -264,7 +362,6 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
 
         console = Console()
 
-        # Display Scheduled Pipelines
         if status_data["scheduled"]:
             table = Table(show_header=True, header_style="bold magenta")
             table.add_column("Pipeline", style="cyan")
@@ -368,7 +465,7 @@ def _follow_logs(pipeline: Optional[str] = None):
             logs = cursor.fetchall()
             conn.close()
 
-            for log in logs[::-1]:  # Show logs in ascending order
+            for log in logs[::-1]:
                 pipeline_name, step, status, timestamp, output, error = log
                 if last_timestamp and timestamp <= last_timestamp:
                     continue

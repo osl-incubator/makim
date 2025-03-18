@@ -30,7 +30,7 @@ def run_scheduled_pipeline(name: str):
         if not steps:
             raise ValueError(f"Pipeline '{name}' has no steps defined.")
 
-        engine.run_pipeline_sequential(name, steps)  # ✅ Use correct function
+        engine.run_pipeline_sequential(name, steps)
 
         engine.log_pipeline_execution(name, "scheduled-execution", "success")
         print(f"✅ [GLOBAL] Successfully ran scheduled pipeline: {name}")
@@ -436,7 +436,6 @@ class MakimPipelineEngine:
             target = step.get("target")
             args = step.get("args", {})
 
-            # ✅ Ensure valid target
             if not target or not target.startswith("main."):
                 typer.echo(f"❌ Invalid target '{target}'. Expected format: 'main.task-name'")
                 raise typer.Exit(1)
@@ -460,7 +459,7 @@ class MakimPipelineEngine:
                 self.log_pipeline_execution(name, target, "failed", error=str(e))
 
                 if fail_fast:
-                    raise typer.Exit(1)  # ✅ Stop execution on first failure if `fail_fast` is enabled
+                    raise typer.Exit(1)
 
 
     def run_pipeline_parallel(
@@ -473,7 +472,6 @@ class MakimPipelineEngine:
             target = step.get("target")
             args = step.get("args", {})
 
-            # ✅ Ensure valid target
             if not target or not target.startswith("main."):
                 print(f"❌ Invalid target '{target}'. Expected format: 'main.task-name'")
                 return
@@ -495,7 +493,6 @@ class MakimPipelineEngine:
                 print(f"❌ ERROR: Step '{target}' failed with error: {e}")
                 self.log_pipeline_execution(name, target, "failed", error=str(e))
 
-        # ✅ Ensure proper worker limits
         max_threads = max_workers if max_workers else len(steps)
 
         if debug:
