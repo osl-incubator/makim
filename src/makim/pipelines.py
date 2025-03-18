@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-import sqlite3
-import typer
-import threading
 import concurrent.futures
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Optional, List, Dict, TYPE_CHECKING
+import sqlite3
+import threading
 
-from apscheduler.schedulers.background import BackgroundScheduler
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
+
+import typer
+
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
+from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
@@ -17,13 +18,14 @@ from apscheduler.triggers.interval import IntervalTrigger
 if TYPE_CHECKING:
     from makim.core import Makim
 
+
 def run_scheduled_pipeline(name: str):
     """Global function to execute scheduled pipelines (used by APScheduler)."""
     from makim.pipelines import MakimPipelineEngine
 
-    print(f"🔍 [GLOBAL] Running scheduled pipeline: {name}")
+    print(f'🔍 [GLOBAL] Running scheduled pipeline: {name}')
 
-    engine = MakimPipelineEngine(config_file="makim.yaml")
+    engine = MakimPipelineEngine(config_file='makim.yaml')
 
     try:
         steps = engine.get_pipeline_steps(name)
@@ -32,13 +34,15 @@ def run_scheduled_pipeline(name: str):
 
         engine.run_pipeline_sequential(name, steps)
 
-        engine.log_pipeline_execution(name, "scheduled-execution", "success")
-        print(f"✅ [GLOBAL] Successfully ran scheduled pipeline: {name}")
+        engine.log_pipeline_execution(name, 'scheduled-execution', 'success')
+        print(f'✅ [GLOBAL] Successfully ran scheduled pipeline: {name}')
 
     except Exception as e:
         error_msg = str(e)
         print(f"❌ [GLOBAL] Scheduled pipeline '{name}' failed: {error_msg}")
-        engine.log_pipeline_execution(name, "scheduled-execution", "failed", error=error_msg)
+        engine.log_pipeline_execution(
+            name, 'scheduled-execution', 'failed', error=error_msg
+        )
 
 
 class MakimPipelineEngine:
@@ -48,11 +52,13 @@ class MakimPipelineEngine:
 
     def __init__(self, config_file: str):
         self.config_file = config_file
-        self.db_path = Path.home() / ".makim" / "pipelines.sqlite"
+        self.db_path = Path.home() / '.makim' / 'pipelines.sqlite'
         self._init_paths()
 
         self.scheduler = BackgroundScheduler(
-            jobstores={"default": SQLAlchemyJobStore(url=f"sqlite:///{self.db_path}")},
+            jobstores={
+                'default': SQLAlchemyJobStore(url=f'sqlite:///{self.db_path}')
+            },
         )
         self.scheduler.start()
 
@@ -96,24 +102,34 @@ class MakimPipelineEngine:
         """
         Run a pipeline and log execution results.
         """
-        from makim.core import Makim  # Fix Circular Import: Import inside function
+        from makim.core import (
+            Makim,
+        )  # Fix Circular Import: Import inside function
 
         def run_task(task):
-            retries = task.get("retries", 0)
+            retries = task.get('retries', 0)
             last_exception = None
 
             for attempt in range(retries + 1):
                 try:
                     makim_instance = Makim()
                     makim_instance.load(self.config_file)
-                    output = makim_instance.run({"task": task["target"], **task.get("args", {})})
-                    self.log_pipeline_execution(name, task["target"], "success", output=output)
+                    output = makim_instance.run(
+                        {'task': task['target'], **task.get('args', {})}
+                    )
+                    self.log_pipeline_execution(
+                        name, task['target'], 'success', output=output
+                    )
                     return
                 except Exception as e:
                     last_exception = str(e)
                     if attempt < retries:
-                        print(f"Retrying {task['target']} (attempt {attempt + 1}/{retries})")
-            self.log_pipeline_execution(name, task["target"], "failed", error=last_exception)
+                        print(
+                            f'Retrying {task["target"]} (attempt {attempt + 1}/{retries})'
+                        )
+            self.log_pipeline_execution(
+                name, task['target'], 'failed', error=last_exception
+            )
 
         threads = []
         for task in steps:
@@ -124,35 +140,43 @@ class MakimPipelineEngine:
         for thread in threads:
             thread.join()
 
-
     def log_pipeline_execution(
-        self, pipeline_name: str, step: str, status: str, output: Optional[str] = None, error: Optional[str] = None
+        self,
+        pipeline_name: str,
+        step: str,
+        status: str,
+        output: Optional[str] = None,
+        error: Optional[str] = None,
     ) -> None:
         """Log execution of pipeline steps into SQLite (including scheduled executions)."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        print(f"🔍 LOGGING EXECUTION: {pipeline_name} - {step} - {status}")
+        print(f'🔍 LOGGING EXECUTION: {pipeline_name} - {step} - {status}')
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO pipeline_runs (pipeline_name, step, status, output, error)
             VALUES (?, ?, ?, ?, ?)
-        """, (pipeline_name, step, status, output or "N/A", error or "N/A"))
+        """,
+            (pipeline_name, step, status, output or 'N/A', error or 'N/A'),
+        )
 
         conn.commit()
         conn.close()
 
-
-    def get_pipeline_logs(self, pipeline_name: Optional[str] = None, limit: int = 10):
+    def get_pipeline_logs(
+        self, pipeline_name: Optional[str] = None, limit: int = 10
+    ):
         """Retrieve execution logs for a specific pipeline."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        query = "SELECT pipeline_name, step, status, timestamp, output, error FROM pipeline_runs ORDER BY timestamp DESC LIMIT ?"
+        query = 'SELECT pipeline_name, step, status, timestamp, output, error FROM pipeline_runs ORDER BY timestamp DESC LIMIT ?'
         params = (limit,)
 
         if pipeline_name:
-            query = "SELECT pipeline_name, step, status, timestamp, output, error FROM pipeline_runs WHERE pipeline_name = ? ORDER BY timestamp DESC LIMIT ?"
+            query = 'SELECT pipeline_name, step, status, timestamp, output, error FROM pipeline_runs WHERE pipeline_name = ? ORDER BY timestamp DESC LIMIT ?'
             params = (pipeline_name, limit)
 
         cursor.execute(query, params)
@@ -163,34 +187,38 @@ class MakimPipelineEngine:
 
     def list_pipelines(self) -> List[Dict[str, Any]]:
         """Retrieve the list of defined pipelines from the Makim configuration."""
-        from makim.core import Makim  # Fix Circular Import: Import inside function
+        from makim.core import (
+            Makim,
+        )  # Fix Circular Import: Import inside function
 
         makim_instance = Makim()
         makim_instance.load(self.config_file)
 
-        pipelines = makim_instance.global_data.get("pipelines", {})
+        pipelines = makim_instance.global_data.get('pipelines', {})
 
         return [
             {
-                "name": name,
-                "tasks": len(data.get("tasks", [])),
-                "help": data.get("help", "—"),
+                'name': name,
+                'tasks': len(data.get('tasks', [])),
+                'help': data.get('help', '—'),
             }
             for name, data in pipelines.items()
         ]
 
     def get_pipeline_structure(self, name: str) -> List[str]:
         """Retrieve the structure of a pipeline as a list of tasks."""
-        from makim.core import Makim  # Fix Circular Import: Import inside function
+        from makim.core import (
+            Makim,
+        )  # Fix Circular Import: Import inside function
 
         makim_instance = Makim()
         makim_instance.load(self.config_file)
 
-        pipeline = makim_instance.global_data.get("pipelines", {}).get(name)
+        pipeline = makim_instance.global_data.get('pipelines', {}).get(name)
         if not pipeline:
             raise ValueError(f"Pipeline '{name}' not found.")
 
-        return [task["target"] for task in pipeline.get("tasks", [])]
+        return [task['target'] for task in pipeline.get('tasks', [])]
 
     def clear_pipeline_logs(self, pipeline_name: Optional[str] = None) -> None:
         """Clear logs for a specific pipeline or all logs."""
@@ -198,31 +226,42 @@ class MakimPipelineEngine:
         cursor = conn.cursor()
 
         if pipeline_name:
-            cursor.execute("DELETE FROM pipeline_runs WHERE pipeline_name = ?", (pipeline_name,))
+            cursor.execute(
+                'DELETE FROM pipeline_runs WHERE pipeline_name = ?',
+                (pipeline_name,),
+            )
         else:
-            cursor.execute("DELETE FROM pipeline_runs")
+            cursor.execute('DELETE FROM pipeline_runs')
 
         conn.commit()
         conn.close()
 
-    def schedule_pipeline(self, name: str, cron_expression: Optional[str] = None, interval_seconds: Optional[int] = None):
+    def schedule_pipeline(
+        self,
+        name: str,
+        cron_expression: Optional[str] = None,
+        interval_seconds: Optional[int] = None,
+    ):
         """Schedule a pipeline using either a cron expression or an interval."""
-        import makim.core
         from makim.core import Makim
+
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
         makim_instance = Makim()
         makim_instance.load(self.config_file)
 
-        pipelines = makim_instance.global_data.get("pipelines", {})
+        pipelines = makim_instance.global_data.get('pipelines', {})
         if name not in pipelines:
             raise ValueError(f"Pipeline '{name}' not found.")
 
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT OR REPLACE INTO pipeline_schedules (pipeline_name, cron_expression, interval_seconds)
             VALUES (?, ?, ?)
-        """, (name, cron_expression, interval_seconds))
+        """,
+            (name, cron_expression, interval_seconds),
+        )
 
         conn.commit()
         conn.close()
@@ -232,51 +271,75 @@ class MakimPipelineEngine:
         elif interval_seconds:
             trigger = IntervalTrigger(seconds=interval_seconds)
         else:
-            raise ValueError("Either a cron expression or an interval must be provided.")
+            raise ValueError(
+                'Either a cron expression or an interval must be provided.'
+            )
         from makim.pipelines import run_scheduled_pipeline
-        self.scheduler.add_job(run_scheduled_pipeline, trigger, args=[name], id=name, replace_existing=True)
+
+        self.scheduler.add_job(
+            run_scheduled_pipeline,
+            trigger,
+            args=[name],
+            id=name,
+            replace_existing=True,
+        )
 
         print(f"✅ Scheduled pipeline '{name}' successfully.")
 
     def run_scheduled_pipeline(self, name: str):
         """Run a scheduled pipeline from the database and log its execution."""
-        print(f"🔍 [CLASS] Running scheduled pipeline: {name}")
+        print(f'🔍 [CLASS] Running scheduled pipeline: {name}')
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT pipeline_name FROM pipeline_schedules WHERE pipeline_name = ?", (name,))
+        cursor.execute(
+            'SELECT pipeline_name FROM pipeline_schedules WHERE pipeline_name = ?',
+            (name,),
+        )
         row = cursor.fetchone()
         conn.close()
 
         if not row:
-            print(f"❌ [CLASS] Scheduled pipeline '{name}' not found in database.")
+            print(
+                f"❌ [CLASS] Scheduled pipeline '{name}' not found in database."
+            )
             return
 
         try:
             makim_instance = Makim()
             makim_instance.load(self.config_file)
 
-            pipeline = makim_instance.global_data.get("pipelines", {}).get(name)
+            pipeline = makim_instance.global_data.get('pipelines', {}).get(
+                name
+            )
             if not pipeline:
                 raise ValueError(f"Pipeline '{name}' not found in config.")
 
-            print(f"🔍 [CLASS] Running scheduled pipeline tasks: {pipeline['steps']}")
-            self.log_pipeline_execution(name, "scheduled-execution", "running")
-            self.run_pipeline(name, pipeline["steps"])
-            self.log_pipeline_execution(name, "scheduled-execution", "success")
+            print(
+                f'🔍 [CLASS] Running scheduled pipeline tasks: {pipeline["steps"]}'
+            )
+            self.log_pipeline_execution(name, 'scheduled-execution', 'running')
+            self.run_pipeline(name, pipeline['steps'])
+            self.log_pipeline_execution(name, 'scheduled-execution', 'success')
 
         except Exception as e:
             error_msg = str(e)
-            print(f"❌ [CLASS] Scheduled pipeline '{name}' failed: {error_msg}")
-            self.log_pipeline_execution(name, "scheduled-execution", "failed", error=error_msg)
+            print(
+                f"❌ [CLASS] Scheduled pipeline '{name}' failed: {error_msg}"
+            )
+            self.log_pipeline_execution(
+                name, 'scheduled-execution', 'failed', error=error_msg
+            )
 
     def list_scheduled_pipelines(self):
         """List all scheduled pipelines."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT pipeline_name, cron_expression, interval_seconds FROM pipeline_schedules")
+        cursor.execute(
+            'SELECT pipeline_name, cron_expression, interval_seconds FROM pipeline_schedules'
+        )
         schedules = cursor.fetchall()
 
         conn.close()
@@ -287,7 +350,9 @@ class MakimPipelineEngine:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("DELETE FROM pipeline_schedules WHERE pipeline_name = ?", (name,))
+        cursor.execute(
+            'DELETE FROM pipeline_schedules WHERE pipeline_name = ?', (name,)
+        )
         conn.commit()
         conn.close()
 
@@ -300,7 +365,10 @@ class MakimPipelineEngine:
         cursor = conn.cursor()
 
         # Check if the pipeline is scheduled
-        cursor.execute("SELECT pipeline_name FROM pipeline_schedules WHERE pipeline_name = ?", (name,))
+        cursor.execute(
+            'SELECT pipeline_name FROM pipeline_schedules WHERE pipeline_name = ?',
+            (name,),
+        )
         row = cursor.fetchone()
 
         if not row:
@@ -309,7 +377,9 @@ class MakimPipelineEngine:
             return
 
         # Remove from SQLite
-        cursor.execute("DELETE FROM pipeline_schedules WHERE pipeline_name = ?", (name,))
+        cursor.execute(
+            'DELETE FROM pipeline_schedules WHERE pipeline_name = ?', (name,)
+        )
         conn.commit()
         conn.close()
 
@@ -318,21 +388,25 @@ class MakimPipelineEngine:
             self.scheduler.remove_job(name)
             typer.echo(f"✅ Unscheduled pipeline '{name}' successfully.")
         except Exception:
-            typer.echo(f"⚠️ Pipeline '{name}' was not found in APScheduler, but removed from the database.")
+            typer.echo(
+                f"⚠️ Pipeline '{name}' was not found in APScheduler, but removed from the database."
+            )
 
     def get_pipeline_status(self):
         """Retrieve the status of scheduled and running pipelines."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("SELECT pipeline_name, cron_expression, interval_seconds FROM pipeline_schedules")
+        cursor.execute(
+            'SELECT pipeline_name, cron_expression, interval_seconds FROM pipeline_schedules'
+        )
         scheduled_pipelines = cursor.fetchall()
 
         running_jobs = self.scheduler.get_jobs()
 
         cursor.execute("""
-            SELECT pipeline_name, step, status, timestamp 
-            FROM pipeline_runs 
+            SELECT pipeline_name, step, status, timestamp
+            FROM pipeline_runs
             ORDER BY timestamp DESC LIMIT 5
         """)
         recent_executions = cursor.fetchall()
@@ -340,9 +414,9 @@ class MakimPipelineEngine:
         conn.close()
 
         return {
-            "scheduled": scheduled_pipelines,
-            "running": running_jobs,
-            "recent_executions": recent_executions,
+            'scheduled': scheduled_pipelines,
+            'running': running_jobs,
+            'recent_executions': recent_executions,
         }
 
     def retry_pipeline(self, name: str):
@@ -350,11 +424,14 @@ class MakimPipelineEngine:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT step FROM pipeline_runs 
-            WHERE pipeline_name = ? AND status = 'failed' 
+        cursor.execute(
+            """
+            SELECT step FROM pipeline_runs
+            WHERE pipeline_name = ? AND status = 'failed'
             ORDER BY timestamp DESC LIMIT 1
-        """, (name,))
+        """,
+            (name,),
+        )
         row = cursor.fetchone()
 
         if not row:
@@ -365,9 +442,10 @@ class MakimPipelineEngine:
         failed_step = row[0]
         conn.close()
 
-        typer.echo(f"🔄 Retrying failed step '{failed_step}' for pipeline '{name}'...")
-        self.run_pipeline(name, [{"target": failed_step}])
-
+        typer.echo(
+            f"🔄 Retrying failed step '{failed_step}' for pipeline '{name}'..."
+        )
+        self.run_pipeline(name, [{'target': failed_step}])
 
     def cancel_pipeline(self, name: str):
         """Cancels a running pipeline in APScheduler."""
@@ -377,40 +455,50 @@ class MakimPipelineEngine:
         except Exception:
             typer.echo(f"⚠️ No running job found for pipeline '{name}'.")
 
-    def get_pipeline_history(self, name: Optional[str] = None, limit: int = 10):
+    def get_pipeline_history(
+        self, name: Optional[str] = None, limit: int = 10
+    ):
         """Retrieve execution history for a specific pipeline or all pipelines."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
         # Get history for a specific pipeline or all pipelines
         if name:
-            cursor.execute("""
-                SELECT pipeline_name, step, status, timestamp 
-                FROM pipeline_runs WHERE pipeline_name = ? 
+            cursor.execute(
+                """
+                SELECT pipeline_name, step, status, timestamp
+                FROM pipeline_runs WHERE pipeline_name = ?
                 ORDER BY timestamp DESC LIMIT ?
-            """, (name, limit))
+            """,
+                (name, limit),
+            )
         else:
-            cursor.execute("""
-                SELECT pipeline_name, step, status, timestamp 
+            cursor.execute(
+                """
+                SELECT pipeline_name, step, status, timestamp
                 FROM pipeline_runs ORDER BY timestamp DESC LIMIT ?
-            """, (limit,))
+            """,
+                (limit,),
+            )
 
         history = cursor.fetchall()
         conn.close()
-        print(f"🔍 HISTORY RESULT: {history}")
+        print(f'🔍 HISTORY RESULT: {history}')
         return history
-
 
     def retry_all_failed(self, name: str):
         """Retries all failed executions of a pipeline."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
-            SELECT step FROM pipeline_runs 
-            WHERE pipeline_name = ? AND status = 'failed' 
+        cursor.execute(
+            """
+            SELECT step FROM pipeline_runs
+            WHERE pipeline_name = ? AND status = 'failed'
             ORDER BY timestamp DESC
-        """, (name,))
+        """,
+            (name,),
+        )
         rows = cursor.fetchall()
 
         if not rows:
@@ -421,82 +509,112 @@ class MakimPipelineEngine:
         failed_steps = [row[0] for row in rows]
         conn.close()
 
-        typer.echo(f"🔄 Retrying {len(failed_steps)} failed steps for pipeline '{name}'...")
-        steps_to_retry = [{"target": step} for step in failed_steps]
+        typer.echo(
+            f"🔄 Retrying {len(failed_steps)} failed steps for pipeline '{name}'..."
+        )
+        steps_to_retry = [{'target': step} for step in failed_steps]
         self.run_pipeline(name, steps_to_retry)
 
-
     def run_pipeline_sequential(
-    self, name: str, steps: List[Dict[str, Any]], debug: bool = False, dry_run: bool = False, fail_fast: bool = False
+        self,
+        name: str,
+        steps: List[Dict[str, Any]],
+        debug: bool = False,
+        dry_run: bool = False,
+        fail_fast: bool = False,
     ) -> None:
         """Execute pipeline steps sequentially with proper validation and error handling."""
         from makim.core import Makim
 
         for step in steps:
-            target = step.get("target")
-            args = step.get("args", {})
+            target = step.get('target')
+            args = step.get('args', {})
 
-            if not target or not target.startswith("main."):
-                typer.echo(f"❌ Invalid target '{target}'. Expected format: 'main.task-name'")
+            if not target or not target.startswith('main.'):
+                typer.echo(
+                    f"❌ Invalid target '{target}'. Expected format: 'main.task-name'"
+                )
                 raise typer.Exit(1)
 
             if debug:
-                print(f"🔍 DEBUG: Running step '{target}' with args {args} (Sequential Mode)")
+                print(
+                    f"🔍 DEBUG: Running step '{target}' with args {args} (Sequential Mode)"
+                )
 
             if dry_run:
                 print(f"🛑 DRY-RUN: Skipping execution of step '{target}'")
-                self.log_pipeline_execution(name, target, "dry-run")
+                self.log_pipeline_execution(name, target, 'dry-run')
                 continue
 
             try:
                 makim_instance = Makim()
                 makim_instance.load(self.config_file)
-                output = makim_instance.run({"task": target, **args})
-                self.log_pipeline_execution(name, target, "success", output=output)
+                output = makim_instance.run({'task': target, **args})
+                self.log_pipeline_execution(
+                    name, target, 'success', output=output
+                )
             except Exception as e:
                 error_message = f"❌ Error in step '{target}': {e}"
                 print(error_message)
-                self.log_pipeline_execution(name, target, "failed", error=str(e))
+                self.log_pipeline_execution(
+                    name, target, 'failed', error=str(e)
+                )
 
                 if fail_fast:
                     raise typer.Exit(1)
 
-
     def run_pipeline_parallel(
-        self, name: str, steps: List[Dict[str, Any]], debug: bool = False, max_workers: Optional[int] = None, dry_run: bool = False
+        self,
+        name: str,
+        steps: List[Dict[str, Any]],
+        debug: bool = False,
+        max_workers: Optional[int] = None,
+        dry_run: bool = False,
     ) -> None:
         """Execute pipeline steps in parallel with worker limits, validation, and better error handling."""
         from makim.core import Makim
 
         def run_task(step):
-            target = step.get("target")
-            args = step.get("args", {})
+            target = step.get('target')
+            args = step.get('args', {})
 
-            if not target or not target.startswith("main."):
-                print(f"❌ Invalid target '{target}'. Expected format: 'main.task-name'")
+            if not target or not target.startswith('main.'):
+                print(
+                    f"❌ Invalid target '{target}'. Expected format: 'main.task-name'"
+                )
                 return
 
             if debug:
-                print(f"🔍 DEBUG: Running step '{target}' with args {args} (Parallel Mode)")
+                print(
+                    f"🔍 DEBUG: Running step '{target}' with args {args} (Parallel Mode)"
+                )
 
             if dry_run:
                 print(f"🛑 DRY-RUN: Skipping execution of step '{target}'")
-                self.log_pipeline_execution(name, target, "dry-run")
+                self.log_pipeline_execution(name, target, 'dry-run')
                 return
 
             try:
                 makim_instance = Makim()
                 makim_instance.load(self.config_file)
-                output = makim_instance.run({"task": target, **args})
-                self.log_pipeline_execution(name, target, "success", output=output)
+                output = makim_instance.run({'task': target, **args})
+                self.log_pipeline_execution(
+                    name, target, 'success', output=output
+                )
             except Exception as e:
                 print(f"❌ ERROR: Step '{target}' failed with error: {e}")
-                self.log_pipeline_execution(name, target, "failed", error=str(e))
+                self.log_pipeline_execution(
+                    name, target, 'failed', error=str(e)
+                )
 
         max_threads = max_workers if max_workers else len(steps)
 
         if debug:
-            print(f"🔍 DEBUG: Running {len(steps)} steps in parallel with {max_threads} workers...")
+            print(
+                f'🔍 DEBUG: Running {len(steps)} steps in parallel with {max_threads} workers...'
+            )
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=max_threads
+        ) as executor:
             executor.map(run_task, steps)

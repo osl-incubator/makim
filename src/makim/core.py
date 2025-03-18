@@ -28,8 +28,8 @@ from typing_extensions import TypeAlias
 
 from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
-from makim.scheduler import MakimScheduler
 from makim.pipelines import MakimPipelineEngine
+from makim.scheduler import MakimScheduler
 from makim.task_logging import FormattedLogStream, LogLevel, Tee
 
 

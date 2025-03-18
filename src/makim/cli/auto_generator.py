@@ -288,6 +288,7 @@ def create_dynamic_command_cron(
     exec(function_code, global_vars, local_vars)
     decorator(local_vars['dynamic_command'])
 
+
 def create_dynamic_command_pipeline(
     makim: Makim, app: Typer, name: str, args: dict[str, Any]
 ) -> None:
@@ -308,7 +309,7 @@ def create_dynamic_command_pipeline(
     group_name = 'pipeline'
 
     # Optional help text
-    help_text = args.get("help", f"Run pipeline '{name}'")
+    help_text = args.get('help', f"Run pipeline '{name}'")
 
     # Register the command with Typer
     decorator = app.command(
@@ -319,7 +320,9 @@ def create_dynamic_command_pipeline(
 
     # Generate the function dynamically
     function_code = 'def dynamic_command():\n'
-    function_code += f'    engine = MakimPipelineEngine(config_file=makim.file)\n'
+    function_code += (
+        '    engine = MakimPipelineEngine(config_file=makim.file)\n'
+    )
     function_code += f'    steps = {args.get("steps", [])!r}\n'
     function_code += f'    engine.run_pipeline("{name}", steps)\n'
 
@@ -331,4 +334,3 @@ def create_dynamic_command_pipeline(
     exec(function_code, global_vars, local_vars)
 
     decorator(local_vars['dynamic_command'])
-    

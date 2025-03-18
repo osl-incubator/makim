@@ -141,7 +141,9 @@ def run_app() -> None:
 
     # Add pipeline commands
     typer_pipeline = _handle_pipeline_commands(makim)
-    app.add_typer(typer_pipeline, name='pipeline', rich_help_panel='Extensions')
+    app.add_typer(
+        typer_pipeline, name='pipeline', rich_help_panel='Extensions'
+    )
 
     # Add dynamic commands
     for name, args in tasks.items():

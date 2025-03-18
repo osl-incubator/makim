@@ -10,7 +10,7 @@ groups:
             default:
         run: cat {{ args.filepath }}
       count:
-        help:  Counts the number of lines in the input.
+        help: Counts the number of lines in the input.
         run: wc -l
 
 pipelines:

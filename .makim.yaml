@@ -483,32 +483,32 @@ groups:
             type: bool
             action: store_true
         env:
-          MAKIM_FILE: .makim.yaml  # Ensure it points to the correct config file
+          MAKIM_FILE: .makim.yaml # Ensure it points to the correct config file
         backend: bash
         run: |
           export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
-          
+
           # List all defined pipelines
           makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline list
-          
+
           # Show a pipeline's structure
           makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline show build-pipeline
-          
+
           # Run a pipeline manually
           makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline run build-pipeline
-          
+
           # Schedule a pipeline execution
           makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline schedule build-pipeline --cron "0 9 * * *"
-          
+
           # List scheduled pipelines
           makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline scheduled
-          
+
           # Remove a scheduled pipeline
           makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline unschedule build-pipeline
-          
+
           # Retry a failed pipeline execution
           makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline retry build-pipeline
-          
+
           # View pipeline execution history
           makim $VERBOSE_FLAG --file $MAKIM_FILE pipeline history
 
@@ -544,7 +544,7 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.out-time-format
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.err-time-format
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.both-time-format
-  
+
   error:
     help: This group helps tests failure tasks
     tasks:
@@ -591,3 +591,20 @@ groups:
           # it requires the password manually
           ssh-keygen -R "[localhost]:2222" || true
           ssh -o StrictHostKeyChecking=no testuser@localhost -p 2222 'pwd'
+
+scheduler:
+  build:
+    schedule: "* * * * *"
+    task: main.build
+    args:
+      clean: true
+  clean:
+    schedule: "* * * * *"
+    task: main.clean
+
+pipelines:
+  build-pipeline:
+    help: Full build process
+    steps:
+      - target: main.build
+      - target: main.clean

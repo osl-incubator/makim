@@ -47,11 +47,17 @@ def _handle_cron_commands(makim_instance: Makim) -> typer.Typer:
 
         @typer_cron.command(help='List all scheduled tasks')
         def list(
-            all_jobs: bool = typer.Option(False, "--all", help="List all cron jobs"),
-            pipeline_name: Optional[str] = typer.Argument(None, help="Filter cron jobs by pipeline name"),
+            all_jobs: bool = typer.Option(
+                False, '--all', help='List all cron jobs'
+            ),
+            pipeline_name: Optional[str] = typer.Argument(
+                None, help='Filter cron jobs by pipeline name'
+            ),
         ) -> None:
             """List tasks with filtering for all jobs or specific pipelines."""
-            _handle_cron_list(makim_instance, pipeline_name=pipeline_name, all_jobs=all_jobs)
+            _handle_cron_list(
+                makim_instance, pipeline_name=pipeline_name, all_jobs=all_jobs
+            )
 
         @typer_cron.command(help='Start a scheduler by its name')
         def start(
@@ -90,20 +96,26 @@ def _handle_cron_commands(makim_instance: Makim) -> typer.Typer:
     return typer_cron
 
 
-def _handle_cron_list(makim_instance: Makim, pipeline_name: Optional[str] = None, all_jobs: bool = False) -> None:
+def _handle_cron_list(
+    makim_instance: Makim,
+    pipeline_name: Optional[str] = None,
+    all_jobs: bool = False,
+) -> None:
     """Handle the cron list command, supporting all, pipeline-specific, or standard cron jobs."""
-    scheduled_tasks = makim_instance.global_data.get("scheduler", {})
-    pipeline_tasks = makim_instance.global_data.get("pipelines", {})
+    scheduled_tasks = makim_instance.global_data.get('scheduler', {})
+    pipeline_tasks = makim_instance.global_data.get('pipelines', {})
 
     if not scheduled_tasks and not pipeline_tasks:
-        typer.echo("❌ No scheduled cron or pipeline jobs configured in .makim.yaml")
+        typer.echo(
+            '❌ No scheduled cron or pipeline jobs configured in .makim.yaml'
+        )
         return
 
     console = Console()
     table = _create_cron_table()
 
     active_jobs = {
-        job["name"]: job
+        job['name']: job
         for job in (
             makim_instance.scheduler.list_jobs()
             if makim_instance.scheduler
@@ -113,15 +125,17 @@ def _handle_cron_list(makim_instance: Makim, pipeline_name: Optional[str] = None
 
     def add_task_to_table(name, config, is_pipeline=False):
         active_job = active_jobs.get(name)
-        status = "🟢 Active" if active_job else "🔴 Inactive"
-        next_run = str(active_job["next_run_time"]) if active_job else "Not scheduled"
+        status = '🟢 Active' if active_job else '🔴 Inactive'
+        next_run = (
+            str(active_job['next_run_time']) if active_job else 'Not scheduled'
+        )
 
         table.add_row(
             name,
-            config.get("task", "Pipeline" if is_pipeline else "N/A"),
-            config.get("schedule", "N/A"),
+            config.get('task', 'Pipeline' if is_pipeline else 'N/A'),
+            config.get('schedule', 'N/A'),
             status,
-            next_run or "Not scheduled",
+            next_run or 'Not scheduled',
         )
 
     if all_jobs:
@@ -132,11 +146,14 @@ def _handle_cron_list(makim_instance: Makim, pipeline_name: Optional[str] = None
 
     elif pipeline_name:
         filtered_tasks = {
-            name: config for name, config in scheduled_tasks.items()
-            if config.get("task", "").startswith(f"{pipeline_name}.")
+            name: config
+            for name, config in scheduled_tasks.items()
+            if config.get('task', '').startswith(f'{pipeline_name}.')
         }
         if not filtered_tasks:
-            typer.echo(f"❌ No cron jobs found for pipeline '{pipeline_name}'.")
+            typer.echo(
+                f"❌ No cron jobs found for pipeline '{pipeline_name}'."
+            )
             return
         for name, config in filtered_tasks.items():
             add_task_to_table(name, config)
