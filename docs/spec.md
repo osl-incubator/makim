@@ -77,6 +77,7 @@ tasks:
     env: <environment_variables>
     hooks: <pre/post-run_hooks>
     matrix: <parameter_combinations>
+    log: <file_logging_configuration>
     run: <command>
 {% endraw %}
 ```
@@ -309,9 +310,9 @@ hosts:
     port: 22
 ```
 
-#### 2. 2. Execute Task on Remote Server
+#### 2. Execute Task on Remote Server
 
-```
+```yaml
 tasks:
   deploy:
     remote: production
@@ -326,7 +327,47 @@ tasks:
 
 ---
 
-## 10. Variables
+## 10. File Logging
+
+### Description
+
+Defines the configuration for tasks to write their output to a file with
+optional custom formatting and control over which output types are logged.
+
+### Structure
+
+```yaml
+log:
+  path: <log_file_path>
+  level: <output_type>
+  format: <log_format_string>
+```
+
+#### Example
+
+```yaml
+tasks:
+  build:
+    help: Build the application
+    log:
+      path: ./logs/build.txt
+      level: both
+      format: "%(asctime)s - %(levelname)s - %(message)s"
+    run: |
+      echo "Building..."
+```
+
+### Supported Format Placeholders
+
+- `%(asctime)s` — Timestamp of the log entry.
+- `%(task)s` — Name of the task being executed.
+- `%(file)s` — File name where the task is defined.
+- `%(levelname)s` — Output type label (`OUT` or `ERR`).
+- `%(message)s` — Actual log output.
+
+---
+
+## 11. Variables
 
 ### Description
 
@@ -340,14 +381,14 @@ Defines reusable variables that can be referenced throughout the configuration.
 
 ### Structure
 
-```
+```yaml
 vars:
   <var_name>: <value>
 ```
 
 ### Example
 
-```
+```yaml
 vars:
   PROJECT_NAME: MyApp
   TIMEOUT: 30
@@ -363,7 +404,7 @@ tasks:
 {% endraw %}
 ```
 
-## 11. Environment Variables
+## 12. Environment Variables
 
 ### Description
 

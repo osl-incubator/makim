@@ -34,6 +34,8 @@ improving task definition and dependency management. Instead of using the
   tasks.
 - **Remote Execution:** Execute tasks on remote servers via SSH with flexible
   configurations.
+- **File Logging:** Log outputs to files with custom formatting and stream
+  control.
 - **Validation:** Ensures `.makim.yaml` configurations are correct with schema
   validation.
 
@@ -57,6 +59,10 @@ groups:
             type: bool
             action: store_true
             help: Remove all cache files
+        log:
+          path: ./logs/clean.txt
+          level: err
+          format: "%(asctime)s - %(file)s - %(levelname)s - %(message)s"
         run: |
           echo "Cleaning build directory..."
           rm -rf build/
