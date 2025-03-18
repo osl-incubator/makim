@@ -28,6 +28,7 @@ from typing_extensions import TypeAlias
 
 from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
+from makim.pipelines import MakimPipelineEngine
 from makim.scheduler import MakimScheduler
 from makim.task_logging import FormattedLogStream, LogLevel, Tee
 
@@ -161,6 +162,7 @@ class Makim:
     task_data: dict[str, Any] = {}
     ssh_config: dict[str, Any] = {}
     scheduler: Optional[MakimScheduler] = None
+    pipeline_engine: Optional[MakimPipelineEngine] = None
 
     def __init__(self) -> None:
         """Prepare the Makim class with the default configuration."""
@@ -175,6 +177,7 @@ class Makim:
         self.shell_args: list[str] = []
         self.tmp_suffix: str = '.makim'
         self.scheduler = None
+        self.pipeline_engine = None
         # os.chdir(os.getcwd())
         self.skip_hooks = False
 
@@ -183,6 +186,8 @@ class Makim:
         state: Dict[str, Any] = self.__dict__.copy()
         if 'scheduler' in state:
             state['scheduler'] = None
+        if 'pipeline_engine' in state:
+            state['pipeline_engine'] = None
         return state
 
     def _call_shell_app(
@@ -437,6 +442,10 @@ class Makim:
         if 'scheduler' in self.global_data:
             if self.scheduler is None:
                 self.scheduler = MakimScheduler(self)
+
+        if 'pipelines' in self.global_data:
+            if self.pipeline_engine is None:
+                self.pipeline_engine = MakimPipelineEngine(self.file)
 
     def _resolve_working_directory(self, scope: str) -> Optional[Path]:
         scope_options = ('global', 'group', 'task')

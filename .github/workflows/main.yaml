@@ -130,6 +130,9 @@ jobs:
       - name: Run smoke test for scheduler
         run: makim smoke-tests.scheduler
 
+      - name: Run smoke test for pipelines
+        run: makim pipeline run test.pipeline
+
       - name: Run smoke test for task logger
         run: makim smoke-tests.task-logger
 
