@@ -1,6 +1,6 @@
 [project]
 name = "makim"
-version = "1.23.1"  # semantic-release
+version = "1.24.0"  # semantic-release
 description = "Simplify the usage of containers"
 authors = [
   {name = "Ivan Ogasawara", email = "ivan.ogasawara@gmail.com"}
@@ -129,7 +129,7 @@ skips = ["B102", "B701", "B507", "B601", "B603"]
 [tool.vulture]
 exclude = ["tests"]
 ignore_decorators = []
-ignore_names = ["verbose", "dry_run"]
+ignore_names = ["verbose", "dry_run", "skip_hooks"]
 make_whitelist = true
 min_confidence = 80
 paths = ["src/makim/"]

@@ -259,6 +259,26 @@
                           }
                         }
                       }
+                    },
+                    "log": {
+                      "type": "object",
+                      "description": "Logging configuration for the task.",
+                      "properties": {
+                        "path": {
+                          "type": "string",
+                          "description": "File path to store logs."
+                        },
+                        "level": {
+                          "type": "string",
+                          "description": "Specifies which stream to log. Options: 'err' for stderr, 'out' for stdout, 'both' for both.",
+                          "enum": ["err", "out", "both"]
+                        },
+                        "format": {
+                          "type": "string",
+                          "description": "Optional log format string (e.g., '%(levelname)s - %(asctime)s - %(message)s')."
+                        }
+                      },
+                      "additionalProperties": false
                     }
                   },
                   "additionalProperties": false

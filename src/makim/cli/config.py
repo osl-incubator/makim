@@ -12,6 +12,7 @@ CLI_ROOT_FLAGS_VALUES_COUNT = {
     '--help': 0,  # not necessary to store this value
     '--verbose': 0,
     '--version': 0,  # not necessary to store this value
+    '--skip-hooks': 0,
 }
 
 
@@ -25,6 +26,7 @@ def extract_root_config(
     makim_file = '.makim.yaml'
     dry_run = False
     verbose = False
+    skip_hooks = False
 
     try:
         idx = 0
@@ -42,6 +44,8 @@ def extract_root_config(
                 dry_run = True
             elif arg == '--verbose':
                 verbose = True
+            elif arg == '--skip-hooks':
+                skip_hooks = True
 
             idx += 1 + CLI_ROOT_FLAGS_VALUES_COUNT[arg]
     except Exception:
@@ -57,4 +61,5 @@ def extract_root_config(
         'file': makim_file,
         'dry_run': dry_run,
         'verbose': verbose,
+        'skip_hooks': skip_hooks,
     }

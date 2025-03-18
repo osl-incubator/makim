@@ -34,6 +34,8 @@ improving task definition and dependency management. Instead of using the
   tasks.
 - **Remote Execution:** Execute tasks on remote servers via SSH with flexible
   configurations.
+- **File Logging:** Log outputs to files with custom formatting and stream
+  control.
 - **Validation:** Ensures `.makim.yaml` configurations are correct with schema
   validation.
 
@@ -57,6 +59,10 @@ groups:
             type: bool
             action: store_true
             help: Remove all cache files
+        log:
+          path: ./logs/clean.txt
+          level: err
+          format: "%(asctime)s - %(file)s - %(levelname)s - %(message)s"
         run: |
           echo "Cleaning build directory..."
           rm -rf build/
@@ -90,22 +96,26 @@ $ makim --help
 
  Makim is a tool that helps you to organize and simplify your helper commands.
 
-╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --version             -v            Show the version and exit                                                                                                                      │
-│ --file                        TEXT  Makim config file [default: .makim.yaml]                                                                                                       │
-│ --dry-run                           Execute the command in dry mode                                                                                                                │
-│ --verbose                           Execute the command in verbose mode                                                                                                            │
-│ --install-completion                Install completion for the current shell.                                                                                                      │
-│ --show-completion                   Show completion for the current shell, to copy it or customize the installation.                                                               │
-│ --help                              Show this message and exit.                                                                                                                    │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭─ build ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ build.clean     Clean build artifacts                                                                                                                                              │
-│ build.compile   Compile the project                                                                                                                                                │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Extensions ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ cron            Tasks Scheduler                                                                                                                                                    │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --version             -v            Show the version and exit                │
+│ --file                        TEXT  Makim config file [default: .makim.yaml] │
+│ --dry-run                           Execute the command in dry mode          │
+│ --verbose                           Execute the command in verbose mode      │
+│ --skip-hooks                        Skip hooks while executing the command   │
+│ --install-completion                Install completion for the current       │
+│                                     shell.                                   │
+│ --show-completion                   Show completion for the current shell,   │
+│                                     to copy it or customize the              │
+│                                     installation.                            │
+│ --help                              Show this message and exit.              │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ build ──────────────────────────────────────────────────────────────────────╮
+│ build.clean                         Clean build artifacts                    │
+│ build.compile                       Compile the project                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Extensions ─────────────────────────────────────────────────────────────────╮
+│ cron                                Tasks Scheduler                          │
+╰──────────────────────────────────────────────────────────────────────────────╯
 
  If you have any problem, open an issue at: https://github.com/osl-incubator/makim
 ```

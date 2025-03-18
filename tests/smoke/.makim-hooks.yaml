@@ -18,6 +18,24 @@ groups:
         run: |
           echo "Project is deployed."
 
+      pre_hook:
+        help: Pre hook task
+        env:
+          HOOKS_SKIPPED: "false"
+        run: |
+          import os
+          print("Running pre hook")
+          assert str(os.getenv("HOOKS_SKIPPED")) == "true"
+
+      post_hook:
+        help: Post hook task
+        env:
+          HOOKS_SKIPPED: "false"
+        run: |
+          import os
+          print("Running post hook")
+          assert str(os.getenv("HOOKS_SKIPPED")) == "true"
+
   build:
     tasks:
       compile:
@@ -36,3 +54,31 @@ groups:
         run: |
           echo "Compiling the project..."
           echo "Project compiled successfully."
+
+  skip-hooks:
+    tasks:
+      skip_pre_hooks:
+        help: Check if pre hooks are skipped or not
+        hooks:
+          pre-run:
+            - task: setup.pre_hook
+        run: |
+          echo "Skipped pre hooks successfully"
+
+      skip_post_hooks:
+        help: Check if post hooks are skipped or not
+        hooks:
+          post-run:
+            - task: setup.post_hook
+        run: |
+          echo "Skipped post hooks successfully"
+
+      skip_both_hooks:
+        help: Check if post hooks are skipped or not
+        hooks:
+          pre-run:
+            - task: setup.pre_hook
+          post-run:
+            - task: setup.post_hook
+        run: |
+          echo "Skipped both hooks successfully"
