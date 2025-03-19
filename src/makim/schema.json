@@ -295,6 +295,10 @@
                           "description": "Seconds to wait before retrying the task."
                         }
                       }
+                    },
+                    "if": {
+                      "type": "string",
+                      "description": "Conditional expression to execute the task."
                     }
                   },
                   "additionalProperties": false

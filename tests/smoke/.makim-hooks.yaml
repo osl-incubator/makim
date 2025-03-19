@@ -1,5 +1,10 @@
+vars:
+  global-check: "yes"
+
 groups:
   setup:
+    vars:
+      group-check: "enabled"
     tasks:
       check_dependencies:
         help: Check if all required dependencies are installed
@@ -35,6 +40,52 @@ groups:
           import os
           print("Running post hook")
           assert str(os.getenv("HOOKS_SKIPPED")) == "true"
+
+      hook-correct-global-vars:
+        help: Should execute because global var matches
+        if: ${{ vars.global_check == "yes" }}
+        log:
+          path: ./tests/smoke/logs/hook_correct_global.txt
+        run: echo "correct-global-vars"
+
+      hook-wrong-global-vars:
+        help: Should be skipped because global var does not match
+        if: ${{ vars.global_check == "no" }}
+        log:
+          path: ./tests/smoke/logs/hook_wrong_global.txt
+        run: echo "wrong-global-vars"
+
+      hook-correct-group-vars:
+        help: Should execute because group var matches
+        if: ${{ vars.group_check == "enabled" }}
+        log:
+          path: ./tests/smoke/logs/hook_correct_group.txt
+        run: echo "correct-group-vars"
+
+      hook-wrong-group-vars:
+        help: Should be skipped because group var does not match
+        if: ${{ vars.group_check == "disabled" }}
+        log:
+          path: ./tests/smoke/logs/hook_wrong_group.txt
+        run: echo "wrong-group-vars"
+
+      hook-correct-task-vars:
+        help: Should execute because task var matches
+        vars:
+          hook_task_check: "active"
+        if: ${{ vars.hook_task_check == "active" }}
+        log:
+          path: ./tests/smoke/logs/hook_correct_task.txt
+        run: echo "correct-task-vars"
+
+      hook-wrong-task-vars:
+        help: Should be skipped because task var does not match
+        vars:
+          hook_task_check: "inactive"
+        if: ${{ vars.hook_task_check == "active" }}
+        log:
+          path: ./tests/smoke/logs/hook_wrong_task.txt
+        run: echo "wrong-task-vars"
 
   build:
     tasks:
@@ -82,3 +133,50 @@ groups:
             - task: setup.post_hook
         run: |
           echo "Skipped both hooks successfully"
+
+  tests:
+    tasks:
+      test-correct-global-vars:
+        hooks:
+          pre-run:
+            - task: setup.hook-correct-global-vars
+        run: |
+          assert open("./tests/smoke/logs/hook_correct_global.txt").read().strip() == "correct-global-vars"
+
+      test-wrong-global-vars:
+        hooks:
+          pre-run:
+            - task: setup.hook-wrong-global-vars
+        run: |
+          import os
+          assert not os.path.exists("./tests/smoke/logs/hook_wrong_global.txt")
+
+      test-correct-group-vars:
+        hooks:
+          pre-run:
+            - task: setup.hook-correct-group-vars
+        run: |
+          assert open("./tests/smoke/logs/hook_correct_group.txt").read().strip() == "correct-group-vars"
+
+      test-wrong-group-vars:
+        hooks:
+          pre-run:
+            - task: setup.hook-wrong-group-vars
+        run: |
+          import os
+          assert not os.path.exists("./tests/smoke/logs/hook_wrong_group.txt")
+
+      test-correct-task-vars:
+        hooks:
+          pre-run:
+            - task: setup.hook-correct-task-vars
+        run: |
+          assert open("./tests/smoke/logs/hook_correct_task.txt").read().strip() == "correct-task-vars"
+
+      test-wrong-task-vars:
+        hooks:
+          pre-run:
+            - task: setup.hook-wrong-task-vars
+        run: |
+          import os
+          assert not os.path.exists("./tests/smoke/logs/hook_wrong_task.txt")

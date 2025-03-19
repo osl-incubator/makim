@@ -11,7 +11,6 @@ import pprint
 import shutil
 import sys
 import tempfile
-import warnings
 
 from copy import deepcopy
 from itertools import product
@@ -368,9 +367,29 @@ class Makim:
             )
 
     def _verify_task_conditional(self, conditional: Any) -> bool:
-        # todo: implement verification
-        print(f'condition {conditional} not verified')
-        return False
+        """Validate task conditionals."""
+        try:
+            # clean double dash prefix in args
+            args_clean = {}
+            if self.args:
+                for arg_name, arg_value in self.args.items():
+                    args_clean[
+                        arg_name.replace('--', '', 1).replace('-', '_')
+                    ] = (
+                        arg_value.replace('--', '', 1)
+                        if isinstance(arg_value, str)
+                        else arg_value
+                    )
+
+            _, variables = self._load_scoped_data('task')
+            result = TEMPLATE.from_string(str(conditional)).render(
+                args=args_clean, env=self.env_scoped, vars=variables
+            )
+            evaluated_result = yaml.safe_load(result)
+
+            return bool(evaluated_result)
+        except Exception:
+            return False
 
     def _verify_args(self) -> None:
         if not self._check_makim_file():
@@ -771,7 +790,9 @@ class Makim:
             if_stmt = hook_data.get('if')
             if if_stmt:
                 result = TEMPLATE.from_string(str(if_stmt)).render(
-                    args=original_args_clean, env=self.env_scoped
+                    args=original_args_clean,
+                    env=self.env_scoped,
+                    vars=variables,
                 )
                 if not yaml.safe_load(result):
                     if self.verbose:
@@ -1015,9 +1036,12 @@ class Makim:
         if self.task_data.get('if') and not self._verify_task_conditional(
             self.task_data['if']
         ):
-            return warnings.warn(
-                f'{args["task"]} not executed. Condition (if) not satisfied.'
-            )
+            if self.verbose:
+                MakimLogs.print_warning(
+                    f'{args["task"]} not executed.'
+                    'Condition (if) not satisfied.'
+                )
+            return
 
         self._run_hooks(args, 'pre-run')
 
