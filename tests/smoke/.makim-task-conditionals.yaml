@@ -1,0 +1,173 @@
+vars:
+  global-check: "yes"
+
+groups:
+  setup:
+    vars:
+      group-check: "enabled"
+
+    tasks:
+      correct-conditional:
+        help: Should execute because condition is true
+        if: ${{ true }}
+        log:
+          path: ./tests/smoke/logs/correct_conditional.txt
+        run: echo "correct-conditional"
+
+      wrong-conditional:
+        help: Should be skipped because condition is false
+        if: ${{ false }}
+        log:
+          path: ./tests/smoke/logs/wrong_conditional.txt
+        run: echo "wrong-conditional"
+
+      correct-args:
+        help: Should execute because args.flag == true
+        args:
+          flag:
+            help: Test flag
+            type: bool
+            action: store_true
+        if: ${{ args.flag }}
+        log:
+          path: ./tests/smoke/logs/correct_args.txt
+        run: echo "correct-args"
+
+      wrong-args:
+        help: Should be skipped because args.flag == false
+        args:
+          flag:
+            help: Test flag
+            type: bool
+            action: store_true
+        if: ${{ args.flag }}
+        log:
+          path: ./tests/smoke/logs/wrong_args.txt
+        run: echo "wrong-args"
+
+      correct-global-vars:
+        help: Should execute because global var matches
+        if: ${{ vars.global_check == "yes" }}
+        log:
+          path: ./tests/smoke/logs/correct_global.txt
+        run: echo "correct-global-vars"
+
+      wrong-global-vars:
+        help: Should be skipped because global var does not match
+        if: ${{ vars.global_check == "no" }}
+        log:
+          path: ./tests/smoke/logs/wrong_global.txt
+        run: echo "wrong-global-vars"
+
+      correct-group-vars:
+        help: Should execute because group var matches
+        if: ${{ vars.group_check == "enabled" }}
+        log:
+          path: ./tests/smoke/logs/correct_group.txt
+        run: echo "correct-group-vars"
+
+      wrong-group-vars:
+        help: Should be skipped because group var does not match
+        if: ${{ vars.group_check == "disabled" }}
+        log:
+          path: ./tests/smoke/logs/wrong_group.txt
+        run: echo "wrong-group-vars"
+
+      correct-task-vars:
+        help: Should execute because task var matches
+        vars:
+          task_check: "active"
+        if: ${{ vars.task_check == "active" }}
+        log:
+          path: ./tests/smoke/logs/correct_task.txt
+        run: echo "correct-task-vars"
+
+      wrong-task-vars:
+        help: Should be skipped because task var does not match
+        vars:
+          task_check: "inactive"
+        if: ${{ vars.task_check == "active" }}
+        log:
+          path: ./tests/smoke/logs/wrong_task.txt
+        run: echo "wrong-task-vars"
+
+  tests:
+    tasks:
+      test-correct-conditional:
+        hooks:
+          pre-run:
+            - task: setup.correct-conditional
+        run: |
+          assert open("./tests/smoke/logs/correct_conditional.txt").read().strip() == "correct-conditional"
+
+      test-wrong-conditional:
+        hooks:
+          pre-run:
+            - task: setup.wrong-conditional
+        run: |
+          import os
+          assert not os.path.exists("./tests/smoke/logs/wrong_conditional.txt")
+
+      test-correct-args:
+        hooks:
+          pre-run:
+            - task: setup.correct-args
+              args:
+                flag: true
+        run: |
+          assert open("./tests/smoke/logs/correct_args.txt").read().strip() == "correct-args"
+
+      test-wrong-args:
+        hooks:
+          pre-run:
+            - task: setup.wrong-args
+              args:
+                flag: false
+        run: |
+          import os
+          assert not os.path.exists("./tests/smoke/logs/wrong_args.txt")
+
+      test-correct-global-vars:
+        hooks:
+          pre-run:
+            - task: setup.correct-global-vars
+        run: |
+          assert open("./tests/smoke/logs/correct_global.txt").read().strip() == "correct-global-vars"
+
+      test-wrong-global-vars:
+        hooks:
+          pre-run:
+            - task: setup.wrong-global-vars
+        run: |
+          import os
+          assert not os.path.exists("./tests/smoke/logs/wrong_global.txt")
+
+      test-correct-group-vars:
+        hooks:
+          pre-run:
+            - task: setup.correct-group-vars
+        run: |
+          assert open("./tests/smoke/logs/correct_group.txt").read().strip() == "correct-group-vars"
+
+      test-wrong-group-vars:
+        hooks:
+          pre-run:
+            - task: setup.wrong-group-vars
+        run: |
+          import os
+          assert not os.path.exists("./tests/smoke/logs/wrong_group.txt")
+
+      test-correct-task-vars:
+        hooks:
+          pre-run:
+            - task: setup.correct-task-vars
+        run: |
+          assert open("./tests/smoke/logs/correct_task.txt").read().strip() == "correct-task-vars"
+
+      test-wrong-task-vars:
+        hooks:
+          pre-run:
+            - task: setup.wrong-task-vars
+        run: |
+          import os
+          assert not os.path.exists("./tests/smoke/logs/wrong_task.txt")
