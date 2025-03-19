@@ -279,6 +279,10 @@
                         }
                       },
                       "additionalProperties": false
+                    },
+                    "if": {
+                      "type": "string",
+                      "description": "Conditional expression to execute the task."
                     }
                   },
                   "additionalProperties": false
