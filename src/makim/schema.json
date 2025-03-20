@@ -279,6 +279,22 @@
                         }
                       },
                       "additionalProperties": false
+                    },
+                    "retry": {
+                      "type": "object",
+                      "description": "Retry configuration for the task.",
+                      "properties": {
+                        "count": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Number of times to retry the task on failure."
+                        },
+                        "delay": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "description": "Seconds to wait before retrying the task."
+                        }
+                      }
                     }
                   },
                   "additionalProperties": false
