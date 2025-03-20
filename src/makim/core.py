@@ -191,6 +191,7 @@ class Makim:
         cmd: str,
         out_stream: TextIO = sys.stdout,
         err_stream: TextIO = sys.stderr,
+        exit_on_error: bool = True,
     ) -> None:
         self._load_shell_app()
 
@@ -221,6 +222,7 @@ class Makim:
                 str(e.full_cmd),
                 MakimError.SH_ERROR_RETURN_CODE,
                 e.exit_code or 1,
+                exit_on_error=exit_on_error,
             )
         except KeyboardInterrupt:
             os.close(fd)
@@ -233,7 +235,7 @@ class Makim:
         os.close(fd)
 
     def _call_shell_remote(
-        self, cmd: str, host_config: dict[str, Any]
+        self, cmd: str, host_config: dict[str, Any], exit_on_error: bool = True
     ) -> None:
         try:
             # Render the host configuration values
@@ -261,7 +263,11 @@ class Makim:
 
             error = stderr.read().decode('utf-8')
             if error:
-                MakimLogs.raise_error(error, MakimError.SSH_EXECUTION_ERROR)
+                MakimLogs.raise_error(
+                    error,
+                    MakimError.SSH_EXECUTION_ERROR,
+                    exit_on_error=exit_on_error,
+                )
 
             ssh.close()
         except paramiko.AuthenticationException:
@@ -273,11 +279,13 @@ class Makim:
             MakimLogs.raise_error(
                 f'SSH error: {ssh_exception!s}',
                 MakimError.SSH_CONNECTION_ERROR,
+                exit_on_error=exit_on_error,
             )
         except Exception as e:
             MakimLogs.raise_error(
                 f'Unexpected error during remote execution: {e!s}',
                 MakimError.SSH_EXECUTION_ERROR,
+                exit_on_error=exit_on_error,
             )
 
     def _render_host_config(
@@ -775,7 +783,10 @@ class Makim:
 
             makim_hook.run(deepcopy(args_hook))
 
-    def _run_command(self, args: dict[str, Any]) -> None:
+    def _run_command(
+        self, args: dict[str, Any], exit_on_error: bool = True
+    ) -> None:
+        print(exit_on_error)
         cmd = self.task_data.get('run', '').strip()
         remote_host = self.task_data.get('remote')
 
@@ -871,11 +882,18 @@ class Makim:
                             MakimError.REMOTE_HOST_NOT_FOUND,
                         )
                     self._call_shell_remote(
-                        current_cmd, cast(dict[str, Any], host_config)
+                        current_cmd,
+                        cast(dict[str, Any], host_config),
+                        exit_on_error=exit_on_error,
                     )
                 else:
                     out_stream, err_stream = self._get_output_stream()
-                    self._call_shell_app(current_cmd, out_stream, err_stream)
+                    self._call_shell_app(
+                        current_cmd,
+                        out_stream,
+                        err_stream,
+                        exit_on_error=exit_on_error,
+                    )
 
         # Run command for each matrix combination
         for matrix_vars in matrix_combinations or [{}]:
@@ -950,19 +968,20 @@ class Makim:
                 MakimLogs.print_info(
                     f'[Retry] Attempt {attempt}/{retry_count}'
                 )
-                self._run_command(args)
+                self._run_command(args, exit_on_error=False)
                 return
             except Exception:
                 if attempt == retry_count:
                     MakimLogs.raise_error(
                         f'[Retry] All {retry_count} retries failed.',
                         MakimError.MAKIM_RETRY_EXHAUSTED,
+                        exit_on_error=True,
                     )
                     return
                 attempt += 1
                 MakimLogs.print_warning(
                     f'[Retry] Attempt {attempt}/{retry_count}.'
-                    f'Retrying in {delay} seconds...'
+                    f'Retrying in {delay} seconds...',
                 )
                 await asyncio.sleep(delay)
 

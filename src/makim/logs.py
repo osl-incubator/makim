@@ -1,5 +1,7 @@
 """Classes and function for handling logs."""
 
+import os
+
 from enum import Enum
 
 from rich.console import Console
@@ -46,11 +48,16 @@ class MakimLogs:
 
     @staticmethod
     def raise_error(
-        message: str, message_type: MakimError, command_error: int = 1
+        message: str,
+        message_type: MakimError,
+        command_error: int = 1,
+        exit_on_error: bool = True,
     ) -> None:
         """Print error message and exit with given error code."""
         console = Console(stderr=True, style='bold red')
         console.print(f'Makim Error #{message_type.value}: {message}')
+        if exit_on_error:
+            raise os._exit(command_error)
         raise MakimException(command_error)
 
     @staticmethod
