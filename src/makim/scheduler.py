@@ -171,7 +171,6 @@ def run_makim_task(
                 if value:
                     cmd.append(f'--{safe_key}')
             else:
-                # Fix: Ensure all list items are strings
                 cmd.extend([f'--{safe_key}', str(value)])
     safe_cmd = _sanitize_command(cmd)
 
@@ -244,7 +243,6 @@ class MakimScheduler:
             )
             return
 
-        # Fix: Check if scheduler is None before accessing attributes
         current_job_ids = {job.id for job in self.scheduler.get_jobs()}
         config_job_ids = set(config_jobs.keys())
 
@@ -345,7 +343,6 @@ class MakimScheduler:
         args : dict, optional
             Additional arguments for the task, by default None.
         """
-        # Fix: Check if scheduler is None before accessing attributes
         if self.scheduler is None:
             MakimLogs.raise_error(
                 'Cannot add job: Scheduler system is not available',
@@ -393,7 +390,6 @@ class MakimScheduler:
         name : str
             The name of the job to remove.
         """
-        # Fix: Check if scheduler is None before accessing attributes
         if self.scheduler is None:
             MakimLogs.raise_error(
                 'Cannot remove job: Scheduler system is not available',
@@ -435,7 +431,6 @@ class MakimScheduler:
         Job or None
             The job object if found, otherwise None.
         """
-        # Fix: Check if scheduler is None before accessing attributes
         if self.scheduler is None:
             MakimLogs.raise_error(
                 'Cannot retrieve job: Scheduler system is not available',
@@ -457,7 +452,6 @@ class MakimScheduler:
         list of dict
             A list of dictionaries containing job details.
         """
-        # Fix: Check if scheduler is None before accessing attributes
         if self.scheduler is None:
             MakimLogs.raise_error(
                 'Cannot list jobs: Scheduler system is not available',
@@ -482,4 +476,4 @@ class MakimScheduler:
             MakimLogs.raise_error(
                 'Failed to retrieve job list', MakimError.SCHEDULER_JOB_ERROR
             )
-            return []  # This ensures a return in all code paths
+            return []
