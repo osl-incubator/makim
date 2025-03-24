@@ -1,0 +1,26 @@
+groups:
+  test:
+    tasks:
+      success:
+        help: "Task that will succeed on first try"
+        retry:
+          count: 4
+          delay: 2
+        run: echo success
+
+      eventually_success:
+        help: "Task that fails once, then succeeds"
+        retry:
+          count: 3
+          delay: 2
+        run: |
+          import os
+          import sys
+          file_path = "./tests/smoke/logs/retry.txt"
+          if os.path.exists(file_path):
+              print("Succeeded on retry.")
+          else:
+            print("Attempt failed")
+            os.makedirs(os.path.dirname(file_path),exist_ok=True)
+            open(file_path, "w").close()
+            sys.exit(1)

@@ -36,6 +36,7 @@ improving task definition and dependency management. Instead of using the
   configurations.
 - **File Logging:** Log outputs to files with custom formatting and stream
   control.
+- **Retry Mechanism:** Adds resilience by retrying tasks that encounter errors.
 - **Validation:** Ensures `.makim.yaml` configurations are correct with schema
   validation.
 

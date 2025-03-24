@@ -321,7 +321,35 @@ tasks:
 
 ---
 
-## 10. Validation
+## 10. Retry Mechanism
+
+### What It Does
+
+Makim supports retrying tasks that could encounter errors during execution.
+
+### Use Case
+
+If a task makes an API call which may fail due to API being unrealiable:
+
+```yaml
+tasks:
+  post-data:
+    help: Make an API call to post data
+    retry:
+      count: 3
+      delay: 10
+    run: |
+      curl --fail -X POST https://example.com/api/data
+```
+
+### Benefit
+
+- Improves reliability for unstable tasks.
+- Reduces the need for manual re-execution.
+
+---
+
+## 11. Validation
 
 ### What It Does
 
