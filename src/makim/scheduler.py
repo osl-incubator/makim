@@ -8,7 +8,7 @@ import subprocess  # nosec B404 - subprocess is required for task execution
 
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, Optional, cast
 
 from apscheduler.job import Job
 from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
@@ -40,7 +40,7 @@ def init_globals(config_file: str, history_path: Path) -> None:
     Config.job_history_path = history_path
 
 
-def _sanitize_command(cmd_list: List[str]) -> List[str]:
+def _sanitize_command(cmd_list: list[str]) -> list[str]:
     """
     Sanitize command arguments to prevent command injection.
 
@@ -163,7 +163,7 @@ def run_makim_task(
     if Config.job_history_path is None:
         MakimLogs.print_warning('Job history logging is disabled')
 
-    cmd: List[str] = ['makim', '--file', Config.config_file or '', task]
+    cmd: list[str] = ['makim', '--file', Config.config_file or '', task]
     if args:
         for key, value in args.items():
             safe_key = str(key)
@@ -218,7 +218,7 @@ class MakimScheduler:
         self.job_history_path = Path.home() / '.makim' / 'history.json'
         self._setup_directories()
         self._initialize_scheduler()
-        self.job_history: Dict[str, list[Dict[str, Any]]] = (
+        self.job_history: dict[str, list[Dict[str, Any]]] = (
             self._load_history()
         )
 
@@ -289,7 +289,7 @@ class MakimScheduler:
                 MakimError.SCHEDULER_JOB_ERROR,
             )
 
-    def _load_history(self) -> Dict[str, list[Dict[str, Any]]]:
+    def _load_history(self) -> dict[str, list[Dict[str, Any]]]:
         """
         Load job execution history from file.
 
@@ -308,7 +308,7 @@ class MakimScheduler:
                         )
                         return {}
                     return cast(
-                        Dict[str, list[Dict[str, Any]]], loaded_history
+                        dict[str, list[Dict[str, Any]]], loaded_history
                     )
         except Exception:
             MakimLogs.print_warning('Could not load job history')
@@ -397,14 +397,14 @@ class MakimScheduler:
             )
             return
 
-        try:
-            job = self.get_job(name)
-            if not job:
-                MakimLogs.raise_error(
-                    f"Job '{name}' does not exist",
-                    MakimError.SCHEDULER_JOB_NOT_FOUND,
-                )
+        job = self.get_job(name)
+        if not job:
+            MakimLogs.raise_error(
+                f"Job '{name}' does not exist",
+                MakimError.SCHEDULER_JOB_NOT_FOUND,
+            )
 
+        try:
             self.scheduler.remove_job(name)
             log_execution(name, 'removed')
             MakimLogs.print_info(
