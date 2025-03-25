@@ -91,6 +91,7 @@ groups:
             - task: smoke-tests.ssh-remote-execution
             - task: smoke-tests.scheduler
             - task: smoke-tests.task-logger
+            - task: smoke-tests.retry
 
       ci:
         help: Run all tasks used on CI
@@ -496,6 +497,26 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.out-time-format
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.err-time-format
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.both-time-format
+
+      retry:
+        help: Test makim tasks with retry config
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-retry.yaml
+        backend: bash
+        hooks:
+          post-run:
+            - task: clean.tmp
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.success
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.eventually_success
 
   error:
     help: This group helps tests failure tasks

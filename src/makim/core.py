@@ -786,7 +786,6 @@ class Makim:
     def _run_command(
         self, args: dict[str, Any], exit_on_error: bool = True
     ) -> None:
-        print(exit_on_error)
         cmd = self.task_data.get('run', '').strip()
         remote_host = self.task_data.get('remote')
 
@@ -981,7 +980,7 @@ class Makim:
                 attempt += 1
                 MakimLogs.print_warning(
                     f'[Retry] Attempt {attempt}/{retry_count}.'
-                    f'Retrying in {delay} seconds...',
+                    f' Retrying in {delay} seconds...',
                 )
                 await asyncio.sleep(delay)
 

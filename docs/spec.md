@@ -367,7 +367,37 @@ tasks:
 
 ---
 
-## 11. Variables
+## 11. Retry Mechanism
+
+### Description
+
+Defines how many times a task should be retried upon failure and the delay
+between each attempt.
+
+### Structure
+
+```yaml
+retry:
+  count: <number_of_attempts>
+  delay: <seconds_between_attempts>
+```
+
+### Example
+
+```yaml
+tasks:
+  post-data:
+    help: Make an API call to post data
+    retry:
+      count: 3
+      delay: 10
+    run: |
+      curl --fail -X POST https://example.com/api/data
+```
+
+---
+
+## 12. Variables
 
 ### Description
 
@@ -404,7 +434,7 @@ tasks:
 {% endraw %}
 ```
 
-## 12. Environment Variables
+## 13. Environment Variables
 
 ### Description
 
