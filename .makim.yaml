@@ -92,6 +92,7 @@ groups:
             - task: smoke-tests.scheduler
             - task: smoke-tests.task-logger
             - task: smoke-tests.retry
+            - task: smoke-tests.validate-conditionals
 
       ci:
         help: Run all tasks used on CI
@@ -391,6 +392,9 @@ groups:
         env:
           MAKIM_FILE: tests/smoke/.makim-hooks.yaml
         backend: bash
+        hooks:
+          post-run:
+            - task: clean.tmp
         run: |
           export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
@@ -399,6 +403,12 @@ groups:
           makim $VERBOSE_FLAG --skip-hooks --file $MAKIM_FILE skip-hooks.skip_pre_hooks
           makim $VERBOSE_FLAG --skip-hooks --file $MAKIM_FILE skip-hooks.skip_post_hooks
           makim $VERBOSE_FLAG --skip-hooks --file $MAKIM_FILE skip-hooks.skip_both_hooks
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-correct-global-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-wrong-global-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-correct-group-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-wrong-group-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-correct-task-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-wrong-task-vars
 
       matrix:
         help: Test makim with matrix combination
@@ -517,6 +527,34 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.success
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.eventually_success
+
+      validate-conditionals:
+        help: Test makim tasks with conditionals
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-task-conditionals.yaml
+        backend: bash
+        hooks:
+          post-run:
+            - task: clean.tmp
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-correct-conditional
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-wrong-conditional
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-correct-args
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-wrong-args
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-correct-global-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-wrong-global-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-correct-group-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-wrong-group-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-correct-task-vars
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-wrong-task-vars
 
   error:
     help: This group helps tests failure tasks
