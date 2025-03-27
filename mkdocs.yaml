@@ -3,8 +3,7 @@ site_url: https://osl-incubator.github.io/makim
 repo_url: https://github.com/osl-incubator/makim.git
 docs_dir: ./docs
 site_dir: ./build
-# extra_css:
-#   - stylesheets/extra.css
+
 theme:
   name: material
   features:
@@ -37,68 +36,21 @@ theme:
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
+
 plugins:
   - search
   - macros
-  # - autorefs
-  # - exclude:
-  #     glob:
-  #       - backends/template.md
-  - mkdocstrings:
-      enable_inventory: true
-      handlers:
-        python:
-          import:
-            - https://docs.python.org/3/objects.inv
-          selection:
-            docstring_style: numpy
-            filters:
-              - "!^Bounds"
-              - "!^__class__"
-              - "!^_filter_with_like"
-              - "!^_find_backends"
-              - "!^_key$"
-              - "!^_literal_value_hash_key"
-              - "!^_log"
-              - "!^_nbytes"
-              - "!^_safe_name$"
-              - "!^_schema_from_csv"
-              - "!^_to_geodataframe"
-              - "!^_tuplize"
-              - "!^ast_schema"
-              - "!^backend_table_type"
-              - "!^bounds$"
-              - "!^column$"
-              - "!^compiler$"
-              - "!^context_class"
-              - "!^database_class"
-              - "!^do_connect"
-              - "!^fetch_from_cursor"
-              - "!^get_schema"
-              - "!^largest$"
-              - "!^reconnect"
-              - "!^select_builder_class"
-              - "!^select_class"
-              - "!^table_class$"
-              - "!^table_expr_class"
-              - "!^translator_class"
-              - "!^Options$"
-          rendering:
-            show_category_heading: true
-            show_root_full_path: false
-            show_root_heading: true
-            show_root_toc_entry: true
-            show_source: false
+  - mkdocstrings
   - mkdocs-jupyter:
       execute: false
       include: ["*.ipynb"]
       ignore:
         - "*.py"
         - ".ipynb_checkpoints/*"
-      # execute_ignore: "tutorial/*Geospatial*.ipynb"
       include_source: true
       include_requirejs: true
   - literate-nav
+
 markdown_extensions:
   - admonition
   - attr_list
@@ -110,9 +62,6 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
-      options:
-        custom_icons:
-          - docs/static/icons
   - pymdownx.details
   - pymdownx.highlight:
       anchor_linenums: true
@@ -128,6 +77,7 @@ markdown_extensions:
   - tables
   - toc:
       permalink: true
+
 extra:
   project_name: "Makim"
   team:

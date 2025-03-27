@@ -602,3 +602,63 @@ groups:
           # it requires the password manually
           ssh-keygen -R "[localhost]:2222" || true
           ssh -o StrictHostKeyChecking=no testuser@localhost -p 2222 'pwd'
+pipelines:
+  build-and-test:
+    help: Complete build and test pipeline
+    default_execution_mode: sequential
+    max_workers: 4
+    steps:
+      - name: clean
+        task: clean.tmp
+
+      - name: build_docs
+        task: docs.build
+
+      - name: run_tests
+        task: tests.unittest
+        depends_on: [clean]
+        retry:
+          attempts: 3
+          backoff: 5
+
+      - name: smoke_tests
+        task: tests.smoke
+        depends_on: [build_docs, run_tests]
+        condition: "os.environ.get('RUN_SMOKE_TESTS', 'true').lower() == 'true'"
+
+  release-pipeline:
+    help: Pipeline for releasing a new version
+    steps:
+      - name: run_tests
+        task: tests.ci
+
+      - name: dry_run
+        task: release.dry
+        depends_on: [run_tests]
+
+      - name: release
+        task: release.ci
+        depends_on: [dry_run]
+        condition: "os.environ.get('CI') == 'true'"
+    schedule:
+      cron: "0 9 * * *"
+
+  my-pipeline:
+    help: Daily tests and documentation updates
+    default_execution_mode: parallel
+    max_workers: 3
+    steps:
+      - name: clean_env
+        task: clean.tmp
+
+      - name: lint
+        task: tests.linter
+        depends_on: [clean_env]
+
+      - name: unit_tests
+        task: tests.unittest
+        depends_on: [clean_env]
+
+      - name: update_docs
+        task: docs.build
+        depends_on: [lint, unit_tests]
