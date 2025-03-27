@@ -60,6 +60,119 @@
       },
       "additionalProperties": false
     },
+    "pipelines": {
+      "type": "object",
+      "description": "Pipeline definitions for orchestrating sequences of tasks",
+      "patternProperties": {
+        "^[a-zA-Z0-9_-]+$": {
+          "type": "object",
+          "required": ["steps"],
+          "properties": {
+            "help": {
+              "type": "string",
+              "description": "Description of the pipeline."
+            },
+            "steps": {
+              "type": "array",
+              "description": "Sequence of tasks to be executed in the pipeline",
+              "items": {
+                "type": "object",
+                "required": ["task"],
+                "properties": {
+                  "task": {
+                    "type": "string",
+                    "description": "The task to be executed in this step (format: 'group.task')."
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "A descriptive name for this step."
+                  },
+                  "args": {
+                    "type": "object",
+                    "description": "Arguments to pass to the task.",
+                    "additionalProperties": {
+                      "type": ["string", "boolean"]
+                    }
+                  },
+                  "depends_on": {
+                    "type": "array",
+                    "description": "List of step names this step depends on (for branching flows).",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "condition": {
+                    "type": "string",
+                    "description": "Conditional expression to determine if this step should be executed."
+                  },
+                  "retry": {
+                    "type": "object",
+                    "description": "Retry configuration for this step.",
+                    "properties": {
+                      "attempts": {
+                        "type": "integer",
+                        "description": "Number of retry attempts."
+                      },
+                      "backoff": {
+                        "type": "integer",
+                        "description": "Backoff time in seconds between retries."
+                      }
+                    },
+                    "additionalProperties": false
+                  },
+                  "timeout": {
+                    "type": "integer",
+                    "description": "Timeout in seconds for this step."
+                  }
+                },
+                "additionalProperties": false
+              }
+            },
+            "env": {
+              "type": "object",
+              "description": "Environment variables for all tasks in the pipeline.",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "env-file": {
+              "type": "string",
+              "description": "Path to the environment file for the pipeline."
+            },
+            "default_execution_mode": {
+              "type": "string",
+              "enum": ["sequential", "parallel"],
+              "description": "Default execution mode for the pipeline."
+            },
+            "max_workers": {
+              "type": "integer",
+              "description": "Maximum number of parallel workers when using parallel execution mode."
+            },
+            "timeout": {
+              "type": "integer",
+              "description": "Global timeout in seconds for the entire pipeline."
+            },
+            "schedule": {
+              "type": "object",
+              "description": "Schedule configuration for automatic pipeline execution.",
+              "properties": {
+                "cron": {
+                  "type": "string",
+                  "description": "Cron expression for scheduling (e.g., '0 9 * * *')."
+                },
+                "interval": {
+                  "type": "integer",
+                  "description": "Interval in seconds between executions."
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "groups": {
       "type": "object",
       "description": "Task groups defined by the user.",

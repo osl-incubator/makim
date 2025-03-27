@@ -18,6 +18,9 @@ from makim.cli.config import CLI_ROOT_FLAGS_VALUES_COUNT, extract_root_config
 from makim.cli.cron_handlers import (
     _handle_cron_commands,
 )
+from makim.cli.pipelines import (
+    _handle_pipeline_commands,
+)
 from makim.core import Makim
 
 app = typer.Typer(
@@ -35,7 +38,7 @@ makim: Makim = Makim()
 
 
 @app.callback(invoke_without_command=True)
-def main(  # noqa: PLR0913
+def main(
     ctx: typer.Context,
     version: bool = typer.Option(
         None,
@@ -135,6 +138,12 @@ def run_app() -> None:
     # Add cron commands if scheduler is configured
     typer_cron = _handle_cron_commands(makim)
     app.add_typer(typer_cron, name='cron', rich_help_panel='Extensions')
+
+    # Add pipeline commands if pipelines are configured
+    typer_pipeline = _handle_pipeline_commands(makim)
+    app.add_typer(
+        typer_pipeline, name='pipeline', rich_help_panel='Extensions'
+    )
 
     # Add dynamic commands
     for name, args in tasks.items():

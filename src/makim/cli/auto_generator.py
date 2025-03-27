@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any, Callable, Dict, Optional, Type, Union, cast
 
 import click
-import typer  # noqa
+import typer
 
 from fuzzywuzzy import process
 from typer import Typer
@@ -286,3 +286,103 @@ def create_dynamic_command_cron(
 
     exec(function_code, global_vars, local_vars)
     decorator(local_vars['dynamic_command'])
+
+
+def create_dynamic_command_pipeline(
+    makim_instance: Any,
+    typer_app: typer.Typer,
+    pipeline_name: str,
+    pipeline_config: Dict[str, Any],
+) -> None:
+    """
+    Create a dynamic command for a pipeline.
+
+    Parameters
+    ----------
+    makim_instance : Any
+        Makim instance with pipeline configurations.
+    typer_app : typer.Typer
+        Typer app to add the command to.
+    pipeline_name : str
+        Name of the pipeline.
+    pipeline_config : Dict[str, Any]
+        Pipeline configuration.
+    """
+    help_text = pipeline_config.get(
+        'help', f"Run the '{pipeline_name}' pipeline"
+    )
+
+    @typer_app.command(
+        pipeline_name,
+        help=help_text,
+    )
+    def pipeline_cmd(
+        parallel: bool = typer.Option(
+            False,
+            '--parallel',
+            help='Run steps in parallel where possible',
+            is_flag=True,
+        ),
+        sequential: bool = typer.Option(
+            False,
+            '--sequential',
+            help='Run steps sequentially',
+            is_flag=True,
+        ),
+        verbose: bool = typer.Option(
+            False,
+            '--verbose',
+            '-v',
+            help='Show verbose output during pipeline execution',
+            is_flag=True,
+        ),
+        debug: bool = typer.Option(
+            False,
+            '--debug',
+            help='Show detailed debug information',
+            is_flag=True,
+        ),
+        dry_run: bool = typer.Option(
+            False,
+            '--dry-run',
+            help='Show steps without executing them',
+            is_flag=True,
+        ),
+    ) -> None:
+        """Execute a specific pipeline."""
+        from rich.console import Console
+
+        console = Console()
+
+        # Determine execution mode
+        execution_mode = None
+
+        if parallel and sequential:
+            console.print(
+                '[bold red]Error:[/] Cannot specify both --parallel and'
+                ' --sequential'
+            )
+            raise typer.Exit(code=1)
+        elif parallel:
+            execution_mode = 'parallel'
+        elif sequential:
+            execution_mode = 'sequential'
+
+        # Use pipeline's default max_workers
+        max_workers = None
+
+        try:
+            success = makim_instance.pipeline.run_pipeline(
+                pipeline_name,
+                execution_mode=execution_mode,
+                max_workers=max_workers,
+                verbose=verbose,
+                dry_run=dry_run,
+                debug=debug,
+            )
+            if not success and not dry_run:
+                raise typer.Exit(code=1)
+        except Exception as e:
+            msg = f"Error running pipeline '{pipeline_name}': {e!s}"
+            console.print(f'[bold red]{msg}[/]')
+            raise typer.Exit(code=1)
