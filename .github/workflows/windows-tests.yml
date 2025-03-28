@@ -1,0 +1,61 @@
+# .github/workflows/windows-tests.yml
+name: Windows Tests
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pytest pytest-cov
+
+      - name: Run Windows compatibility tests
+        run: |
+          pytest -xvs tests/windows/test_windows_compatibility.py
+
+      - name: Run comprehensive tests
+        run: |
+          pytest -xvs tests
+
+      - name: Run benchmarks
+        run: |
+          python tests/benchmarks/benchmark_platforms.py
+
+      - name: Test Windows smoke tests
+        run: |
+          # Create a simple test config
+          echo 'groups:
+            test:
+              tasks:
+                basic:
+                  run: echo "Hello from CI"
+                powershell:
+                  backend: powershell
+                  run: |
+                    Write-Output "PowerShell test from CI"
+                    Get-Date
+          ' > ci-test.yaml
+
+          # Run the tests
+          python -m makim --file ci-test.yaml test.basic
+          python -m makim --file ci-test.yaml test.powershell
