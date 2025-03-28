@@ -93,6 +93,10 @@ groups:
             - task: smoke-tests.task-logger
             - task: smoke-tests.retry
             - task: smoke-tests.validate-conditionals
+            - task: smoke-tests.wsl-test
+            - task: smoke-tests.powershell-test
+            - task: smoke-tests.path-test
+            - task: smoke-tests.command-test
 
       ci:
         help: Run all tasks used on CI
@@ -105,6 +109,202 @@ groups:
 
   smoke-tests:
     tasks:
+      wsl-test:
+        help: Test Windows and WSL compatibility
+        backend: bash
+        args:
+          verbose-mode:
+            help: Run in verbose mode
+            type: bool
+            action: store_true
+        vars:
+          platform_name: "${{ __import__('platform').system() }}"
+          is_windows: "${{ __import__('platform').system() == 'Windows' }}"
+          is_wsl: "${{ 'WSL_DISTRO_NAME' in __import__('os').environ or ('microsoft' in open('/proc/version').read().lower() if __import__('os').path.exists('/proc/version') else False) }}"
+          shell: "${{ __import__('os').environ.get('SHELL', 'Unknown') }}"
+        env:
+          PLATFORM_NAME: "${{ vars.platform_name }}"
+          IS_WINDOWS: "${{ vars.is_windows }}"
+          IS_WSL: "${{ vars.is_wsl }}"
+          SHELL_NAME: "${{ vars.shell }}"
+        run: |
+          echo "==== Platform Detection Test ===="
+          echo "Platform: $PLATFORM_NAME"
+          echo "Is Windows: $IS_WINDOWS"
+          echo "Is WSL: $IS_WSL"
+          echo "Shell: $SHELL_NAME"
+
+          # Test platform-specific features
+          if [ "$IS_WSL" = "True" ]; then
+            echo "==== WSL-specific Tests ===="
+            echo "Windows path conversion:"
+            wslpath -w $(pwd) || echo "wslpath failed"
+
+            echo "Windows command access test:"
+            which powershell.exe > /dev/null 2>&1 && powershell.exe -Command "Write-Host 'PowerShell is working!' -ForegroundColor Green" || echo "PowerShell.exe not found"
+          fi
+
+          if [ "$IS_WINDOWS" = "True" ]; then
+            echo "==== Windows-specific Tests ===="
+            echo "PowerShell command test:"
+            powershell -Command "Write-Host 'Running on Windows' -ForegroundColor Green"
+          fi
+
+          echo "==== Environment Variables ===="
+          echo "PATH: $PATH"
+          echo "HOME: $HOME"
+
+          echo "==== File System Test ===="
+          echo "Current directory: $(pwd)"
+          echo "Files in current directory:"
+          ls -la
+
+          echo "==== Test completed successfully ===="
+
+      powershell-test:
+        help: Test PowerShell script execution via Makim
+        backend: python
+        run: |
+          import os
+          import tempfile
+          import subprocess
+          import platform
+
+          print("==== PowerShell Integration Test ====")
+
+          # Create a temporary PowerShell script
+          with tempfile.NamedTemporaryFile(suffix='.ps1', delete=False, mode='w') as f:
+              f.write('''
+              Write-Host "PowerShell script execution test"
+              Write-Host "Windows version:" -ForegroundColor Green
+              $OSInfo = New-Object -ComObject "WScript.Shell"
+              Write-Host $OSInfo.RegRead("HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProductName")
+              Write-Host "Current directory:" -ForegroundColor Green
+              Get-Location
+              ''')
+              ps_script = f.name
+
+          try:
+              if platform.system() == "Windows":
+                  print("Executing PowerShell script directly on Windows...")
+                  subprocess.call(["powershell", "-ExecutionPolicy", "Bypass", "-File", ps_script])
+              elif "WSL_DISTRO_NAME" in os.environ or ("microsoft" in platform.uname().release.lower() if platform.system() == "Linux" else False):
+                  print("Executing PowerShell script from WSL...")
+                  # Convert path to Windows format
+                  try:
+                      win_path = subprocess.check_output(["wslpath", "-w", ps_script], text=True).strip()
+                      subprocess.call(["powershell.exe", "-ExecutionPolicy", "Bypass", "-File", win_path])
+                  except Exception as e:
+                      print(f"Error converting path or executing PowerShell: {e}")
+              else:
+                  print("PowerShell not available on this platform")
+          except Exception as e:
+              print(f"Error executing PowerShell: {e}")
+          finally:
+              # Clean up
+              os.unlink(ps_script)
+
+      path-test:
+        help: Test path conversion between Windows and Unix formats
+        backend: python
+        run: |
+          import os
+          import platform
+          import subprocess
+
+          print("==== Path Conversion Test ====")
+          current_dir = os.getcwd()
+          print(f"Current directory (native): {current_dir}")
+
+          if platform.system() == "Windows":
+              print("Windows path handling:")
+              # Convert to Unix-style for display
+              print(f"  Windows path: {current_dir}")
+              print(f"  Unix-style: {current_dir.replace('\\', '/')}")
+          elif "WSL_DISTRO_NAME" in os.environ or ("microsoft" in platform.uname().release.lower() if platform.system() == "Linux" else False):
+              print("WSL path handling:")
+              try:
+                  # Unix to Windows path
+                  win_path = subprocess.check_output(["wslpath", "-w", current_dir], text=True).strip()
+                  print(f"  Unix path: {current_dir}")
+                  print(f"  Windows path: {win_path}")
+
+                  # Windows back to Unix path
+                  unix_path = subprocess.check_output(["wslpath", "-u", win_path], text=True).strip()
+                  print(f"  Converted back to Unix: {unix_path}")
+
+                  # Check if the round-trip conversion is accurate
+                  print(f"  Round-trip conversion successful: {unix_path == current_dir}")
+              except Exception as e:
+                  print(f"  Error in path conversion: {e}")
+          else:
+              print("Running on native Linux - path conversion not applicable")
+
+      command-test:
+        help: Test cross-platform command execution
+        backend: python
+        run: |
+          import os
+          import platform
+          import subprocess
+          import tempfile
+
+          print("==== Cross-Platform Command Test ====")
+
+          # Test commands
+          unix_commands = [
+              "mkdir -p test_dir/nested",
+              "touch test_dir/nested/test.txt",
+              "ls -la test_dir",
+              "cat /etc/os-release 2>/dev/null || echo 'OS release info not available'",
+          ]
+
+          windows_commands = [
+              "mkdir test_dir\\nested",
+              "echo Hello > test_dir\\nested\\test.txt",
+              "dir test_dir",
+              "ver",
+          ]
+
+          # Determine which commands to run
+          if platform.system() == "Windows":
+              print("Running Windows commands...")
+              commands = windows_commands
+              shell = True
+          elif "WSL_DISTRO_NAME" in os.environ or ("microsoft" in platform.uname().release.lower() if platform.system() == "Linux" else False):
+              print("Running Unix commands in WSL...")
+              commands = unix_commands
+              shell = True
+
+              print("\nTesting access to Windows commands from WSL:")
+              try:
+                  output = subprocess.check_output(["cmd.exe", "/c", "ver"], text=True, stderr=subprocess.PIPE)
+                  print(f"Windows version: {output.strip()}")
+              except Exception as e:
+                  print(f"Error accessing Windows commands: {e}")
+          else:
+              print("Running Unix commands on Linux...")
+              commands = unix_commands
+              shell = True
+
+          # Execute the commands
+          print("\nExecuting platform-specific commands:")
+          for cmd in commands:
+              print(f"\nRunning: {cmd}")
+              try:
+                  subprocess.call(cmd, shell=shell)
+              except Exception as e:
+                  print(f"Command failed: {e}")
+
+          # Clean up
+          try:
+              if platform.system() == "Windows":
+                  subprocess.call("rmdir /s /q test_dir", shell=True)
+              else:
+                  subprocess.call("rm -rf test_dir", shell=True)
+          except Exception as e:
+              print(f"Clean-up failed: {e}")
+
       simple:
         help: Test makim using a simple makimfile
         args:
@@ -602,3 +802,196 @@ groups:
           # it requires the password manually
           ssh-keygen -R "[localhost]:2222" || true
           ssh -o StrictHostKeyChecking=no testuser@localhost -p 2222 'pwd'
+
+  windows-compatibility:
+    help: Tests specifically for Windows compatibility features
+    tasks:
+      verify-all:
+        help: Run all Windows compatibility tests
+        hooks:
+          pre-run:
+            - task: windows-compatibility.platform-detection
+            - task: windows-compatibility.powershell-backend
+            - task: windows-compatibility.cmd-backend
+            - task: windows-compatibility.path-handling
+            - task: windows-compatibility.performance-benchmark
+
+      platform-detection:
+        help: Test platform detection mechanisms
+        backend: python
+        run: |
+          import platform
+          import os
+          from makim.core import is_windows, is_wsl
+
+          print("=== Platform Detection Test ===")
+          print(f"Platform system: {platform.system()}")
+          print(f"is_windows(): {is_windows()}")
+          print(f"is_wsl(): {is_wsl()}")
+
+          # Verify correct detection
+          if platform.system() == 'Windows':
+              assert is_windows(), "Failed to detect Windows"
+              assert not is_wsl(), "Incorrectly detected as WSL"
+          elif 'WSL_DISTRO_NAME' in os.environ:
+              assert not is_windows(), "Incorrectly detected as Windows"
+              assert is_wsl(), "Failed to detect WSL"
+          else:
+              print("Running on non-Windows platform")
+
+          print("Platform detection test passed!")
+
+      powershell-backend:
+        help: Test PowerShell as backend on Windows/WSL
+        run: |
+          # Create a temporary PowerShell test file
+          if [ -d "/tmp" ]; then
+            TEST_DIR="/tmp"
+          else
+            TEST_DIR="$TEMP"
+          fi
+
+          PS_TEST="$TEST_DIR/makim_test_$$.ps1"
+          echo 'Write-Output "PowerShell backend test successful!"' > "$PS_TEST"
+
+          # Create a simple makim file for testing PowerShell backend
+          PS_MAKIM="$TEST_DIR/makim_ps_$$.yaml"
+          cat > "$PS_MAKIM" << 'EOF'
+          groups:
+            test:
+              tasks:
+                powershell:
+                  help: Test PowerShell backend
+                  backend: powershell
+                  run: |
+                    Write-Output "Running with PowerShell backend"
+                    Get-Date
+          EOF
+
+          # Run the test
+          echo "Testing PowerShell backend..."
+          makim --verbose --file "$PS_MAKIM" test.powershell
+
+          # Clean up
+          rm -f "$PS_TEST" "$PS_MAKIM"
+
+      cmd-backend:
+        help: Test CMD as backend on Windows
+        run: |
+          if [ "$(uname -s)" = "Windows_NT" ] || [ -n "$WSL_DISTRO_NAME" ]; then
+            # Create a temporary cmd test file
+            if [ -d "/tmp" ]; then
+              TEST_DIR="/tmp"
+            else
+              TEST_DIR="$TEMP"
+            fi
+
+            CMD_MAKIM="$TEST_DIR/makim_cmd_$$.yaml"
+            cat > "$CMD_MAKIM" << 'EOF'
+            groups:
+              test:
+                tasks:
+                  cmd:
+                    help: Test CMD backend
+                    backend: cmd
+                    run: |
+                      echo Running with CMD backend
+                      echo Current directory: %CD%
+            EOF
+
+            # Run the test
+            echo "Testing CMD backend..."
+            makim --verbose --file "$CMD_MAKIM" test.cmd
+
+            # Clean up
+            rm -f "$CMD_MAKIM"
+          else
+            echo "Skipping CMD backend test on non-Windows platform"
+          fi
+
+      path-handling:
+        help: Test path handling across platforms
+        backend: python
+        run: |
+          import os
+          import platform
+          from pathlib import Path
+          from makim.core import _normalize_path
+
+          print("=== Path Handling Test ===")
+
+          # Test basic path normalization
+          test_paths = [
+              "/path/to/test",
+              "C:\\Users\\test\\Documents",
+              "./relative/path",
+              "..\\parent\\path",
+              "~\\home\\path" if platform.system() == "Windows" else "~/home/path",
+          ]
+
+          for path in test_paths:
+              norm_path = _normalize_path(path)
+              print(f"Original: {path}")
+              print(f"Normalized: {norm_path}")
+              print(f"pathlib Path: {Path(path)}")
+              print("---")
+
+          # Test current directory resolution
+          print(f"Current dir: {os.getcwd()}")
+          print(f"Normalized current dir: {_normalize_path(os.getcwd())}")
+          print("Path handling tests completed!")
+
+      performance-benchmark:
+        help: Benchmark subprocess vs sh performance
+        backend: python
+        run: |
+          import time
+          import platform
+          import subprocess
+          import os
+
+          print("=== Performance Benchmark ===")
+          print(f"Platform: {platform.system()}")
+
+          ITERATIONS = 10
+
+          def run_subprocess_test():
+              start = time.time()
+              for _ in range(ITERATIONS):
+                  if platform.system() == "Windows":
+                      subprocess.run(["cmd", "/c", "echo", "test"], capture_output=True, text=True)
+                  else:
+                      subprocess.run(["echo", "test"], capture_output=True, text=True)
+              end = time.time()
+              return end - start
+
+          subprocess_time = run_subprocess_test()
+          print(f"subprocess module ({ITERATIONS} iterations): {subprocess_time:.4f}s")
+
+          # Only test sh on non-Windows platforms
+          if platform.system() != "Windows":
+              try:
+                  import sh
+                  def run_sh_test():
+                      start = time.time()
+                      for _ in range(ITERATIONS):
+                          result = sh.echo("test", _out=subprocess.DEVNULL)
+                      end = time.time()
+                      return end - start
+
+                  sh_time = run_sh_test()
+                  print(f"sh module ({ITERATIONS} iterations): {sh_time:.4f}s")
+                  print(f"Comparison: subprocess is {sh_time/subprocess_time:.2f}x the speed of sh")
+              except ImportError:
+                  print("sh module not available for testing")
+
+          print("Benchmark completed!")
+
+  ci:
+    help: Continuous Integration tasks
+    tasks:
+      windows-tests:
+        help: Run Windows compatibility tests in CI
+        hooks:
+          pre-run:
+            - task: windows-compatibility.verify-all

@@ -7,8 +7,13 @@ import copy
 import io
 import json
 import os
+import platform
 import pprint
+import re
 import shutil
+
+# Security note: subprocess is necessary for Windows compatibility
+import subprocess  # nosec B404
 import sys
 import tempfile
 
@@ -19,8 +24,7 @@ from typing import Any, Dict, List, Optional, TextIO, TypedDict, Union, cast
 
 import dotenv
 import paramiko
-import sh
-import yaml  # type: ignore
+import yaml
 
 from jinja2 import Environment
 from jsonschema import ValidationError, validate
@@ -30,6 +34,181 @@ from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
 from makim.scheduler import MakimScheduler
 from makim.task_logging import FormattedLogStream, LogLevel, Tee
+
+
+class ProcessWrapper:
+    """Wrapper around subprocess.Popen for compatibility with sh."""
+
+    def __init__(self, process: subprocess.Popen[Any]) -> None:
+        """Initialize with a subprocess.Popen object."""
+        self.process = process
+        self.pid = process.pid
+
+    def wait(self) -> int:
+        """Wait for the process to complete and return its exit code."""
+        return self.process.wait()
+
+    def kill(self) -> None:
+        """Kill the process."""
+        self.process.kill()
+
+    def kill_group(self) -> None:
+        """Kill the process group."""
+        self.kill()
+
+
+# Platform detection mechanism
+def is_windows() -> bool:
+    """Check if the current platform is Windows."""
+    return platform.system() == 'Windows'
+
+
+def is_wsl() -> bool:
+    """Check if the current environment is Windows Subsystem for Linux.
+
+    Detects if running in Windows Subsystem for Linux using multiple methods.
+    """
+    # Method 1: Check for /proc/version containing Microsoft
+    try:
+        with open('/proc/version', 'r') as f:
+            if 'microsoft' in f.read().lower():
+                return True
+    except (
+        FileNotFoundError,
+        PermissionError,
+        OSError,
+    ):  # Specific exceptions
+        pass
+
+    # Method 2: Check for WSL-specific environment variables
+    if 'WSL_DISTRO_NAME' in os.environ:
+        return True
+
+    # Method 3: Check for /proc/sys/kernel/osrelease containing WSL
+    try:
+        with open('/proc/sys/kernel/osrelease', 'r') as f:
+            if 'wsl' in f.read().lower() or 'microsoft' in f.read().lower():
+                return True
+    except (
+        FileNotFoundError,
+        PermissionError,
+        OSError,
+    ):  # Specific exceptions
+        pass
+
+    return False
+
+
+def handle_windows_encoding(output: Union[str, bytes]) -> str:
+    """Handle Windows-specific encoding issues in command output."""
+    if is_windows():
+        # Windows command outputs sometimes need special handling
+        try:
+            # Try to handle any potential encoding issues
+            if isinstance(output, bytes):
+                return output.decode('utf-8', errors='replace')
+            return str(output)
+        except UnicodeDecodeError:
+            # Fall back to a more lenient encoding
+            if isinstance(output, bytes):
+                return output.decode('cp1252', errors='replace')
+            return str(output)
+    return str(output)
+
+
+# Shell command execution wrapper
+class ShellCommand:
+    """Cross-platform shell command execution wrapper."""
+
+    def __init__(self, command_name: str) -> None:
+        """Initialize with the command name to execute."""
+        self.command_name = command_name
+
+    def __call__(
+        self, *args: Any, **kwargs: Any
+    ) -> Union[ProcessWrapper, subprocess.Popen[Any]]:
+        """Execute the command, handling platform-specific differences."""
+        # Extract parameters from kwargs that are used by sh
+        _in = kwargs.pop('_in', sys.stdin)
+        _out = kwargs.pop('_out', sys.stdout)
+        _err = kwargs.pop('_err', sys.stderr)
+        _env = kwargs.pop('_env', os.environ)
+        _cwd = kwargs.pop('_cwd', None)
+        _bg = kwargs.pop('_bg', False)
+
+        # Prepare command
+        cmd = [self.command_name]
+
+        # Special handling for PowerShell to ensure scripts work
+        if self.command_name.lower() == 'powershell':
+            cmd.extend(['-ExecutionPolicy', 'Bypass'])
+
+            # Check if the last argument is a path to a file
+            if len(args) > 0 and os.path.exists(args[-1]):
+                script_path = args[-1]
+                # Make sure it has .ps1 extension for PowerShell
+                if not script_path.lower().endswith('.ps1'):
+                    script_dir = os.path.dirname(script_path)
+                    script_name = os.path.basename(script_path)
+                    base_name, _ = os.path.splitext(script_name)
+                    new_path = os.path.join(script_dir, f'{base_name}.ps1')
+                    try:
+                        shutil.copy2(script_path, new_path)
+                        script_path = new_path
+                    except Exception as e:
+                        if kwargs.get('verbose', False):
+                            print(
+                                f'Warning: Could not copy script to .ps1 '
+                                f'extension: {e}'
+                            )
+
+                cmd.extend(['-File', script_path])
+                # Remove the path from args since we've already added it
+                # with -File
+                args = args[:-1]
+
+        # Add remaining arguments
+        cmd.extend(args)
+
+        # Configure subprocess parameters
+        subprocess_kwargs = {
+            'stdin': _in,
+            'stdout': _out,
+            'stderr': _err,
+            'env': _env,
+            'cwd': _cwd,
+            'text': True,
+        }
+
+        # Handle UNC paths (network paths starting with \\)
+        if _cwd and isinstance(_cwd, str) and _cwd.startswith('\\\\'):
+            # UNC paths aren't supported as working directories
+            # in many commands
+            # Use a local Windows directory instead
+            _cwd = os.environ.get('TEMP', 'C:\\Windows\\Temp')
+            subprocess_kwargs['cwd'] = _cwd
+
+        # Create the process
+        process = subprocess.Popen[Any](cmd, **subprocess_kwargs)
+
+        # If background execution is requested
+        if _bg:
+            return ProcessWrapper(process)
+
+        # Wait for the process to complete
+        returncode = process.wait()
+
+        # Handle errors
+        if returncode != 0:
+            # Create an error object similar to sh.ErrorReturnCode
+            class ErrorReturnCode(Exception):
+                def __init__(self, command: List[str], exit_code: int) -> None:
+                    self.full_cmd = command
+                    self.exit_code = exit_code
+
+            raise ErrorReturnCode(cmd, returncode)
+
+        return process
 
 
 def command_exists(command: str) -> bool:
@@ -48,9 +227,13 @@ SCOPE_GLOBAL = 0
 SCOPE_GROUP = 1
 SCOPE_TARGET = 2
 
-# note: this is necessary for the executable version (pyinstaller)
+# Shell backend selection including Windows shells
 DEFAULT_SHELL_NAME = (
-    'xonsh'
+    'powershell'
+    if is_windows() and command_exists('powershell')
+    else 'cmd'
+    if is_windows()
+    else 'xonsh'
     if command_exists('xonsh')
     else 'bash'
     if command_exists('bash')
@@ -63,22 +246,47 @@ DEFAULT_SHELL_NAME = (
 
 if not DEFAULT_SHELL_NAME:
     MakimLogs.raise_error(
-        'No backend found (xonsh, bash, zsh, sh).',
+        'No backend found (xonsh, bash, zsh, sh, powershell, cmd).',
         MakimError.MAKIM_NO_BACKEND_FOUND,
     )
 
 MakimLogs.print_info(f' DEFAULT SHELL: {DEFAULT_SHELL_NAME}')
-DEFAULT_SHELL_APP = getattr(sh, DEFAULT_SHELL_NAME)
 
+# Initialize shell app based on platform
+if is_windows():
+    DEFAULT_SHELL_APP = ShellCommand(DEFAULT_SHELL_NAME)
+else:
+    try:
+        import sh
+
+        DEFAULT_SHELL_APP = getattr(sh, DEFAULT_SHELL_NAME)
+    except ImportError:
+        # If MakimError doesn't have MAKIM_DEPENDENCY_MISSING,
+        # add a fallback error code
+        error_code = getattr(
+            MakimError,
+            'MAKIM_DEPENDENCY_MISSING',
+            MakimError.MAKIM_CONFIG_FILE_INVALID,
+        )
+        MakimLogs.raise_error(
+            'The sh library is required for Unix systems.',
+            error_code,
+        )
+
+# Shell arguments for different shells
 KNOWN_SHELL_APP_ARGS = {
     'bash': ['-e'],
     'php': ['-f'],
     'nox': ['-f'],
+    'powershell': ['-ExecutionPolicy', 'Bypass', '-Command'],
+    'cmd': ['/c'],
 }
 
-# useful when the program just read specific file extension
+# File suffixes for different shells
 KNOWN_SHELL_APP_FILE_SUFFIX = {
     'nox': '.makim.py',
+    'powershell': '.ps1',
+    'cmd': '.bat',
 }
 
 TEMPLATE = Environment(
@@ -142,7 +350,7 @@ class Makim:
     dry_run: bool = False
     verbose: bool = False
     global_data: dict[str, Any] = {}
-    shell_app: sh.Command = DEFAULT_SHELL_APP
+    shell_app: Any = DEFAULT_SHELL_APP
     shell_args: list[str] = []
     tmp_suffix: str = '.makim'
     skip_hooks: bool = False
@@ -172,10 +380,9 @@ class Makim:
         self.dry_run = False
         self.verbose = False
         self.shell_app = DEFAULT_SHELL_APP
-        self.shell_args: list[str] = []
-        self.tmp_suffix: str = '.makim'
+        self.shell_args = []
+        self.tmp_suffix = '.makim'
         self.scheduler = None
-        # os.chdir(os.getcwd())
         self.skip_hooks = False
 
     def __getstate__(self) -> Dict[str, Any]:
@@ -184,6 +391,86 @@ class Makim:
         if 'scheduler' in state:
             state['scheduler'] = None
         return state
+
+    def _normalize_path(self, path: str) -> str:
+        """Normalize path for the current platform."""
+        return os.path.normpath(path)
+
+    def _adapt_for_powershell(self, cmd: str) -> str:
+        """Adapt a bash-style command for PowerShell execution."""
+        # Basic command adaptations
+        replacements = [
+            ('export ', '$env:'),
+            (' && ', '; '),
+            (' || ', ' -or '),
+            ('echo ', 'Write-Output '),
+            ('rm -rf ', 'Remove-Item -Recurse -Force '),
+            ('rm ', 'Remove-Item '),
+            ('cp -r ', 'Copy-Item -Recurse '),
+            ('cp ', 'Copy-Item '),
+            ('mv ', 'Move-Item '),
+            ('mkdir -p ', 'New-Item -ItemType Directory -Force -Path '),
+            ('mkdir ', 'New-Item -ItemType Directory -Path '),
+            ('touch ', 'New-Item -ItemType File -Force -Path '),
+            ('grep ', 'Select-String -Pattern '),
+            ('cat ', 'Get-Content '),
+            ('ls -la', 'Get-ChildItem -Force'),
+            (
+                'ls -l',
+                'Get-ChildItem | Format-Table -Property Mode,Length,'
+                'LastWriteTime,Name',
+            ),
+            ('ls ', 'Get-ChildItem '),
+            ('pwd', '(Get-Location).Path'),
+            ('cd ', 'Set-Location '),
+            ('sleep ', 'Start-Sleep -Seconds '),
+            ('chmod +x ', "# PowerShell doesn't need chmod - commented out: "),
+            (
+                'find ',
+                'Get-ChildItem -Recurse | Where-Object { $_.Name -like "*',
+            ),
+            (' | ', ' | '),  # Keep pipe symbols intact
+        ]
+
+        for old, new in replacements:
+            if old.endswith(' '):
+                # Only replace if it's a whole word (has space after)
+                cmd = re.sub(
+                    r'(^|[^\w])' + re.escape(old[:-1]) + r'(\s)',
+                    r'\1' + new,
+                    cmd,
+                )
+            else:
+                cmd = cmd.replace(old, new)
+
+        # Handle find command completion (adding the closing part)
+        if 'Get-ChildItem -Recurse | Where-Object { $_.Name -like "*' in cmd:
+            cmd = cmd.replace(
+                'Get-ChildItem -Recurse | Where-Object { $_.Name -like "*',
+                'Get-ChildItem -Recurse | Where-Object { $_.Name -like "*',
+            )
+            # Add the closing part of the Where-Object command
+            # if it's not there
+            if '*" }' not in cmd:
+                cmd = cmd + '*" }'
+
+        # Convert environment variable references from $VAR to $env:VAR
+        # But be careful not to convert $_ (PowerShell's ForEach-Object
+        # current item variable)
+        cmd = re.sub(r'(^|\s)\$(?!_)([A-Za-z0-9_]+)', r'\1$env:\2', cmd)
+
+        # Fix output redirection
+        cmd = cmd.replace(' > ', ' | Out-File -FilePath ')
+        cmd = cmd.replace(' >> ', ' | Out-File -FilePath -Append ')
+
+        # Fix command substitution
+        cmd = re.sub(r'\$\((.*?)\)', r'$(Invoke-Expression "\1")', cmd)
+
+        # Fix scripts that use set -e to exit on error
+        if 'set -e' in cmd:
+            cmd = cmd.replace('set -e', '$ErrorActionPreference = "Stop"')
+
+        return cmd
 
     def _call_shell_app(
         self,
@@ -194,44 +481,74 @@ class Makim:
     ) -> None:
         self._load_shell_app()
 
+        # Create temp file with appropriate extension
         fd, filepath = tempfile.mkstemp(suffix=self.tmp_suffix, text=True)
 
         with open(filepath, 'w') as f:
             f.write(cmd)
 
-        p = self.shell_app(
-            *self.shell_args,
-            filepath,
-            _in=sys.stdin,
-            _out=out_stream,
-            _err=err_stream,
-            _bg=True,
-            _bg_exc=False,
-            _no_err=True,
-            _env=os.environ,
-            _new_session=True,
-            _cwd=str(self._resolve_working_directory('task')),
-        )
-
         try:
-            p.wait()
-        except sh.ErrorReturnCode as e:
+            if is_windows():
+                # Windows implementation using ShellCommand
+                p = self.shell_app(
+                    *self.shell_args,
+                    filepath,
+                    _in=sys.stdin,
+                    _out=out_stream,
+                    _err=err_stream,
+                    _bg=True,
+                    _env=os.environ,
+                    _cwd=str(self._resolve_working_directory('task')),
+                )
+                p.wait()
+            else:
+                # Unix implementation using sh
+                import sh
+
+                p = self.shell_app(
+                    *self.shell_args,
+                    filepath,
+                    _in=sys.stdin,
+                    _out=out_stream,
+                    _err=err_stream,
+                    _bg=True,
+                    _bg_exc=False,
+                    _no_err=True,
+                    _env=os.environ,
+                    _new_session=True,
+                    _cwd=str(self._resolve_working_directory('task')),
+                )
+                p.wait()
+        except Exception as e:
             os.close(fd)
-            MakimLogs.raise_error(
-                str(e.full_cmd),
-                MakimError.SH_ERROR_RETURN_CODE,
-                e.exit_code or 1,
-                exit_on_error=exit_on_error,
-            )
-        except KeyboardInterrupt:
+            if isinstance(
+                e, sh.ErrorReturnCode if 'sh' in sys.modules else Exception
+            ):
+                MakimLogs.raise_error(
+                    str(getattr(e, 'full_cmd', e)),
+                    MakimError.SH_ERROR_RETURN_CODE,
+                    getattr(e, 'exit_code', 1) or 1,
+                    exit_on_error=exit_on_error,
+                )
+            elif isinstance(e, KeyboardInterrupt):
+                pid = getattr(p, 'pid', 0)
+                if hasattr(p, 'kill_group'):
+                    p.kill_group()
+                else:
+                    p.kill()
+                MakimLogs.raise_error(
+                    f'Process {pid} killed.',
+                    MakimError.SH_KEYBOARD_INTERRUPT,
+                )
+            else:
+                MakimLogs.raise_error(
+                    f'Command execution error: {e!s}',
+                    MakimError.SH_ERROR_RETURN_CODE,
+                    1,
+                    exit_on_error=exit_on_error,
+                )
+        finally:
             os.close(fd)
-            pid = p.pid
-            p.kill_group()
-            MakimLogs.raise_error(
-                f'Process {pid} killed.',
-                MakimError.SH_KEYBOARD_INTERRUPT,
-            )
-        os.close(fd)
 
     def _call_shell_remote(
         self, cmd: str, host_config: dict[str, Any], exit_on_error: bool = True
@@ -258,9 +575,13 @@ class Makim:
             if self.verbose:
                 MakimLogs.print_info(cmd)
 
-            MakimLogs.print_info(stdout.read().decode('utf-8'))
+            output = stdout.read().decode('utf-8')
+            # Handle potential encoding issues
+            output = handle_windows_encoding(output)
+            MakimLogs.print_info(output)
 
             error = stderr.read().decode('utf-8')
+            error = handle_windows_encoding(error)
             if error:
                 MakimLogs.raise_error(
                     error,
@@ -354,7 +675,7 @@ class Makim:
                 error_message, MakimError.JSON_SCHEMA_DECODING_ERROR
             )
         except FileNotFoundError:
-            error_message = 'Vaidation schema file not found.'
+            error_message = 'Validation schema file not found.'
             MakimLogs.raise_error(
                 error_message, MakimError.MAKIM_SCHEMA_FILE_NOT_FOUND
             )
@@ -475,8 +796,12 @@ class Makim:
             current_path: Union[None, Path], new_path: str
         ) -> Path:
             if not current_path:
-                return Path(new_path)
-            return current_path / Path(new_path)
+                # Convert to absolute path and normalize for platform
+                return Path(self._normalize_path(new_path))
+
+            # Combine paths and normalize for platform
+            combined = current_path / Path(new_path)
+            return Path(self._normalize_path(str(combined)))
 
         scope_id = scope_options.index(scope)
 
@@ -566,19 +891,47 @@ class Makim:
                 MakimError.MAKIM_CONFIG_FILE_INVALID,
             )
 
-        self.shell_app = getattr(sh, cmd_name)
+        # Override suffix for PowerShell - ALWAYS use .ps1
+        if cmd_name.lower() == 'powershell' and is_windows():
+            cmd_tmp_suffix = '.ps1'
+
         self.shell_args = cmd_args
         self.tmp_suffix = cmd_tmp_suffix
+
+        # Create the appropriate shell command based on platform
+        if is_windows():
+            self.shell_app = ShellCommand(cmd_name)
+        else:
+            try:
+                import sh
+
+                self.shell_app = getattr(sh, cmd_name)
+            except ImportError:
+                # If MakimError doesn't have MAKIM_DEPENDENCY_MISSING,
+                # add a fallback error code
+                error_code = getattr(
+                    MakimError,
+                    'MAKIM_DEPENDENCY_MISSING',
+                    MakimError.MAKIM_CONFIG_FILE_INVALID,
+                )
+                MakimLogs.raise_error(
+                    'The sh library is required for Unix systems.',
+                    error_code,
+                )
 
     def _load_dotenv(self, data_scope: dict[str, Any]) -> dict[str, str]:
         env_file = data_scope.get('env-file')
         if not env_file:
             return {}
 
-        if not env_file.startswith('/'):
+        if not env_file.startswith('/') and not (
+            is_windows() and env_file[1:2] == ':'
+        ):
             # use makim file as reference for the working directory
             # for the .env file
             env_file = str(Path(self.file).parent / env_file)
+
+        env_file = self._normalize_path(env_file)
 
         if not Path(env_file).exists():
             MakimLogs.raise_error(
@@ -739,7 +1092,134 @@ class Makim:
 
         return combinations
 
-    # run commands
+    # Helper methods for command execution to reduce complexity
+    def _prepare_command_environment(
+        self, args: dict[str, Any]
+    ) -> tuple[dict[str, Any], dict[str, Any], list[dict[str, Any]]]:
+        """Prepare the command environment and arguments."""
+        if not isinstance(self.group_data.get('vars', {}), dict):
+            MakimLogs.raise_error(
+                '`vars` attribute inside the group '
+                f'{self.group_name} is not a dictionary.',
+                MakimError.MAKIM_VARS_ATTRIBUTE_INVALID,
+            )
+
+        # Get matrix configuration if it exists
+        matrix_combinations: list[dict[str, Any]] = []
+        if matrix_config := self.task_data.get('matrix', {}):
+            matrix_combinations = self._generate_matrix_combinations(
+                matrix_config
+            )
+
+        env, variables = self._load_scoped_data('task')
+        self.env_scoped = deepcopy(env)
+
+        args_input: dict[str, Any] = {'file': self.file}
+        for k, v in self.task_data.get('args', {}).items():
+            if not isinstance(v, dict):
+                raise Exception('`args` attribute should be a dictionary.')
+            k_clean = k.replace('-', '_')
+            action = v.get('action', '').replace('-', '_')
+            is_store_true = action == 'store_true'
+            default = v.get('default', False if is_store_true else None)
+
+            args_input[k_clean] = default
+
+            input_flag = f'--{k}'
+            if args.get(input_flag) is not None:
+                if action == 'store_true':
+                    args_input[k_clean] = (
+                        True if args[input_flag] is None else args[input_flag]
+                    )
+                    continue
+
+                args_input[k_clean] = (
+                    args[input_flag].strip()
+                    if isinstance(args[input_flag], str)
+                    else args[input_flag]
+                )
+            elif v.get('required'):
+                MakimLogs.raise_error(
+                    f'The argument `{k}` is set as required. '
+                    'Please, provide that argument to proceed.',
+                    MakimError.MAKIM_ARGUMENT_REQUIRED,
+                )
+
+        return args_input, variables, matrix_combinations
+
+    def _process_matrix_combination(
+        self,
+        matrix_vars: dict[str, Any],
+        args_input: dict[str, Any],
+        variables: dict[str, Any],
+        env: dict[str, str],
+        exit_on_error: bool = True,
+    ) -> None:
+        """Process a single matrix combination."""
+        cmd = self.task_data.get('run', '').strip()
+        remote_host = self.task_data.get('remote')
+
+        # Update environment variables
+        for k, v in env.items():
+            os.environ[k] = v
+
+        # Create a copy of variables and update with matrix values
+        current_vars = deepcopy(variables)
+        if matrix_vars:
+            current_vars['matrix'] = matrix_vars
+
+        # Render command with current matrix values
+        current_cmd = TEMPLATE.from_string(cmd).render(
+            args=args_input, env=env, vars=current_vars, matrix=matrix_vars
+        )
+
+        # Normalize paths in the command if on Windows
+        if is_windows():
+            # Replace Unix-style paths with Windows-style paths
+            # in the command
+            current_cmd = current_cmd.replace('/', '\\')
+
+            # If using PowerShell, adapt command syntax
+            if DEFAULT_SHELL_NAME.lower() == 'powershell':
+                current_cmd = self._adapt_for_powershell(current_cmd)
+
+        if self.verbose:
+            # Prepare execution context for logging
+            execution_context = {
+                'args_input': args_input,
+                'current_vars': current_vars,
+                'env': env,
+                'matrix_vars': matrix_vars,
+            }
+            # Log command execution details
+            width, _ = get_terminal_size()
+            self._log_command_execution(execution_context, width)
+            MakimLogs.print_info('>>> ' + current_cmd.replace('\n', '\n>>> '))
+            MakimLogs.print_info('=' * width)
+
+        if not self.dry_run and current_cmd:
+            if remote_host:
+                host_config = self.ssh_config.get(remote_host)
+                if not host_config:
+                    MakimLogs.raise_error(
+                        f"Remote host '{remote_host}' configuration "
+                        f'not found.',
+                        MakimError.REMOTE_HOST_NOT_FOUND,
+                    )
+                self._call_shell_remote(
+                    current_cmd,
+                    cast(dict[str, Any], host_config),
+                    exit_on_error=exit_on_error,
+                )
+            else:
+                out_stream, err_stream = self._get_output_stream()
+                self._call_shell_app(
+                    current_cmd,
+                    out_stream,
+                    err_stream,
+                    exit_on_error=exit_on_error,
+                )
+
     def _run_hooks(self, args: dict[str, Any], hook_type: str) -> None:
         if self.skip_hooks:
             return
@@ -807,119 +1287,22 @@ class Makim:
     def _run_command(
         self, args: dict[str, Any], exit_on_error: bool = True
     ) -> None:
-        cmd = self.task_data.get('run', '').strip()
-        remote_host = self.task_data.get('remote')
+        """Run the command with arguments and handle matrix combinations.
 
-        if not isinstance(self.group_data.get('vars', {}), dict):
-            MakimLogs.raise_error(
-                '`vars` attribute inside the group '
-                f'{self.group_name} is not a dictionary.',
-                MakimError.MAKIM_VARS_ATTRIBUTE_INVALID,
-            )
-
-        # Get matrix configuration if it exists
-        matrix_combinations: list[dict[str, Any]] = []
-        if matrix_config := self.task_data.get('matrix', {}):
-            matrix_combinations = self._generate_matrix_combinations(
-                matrix_config
-            )
-
-        env, variables = self._load_scoped_data('task')
-        self.env_scoped = deepcopy(env)
-
-        args_input: dict[str, str | bool | float | int] = {'file': self.file}
-        for k, v in self.task_data.get('args', {}).items():
-            if not isinstance(v, dict):
-                raise Exception('`args` attribute should be a dictionary.')
-            k_clean = k.replace('-', '_')
-            action = v.get('action', '').replace('-', '_')
-            is_store_true = action == 'store_true'
-            default = v.get('default', False if is_store_true else None)
-
-            args_input[k_clean] = default
-
-            input_flag = f'--{k}'
-            if args.get(input_flag) is not None:
-                if action == 'store_true':
-                    args_input[k_clean] = (
-                        True if args[input_flag] is None else args[input_flag]
-                    )
-                    continue
-
-                args_input[k_clean] = (
-                    args[input_flag].strip()
-                    if isinstance(args[input_flag], str)
-                    else args[input_flag]
-                )
-            elif v.get('required'):
-                MakimLogs.raise_error(
-                    f'The argument `{k}` is set as required. '
-                    'Please, provide that argument to proceed.',
-                    MakimError.MAKIM_ARGUMENT_REQUIRED,
-                )
-
-        width, _ = get_terminal_size()
-
-        def process_matrix_combination(matrix_vars: dict[str, Any]) -> None:
-            # Update environment variables
-            for k, v in env.items():
-                os.environ[k] = v
-
-            # Create a copy of variables and update with matrix values
-            current_vars = deepcopy(variables)
-            if matrix_vars:
-                current_vars['matrix'] = matrix_vars
-
-            # Render command with current matrix values
-            current_cmd = TEMPLATE.from_string(cmd).render(
-                args=args_input, env=env, vars=current_vars, matrix=matrix_vars
-            )
-
-            if self.verbose:
-                # Prepare execution context for logging
-                execution_context = {
-                    'args_input': args_input,
-                    'current_vars': current_vars,
-                    'env': env,
-                    'matrix_vars': matrix_vars,
-                }
-                # Log command execution details
-                self._log_command_execution(execution_context, width)
-                MakimLogs.print_info(
-                    '>>> ' + current_cmd.replace('\n', '\n>>> ')
-                )
-                MakimLogs.print_info('=' * width)
-
-            if not self.dry_run and current_cmd:
-                if remote_host:
-                    host_config = self.ssh_config.get(remote_host)
-                    if not host_config:
-                        MakimLogs.raise_error(
-                            f"""
-                            Remote host '{remote_host}' configuration
-                            not found.
-                            """,
-                            MakimError.REMOTE_HOST_NOT_FOUND,
-                        )
-                    self._call_shell_remote(
-                        current_cmd,
-                        cast(dict[str, Any], host_config),
-                        exit_on_error=exit_on_error,
-                    )
-                else:
-                    out_stream, err_stream = self._get_output_stream()
-                    self._call_shell_app(
-                        current_cmd,
-                        out_stream,
-                        err_stream,
-                        exit_on_error=exit_on_error,
-                    )
+        Processes each combination from the matrix if defined.
+        """
+        args_input, variables, matrix_combinations = (
+            self._prepare_command_environment(args)
+        )
+        env, _ = self._load_scoped_data('task')
 
         # Run command for each matrix combination
         for matrix_vars in matrix_combinations or [{}]:
-            process_matrix_combination(matrix_vars)
+            self._process_matrix_combination(
+                matrix_vars, args_input, variables, env, exit_on_error
+            )
 
-        # move back the environment variable to the previous values
+        # Restore the environment variables to the previous values
         os.environ.clear()
         os.environ.update(self.env_scoped)
 
@@ -1000,8 +1383,8 @@ class Makim:
                     return
                 attempt += 1
                 MakimLogs.print_warning(
-                    f'[Retry] Attempt {attempt}/{retry_count}.'
-                    f' Retrying in {delay} seconds...',
+                    f'[Retry] Attempt {attempt}/{retry_count}. '
+                    f'Retrying in {delay} seconds...',
                 )
                 await asyncio.sleep(delay)
 
@@ -1038,7 +1421,7 @@ class Makim:
         ):
             if self.verbose:
                 MakimLogs.print_warning(
-                    f'{args["task"]} not executed.'
+                    f'{args["task"]} not executed. '
                     'Condition (if) not satisfied.'
                 )
             return

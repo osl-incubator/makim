@@ -3,13 +3,15 @@ channels:
   - nodefaults
   - conda-forge
 dependencies:
-  - bash
   - python
   - poetry >=1.5
   - nodejs
   - perl
   - r-base
-  - sh
+  - bash # [not win]
+  - sh # [not win]
+  - pywin32 # [win]
+  - psutil # [win]  # Add for process management on Windows
   - pip
   - pip:
       # note: workaround ci issue for macos

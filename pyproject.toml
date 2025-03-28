@@ -11,10 +11,10 @@ homepage = "https://github.com/osl-incubator/makim"
 readme = "README.md"
 requires-python = ">=3.9,<4"
 dependencies = [
-  "sh >= 2.0.0",
+  "sh >= 2.0.0; platform_system != 'Windows'",
   "pyyaml >= 5.0",
   "jinja2 >= 2.0",
-  "xonsh >= 0.15.0",
+  "xonsh >= 0.15.0; platform_system != 'Windows'",
   "python-dotenv >= 0.21.1",
   "typer >= 0.9.0",
   "fuzzywuzzy >= 0.18.0",
@@ -22,7 +22,7 @@ dependencies = [
   "rich >= 10.11.0",
   "shellingham >= 1.5.4",
   "jsonschema >= 4",
-  "paramiko  >= 3.5.0",
+  "paramiko >= 3.5.0",
   "types-paramiko >= 3.5.0",
   "apscheduler (>=3.11.0,<4.0.0)",
   "sqlalchemy (>=2.0.37,<3.0.0)"
@@ -87,7 +87,6 @@ warn_unused_configs = true
 show_error_codes = true
 exclude = ["scripts/"]
 
-
 [tool.ruff]
 line-length = 79
 force-exclude = true
@@ -119,7 +118,6 @@ lines-between-types = 1
 
 [tool.ruff.format]
 quote-style = "single"
-
 
 [tool.bandit]
 exclude_dirs = ["tests"]
