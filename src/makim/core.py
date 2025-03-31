@@ -19,12 +19,12 @@ from typing import Any, Dict, List, Optional, TextIO, TypedDict, Union, cast
 
 import dotenv
 import paramiko
-import sh
 import yaml  # type: ignore
 
 from jinja2 import Environment
 from jsonschema import ValidationError, validate
 from typing_extensions import TypeAlias
+from xh import xh
 
 from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
@@ -68,7 +68,7 @@ if not DEFAULT_SHELL_NAME:
     )
 
 MakimLogs.print_info(f' DEFAULT SHELL: {DEFAULT_SHELL_NAME}')
-DEFAULT_SHELL_APP = getattr(sh, DEFAULT_SHELL_NAME)
+DEFAULT_SHELL_APP = getattr(xh, DEFAULT_SHELL_NAME)
 
 KNOWN_SHELL_APP_ARGS = {
     'bash': ['-e'],
@@ -142,7 +142,7 @@ class Makim:
     dry_run: bool = False
     verbose: bool = False
     global_data: dict[str, Any] = {}
-    shell_app: sh.Command = DEFAULT_SHELL_APP
+    shell_app: xh.Command = DEFAULT_SHELL_APP
     shell_args: list[str] = []
     tmp_suffix: str = '.makim'
     skip_hooks: bool = False
@@ -215,7 +215,7 @@ class Makim:
 
         try:
             p.wait()
-        except sh.ErrorReturnCode as e:
+        except xh.ErrorReturnCode as e:
             os.close(fd)
             MakimLogs.raise_error(
                 str(e.full_cmd),
@@ -566,7 +566,7 @@ class Makim:
                 MakimError.MAKIM_CONFIG_FILE_INVALID,
             )
 
-        self.shell_app = getattr(sh, cmd_name)
+        self.shell_app = getattr(xh, cmd_name)
         self.shell_args = cmd_args
         self.tmp_suffix = cmd_tmp_suffix
 

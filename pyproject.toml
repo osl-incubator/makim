@@ -11,7 +11,7 @@ homepage = "https://github.com/osl-incubator/makim"
 readme = "README.md"
 requires-python = ">=3.9,<4"
 dependencies = [
-  "sh >= 2.0.0",
+  "xhell >= 0.1.1",
   "pyyaml >= 5.0",
   "jinja2 >= 2.0",
   "xonsh >= 0.15.0",
