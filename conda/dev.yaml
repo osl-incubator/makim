@@ -9,7 +9,6 @@ dependencies:
   - nodejs
   - perl
   - r-base
-  - sh
   - pip
   - pip:
       # note: workaround ci issue for macos
