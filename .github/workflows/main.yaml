@@ -57,6 +57,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: prepare conda env file for windows
+        if: ${{ matrix.os == 'windows' }}
+        run: cp conda/dev-win.yaml conda/dev.yaml
+
       - uses: conda-incubator/setup-miniconda@v3
         with:
           miniforge-version: latest
