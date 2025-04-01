@@ -659,44 +659,6 @@ traitlets = ">=4"
 test = ["pytest"]
 
 [[package]]
-name = "compose-go"
-version = "2.33.1"
-description = "Docker Compose v2 (GoLang) wrapped in a Python Package"
-optional = false
-python-versions = "<4,>=3.9"
-groups = ["dev"]
-files = [
-    {file = "compose_go-2.33.1-cp311-cp311-manylinux_2_39_x86_64.whl", hash = "sha256:e4b95ca1a9c1b1d48d355a9d92d06ffecd4ada16c5ec8cf4a015a2d714f1ada2"},
-    {file = "compose_go-2.33.1.tar.gz", hash = "sha256:52193d3bb9d6d44f4b95755536b0e76682207a7c0c457623400dc4d4393f7c4b"},
-]
-
-[[package]]
-name = "containers-sugar"
-version = "1.16.1"
-description = "Simplify the usage of containers"
-optional = false
-python-versions = "<4,>=3.9"
-groups = ["dev"]
-files = [
-    {file = "containers_sugar-1.16.1-py3-none-any.whl", hash = "sha256:5e218c47306c93fe55f46d7cb67b107643ba2ae60be32993351c4c4f8067b316"},
-    {file = "containers_sugar-1.16.1.tar.gz", hash = "sha256:73bb1788d58d4e528d935b2ae77afd567b7c193910024d1e58877cc92ccffc35"},
-]
-
-[package.dependencies]
-colorama = ">=0.4.6"
-compose-go = ">=1.27.0"
-Jinja2 = ">=2"
-jsonschema = ">=4"
-python-dotenv = ">=0.21.1"
-pyyaml = ">=6"
-sh = ">=2.0.0"
-typer = ">=0.9.0"
-xonsh = ">=0.15.0"
-
-[package.extras]
-tui = ["plotille (>=5)", "rich (>=10.11.0)", "textual (>=0.48)"]
-
-[[package]]
 name = "coverage"
 version = "7.8.0"
 description = "Code coverage measurement for Python"
@@ -2940,7 +2902,7 @@ version = "1.1.0"
 description = "Read key-value pairs from a .env file and set them as environment variables"
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "dev"]
+groups = ["main"]
 files = [
     {file = "python_dotenv-1.1.0-py3-none-any.whl", hash = "sha256:d7c01d9e2293916c18baf562d95698754b0dbbb5e74d457c45d4f6561fb9d55d"},
     {file = "python_dotenv-1.1.0.tar.gz", hash = "sha256:41f90bc6f5f177fb41f53e87666db362025010eb28f60a01c9143bfa33a2b2d5"},
@@ -3613,12 +3575,12 @@ version = "2.2.2"
 description = "Python subprocess replacement"
 optional = false
 python-versions = "<4.0,>=3.8.1"
-groups = ["main", "dev"]
+groups = ["main"]
+markers = "platform_system != \"Windows\""
 files = [
     {file = "sh-2.2.2-py3-none-any.whl", hash = "sha256:e0b15b4ae8ffcd399bc8ffddcbd770a43c7a70a24b16773fbb34c001ad5d52af"},
     {file = "sh-2.2.2.tar.gz", hash = "sha256:653227a7c41a284ec5302173fbc044ee817c7bad5e6e4d8d55741b9aeb9eb65b"},
 ]
-markers = {main = "platform_system != \"Windows\""}
 
 [[package]]
 name = "shellingham"
@@ -3626,7 +3588,7 @@ version = "1.5.4"
 description = "Tool to Detect Surrounding Shell"
 optional = false
 python-versions = ">=3.7"
-groups = ["main", "dev"]
+groups = ["main"]
 files = [
     {file = "shellingham-1.5.4-py2.py3-none-any.whl", hash = "sha256:7ecfff8f2fd72616f7481040475a65b2bf8af90a56c89140852d1120324e8686"},
     {file = "shellingham-1.5.4.tar.gz", hash = "sha256:8dbca0739d487e5bd35ab3ca4b36e11c4078f3a234bfce294b0a0291363404de"},
@@ -3959,7 +3921,7 @@ version = "0.15.2"
 description = "Typer, build great CLIs. Easy to code. Based on Python type hints."
 optional = false
 python-versions = ">=3.7"
-groups = ["main", "dev"]
+groups = ["main"]
 files = [
     {file = "typer-0.15.2-py3-none-any.whl", hash = "sha256:46a499c6107d645a9c13f7ee46c5d5096cae6f5fc57dd11eccbbb9ae3e44ddfc"},
     {file = "typer-0.15.2.tar.gz", hash = "sha256:ab2fab47533a813c49fe1f16b1a370fd5819099c00b119e0633df65f22144ba5"},
@@ -4227,7 +4189,7 @@ version = "0.19.3"
 description = "Python-powered shell. Full-featured and cross-platform."
 optional = false
 python-versions = ">=3.9"
-groups = ["main", "dev"]
+groups = ["main"]
 files = [
     {file = "xonsh-0.19.3-py310-none-any.whl", hash = "sha256:e0cd36b5a9765aa6f0e5365ac349fd3cbd452cc932d92c754de323dab2a8589a"},
     {file = "xonsh-0.19.3-py311-none-any.whl", hash = "sha256:319f03034a4838041d2326785c1fde3a45c709e825451aa4ff01b803ca452856"},
@@ -4273,4 +4235,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4"
-content-hash = "fed9a02883f672708d06cb040fda78f9f4dadcdb473f35fc97635f3e56cc62f7"
+content-hash = "c40f514567348561e6beb122d1c246d955328e1d4093a69ee92eeddf7c952ae3"
