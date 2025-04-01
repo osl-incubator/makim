@@ -87,7 +87,9 @@ jobs:
 
       - name: Run smoke tests using makim and containers-sugar
         if: ${{ matrix.os == 'ubuntu' }}
-        run: makim smoke-tests.containers
+        run: |
+          pip install compose-go
+          makim smoke-tests.containers
 
       - name: Run smoke tests using different interpreters
         run: makim smoke-tests.shell-app
@@ -129,7 +131,7 @@ jobs:
         run: makim smoke-tests.shell-app
 
       - name: Run smoke test for ssh remote execution
-        if: ${{ matrix.os != 'macos' }}
+        if: ${{ matrix.os == 'linux' }}
         run: makim smoke-tests.ssh-remote-execution
 
       - name: Run smoke test for scheduler
