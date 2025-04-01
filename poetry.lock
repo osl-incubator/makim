@@ -3618,6 +3618,7 @@ files = [
     {file = "sh-2.2.2-py3-none-any.whl", hash = "sha256:e0b15b4ae8ffcd399bc8ffddcbd770a43c7a70a24b16773fbb34c001ad5d52af"},
     {file = "sh-2.2.2.tar.gz", hash = "sha256:653227a7c41a284ec5302173fbc044ee817c7bad5e6e4d8d55741b9aeb9eb65b"},
 ]
+markers = {main = "platform_system != \"Windows\""}
 
 [[package]]
 name = "shellingham"
@@ -4207,18 +4208,18 @@ test = ["websockets"]
 
 [[package]]
 name = "xhell"
-version = "0.1.1"
+version = "0.2.0"
 description = "Shell library for Windows and Wrapper for sh for Linux and MacOS"
 optional = false
 python-versions = "<4,>=3.9"
 groups = ["main"]
 files = [
-    {file = "xhell-0.1.1-py3-none-any.whl", hash = "sha256:9d068829cf8740d36acdd60f2a78e5e8b56f0af3593f6fc8c1b0cbc5f1ae951e"},
-    {file = "xhell-0.1.1.tar.gz", hash = "sha256:9644e9e45e8b071035c9fc845cb7b2ba1960ddc3b26b0b8298ed499031901a43"},
+    {file = "xhell-0.2.0-py3-none-any.whl", hash = "sha256:4d0e17ac9ce4ff499dd82f8a6caab7c7d75a2f37394a0e4d041f43483aa83a62"},
+    {file = "xhell-0.2.0.tar.gz", hash = "sha256:3428418bbf40bad3e276b0163f4564f16a39d6967a37159a814187ad9e3d0985"},
 ]
 
 [package.dependencies]
-sh = ">=2"
+sh = {version = ">=2", markers = "platform_system != \"Windows\""}
 
 [[package]]
 name = "xonsh"
@@ -4272,4 +4273,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.9,<4"
-content-hash = "d36eba1f52fe3d768988ea52bddf6eba6323b6c7981d01cdd58e2bb4af62432f"
+content-hash = "e4ce10a5349c78273ebc30f92a07b82a2153ca21a85448ea40d3086acd3aab91"
