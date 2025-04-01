@@ -1,0 +1,17 @@
+name: makim
+channels:
+  - nodefaults
+  - conda-forge
+dependencies:
+  - python
+  - poetry >=1.5
+  - nodejs
+  - perl
+  - r-base
+  - pip
+  - pip:
+      # note: workaround ci issue for macos
+      - setuptools >= 40.8.0
+      - wheel >=0.42.0
+      # fix the distlib issue
+      - paginate >=0.5
