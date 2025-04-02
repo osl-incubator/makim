@@ -3,7 +3,6 @@ channels:
   - nodefaults
   - conda-forge
 dependencies:
-  - bash
   - python
   - poetry >=1.5
   - nodejs
@@ -16,5 +15,3 @@ dependencies:
       - wheel >=0.42.0
       # fix the distlib issue
       - paginate >=0.5
-      # compose-go fails sometimes when installed by poetry
-      - compose-go==2.33.1

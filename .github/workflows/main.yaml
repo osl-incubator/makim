@@ -41,6 +41,7 @@ jobs:
         os:
           - "ubuntu"
           - "macos"
+          - "windows"
 
     runs-on: ${{ matrix.os }}-latest
     timeout-minutes: 20
@@ -55,6 +56,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: prepare conda env file for windows
+        if: ${{ matrix.os == 'windows' }}
+        run: cp conda/dev-win.yaml conda/dev.yaml
 
       - uses: conda-incubator/setup-miniconda@v3
         with:
@@ -81,8 +86,10 @@ jobs:
         run: makim smoke-tests.complex
 
       - name: Run smoke tests using makim and containers-sugar
-        if: ${{ matrix.os != 'macos' }}
-        run: makim smoke-tests.containers
+        if: ${{ matrix.os == 'ubuntu' }}
+        run: |
+          pip install "containers-sugar>=1.16.1"
+          makim smoke-tests.containers
 
       - name: Run smoke tests using different interpreters
         run: makim smoke-tests.shell-app
@@ -124,7 +131,7 @@ jobs:
         run: makim smoke-tests.shell-app
 
       - name: Run smoke test for ssh remote execution
-        if: ${{ matrix.os != 'macos' }}
+        if: ${{ matrix.os == 'linux' }}
         run: makim smoke-tests.ssh-remote-execution
 
       - name: Run smoke test for scheduler
