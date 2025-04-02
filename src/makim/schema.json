@@ -244,6 +244,32 @@
                             },
                             "additionalProperties": false
                           }
+                        },
+                        "failure": {
+                          "type": "array",
+                          "description": "Tasks to run if this task fails",
+                          "items": {
+                            "type": "object",
+                            "required": ["task"],
+                            "properties": {
+                              "task": {
+                                "type": "string",
+                                "description": "Name of the task to run."
+                              },
+                              "args": {
+                                "type": "object",
+                                "description": "Arguments to pass to the dependency task.",
+                                "additionalProperties": {
+                                  "type": ["string", "boolean"]
+                                }
+                              },
+                              "if": {
+                                "type": "string",
+                                "description": "Conditional expression to execute the task."
+                              }
+                            },
+                            "additionalProperties": false
+                          }
                         }
                       },
                       "additionalProperties": false
