@@ -1,6 +1,22 @@
 # Release Notes
 ---
 
+# [1.25.0](https://github.com/osl-incubator/makim/compare/1.24.0...1.25.0) (2025-04-02)
+
+
+### Bug Fixes
+
+* **core:** enforce explicit group naming for tasks ([#169](https://github.com/osl-incubator/makim/issues/169)) ([ffd7f55](https://github.com/osl-incubator/makim/commit/ffd7f55a8078376efeb1fdc83570b7c0b123a4f3))
+* Improve error handling and logging in task scheduler module ([#185](https://github.com/osl-incubator/makim/issues/185)) ([67e21d9](https://github.com/osl-incubator/makim/commit/67e21d9c9a9c38458e367f179ec336479d46789d))
+
+
+### Features
+
+* Add an option for tasks to specify a log file, log format and log level ([#162](https://github.com/osl-incubator/makim/issues/162)) ([9ee5d40](https://github.com/osl-incubator/makim/commit/9ee5d4056c5cfcb41acdb27f4090840be51b304b))
+* **core:** Add conditionals to validate execution of tasks ([#183](https://github.com/osl-incubator/makim/issues/183)) ([fa455da](https://github.com/osl-incubator/makim/commit/fa455da70ba2ea411f189aecdd1b5422fd9d6c25))
+* Implement task retry mechanism ([#175](https://github.com/osl-incubator/makim/issues/175)) ([100d0e4](https://github.com/osl-incubator/makim/commit/100d0e47fe39bd51017b816ccb8c65b4b25d44ed))
+* Replace sh by xh ([#190](https://github.com/osl-incubator/makim/issues/190)) ([6c9d22e](https://github.com/osl-incubator/makim/commit/6c9d22ecd39cfbb1005c812f4b6d3af39966f53e))
+
 # [1.24.0](https://github.com/osl-incubator/makim/compare/1.23.1...1.24.0) (2025-03-07)
 
 
