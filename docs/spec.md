@@ -1,4 +1,4 @@
-# Makim Specification
+# Specifications
 
 ## Overview
 

@@ -1,4 +1,4 @@
-# Makim Template
+# Template Tags
 
 **Makim** config files are powered by the Jinja2 template engine, allowing you
 to use Jinja2 tags for added flexibility in your Makim config files.

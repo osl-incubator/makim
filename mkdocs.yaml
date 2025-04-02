@@ -50,7 +50,7 @@ plugins:
         python:
           import:
             - https://docs.python.org/3/objects.inv
-          selection:
+          options:
             docstring_style: numpy
             filters:
               - "!^Bounds"
@@ -83,7 +83,6 @@ plugins:
               - "!^table_expr_class"
               - "!^translator_class"
               - "!^Options$"
-          rendering:
             show_category_heading: true
             show_root_full_path: false
             show_root_heading: true
