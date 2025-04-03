@@ -93,6 +93,7 @@ groups:
             - task: smoke-tests.task-logger
             - task: smoke-tests.retry
             - task: smoke-tests.validate-conditionals
+            - task: smoke-tests.failure-hook
 
       ci:
         help: Run all tasks used on CI
@@ -555,6 +556,29 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-wrong-group-vars
           makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-correct-task-vars
           makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-wrong-task-vars
+
+      failure-hook:
+        help: Test makim tasks with failure hook
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-failure-hook.yaml
+        backend: bash
+        hooks:
+          post-run:
+            - task: clean.tmp
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-simple-failure
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-failure-pass
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-failure-retry
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-failure-retry-once
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-retry-pass
 
   error:
     help: This group helps tests failure tasks

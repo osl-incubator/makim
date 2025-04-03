@@ -972,15 +972,18 @@ class Makim:
             cast(TextIO, Tee(sys.stderr, stderr_stream)),
         )
 
-    async def _run_with_retry(self, args: dict[str, Any]) -> None:
+    async def _run_with_retry(self, args: dict[str, Any]) -> bool:
         """Run a command with retry logic."""
         retry_config = self.task_data.get('retry', {})
         retry_count = retry_config.get('count')
         delay = retry_config.get('delay', 0)
 
         if not retry_config or retry_count == 1:
-            self._run_command(args)
-            return
+            try:
+                self._run_command(args, exit_on_error=False)
+                return True
+            except Exception:
+                return False
 
         attempt = 1
         while attempt <= retry_count:
@@ -989,21 +992,20 @@ class Makim:
                     f'[Retry] Attempt {attempt}/{retry_count}'
                 )
                 self._run_command(args, exit_on_error=False)
-                return
+                return True
             except Exception:
                 if attempt == retry_count:
-                    MakimLogs.raise_error(
-                        f'[Retry] All {retry_count} retries failed.',
-                        MakimError.MAKIM_RETRY_EXHAUSTED,
-                        exit_on_error=True,
+                    MakimLogs.print_warning(
+                        f'[Retry] All {retry_count} retries failed.'
                     )
-                    return
+                    return False
                 attempt += 1
                 MakimLogs.print_warning(
                     f'[Retry] Attempt {attempt}/{retry_count}.'
                     f' Retrying in {delay} seconds...',
                 )
                 await asyncio.sleep(delay)
+        return False
 
     # public methods
     def load(
@@ -1045,9 +1047,20 @@ class Makim:
 
         self._run_hooks(args, 'pre-run')
 
-        if self.task_data.get('retry'):
-            asyncio.run(self._run_with_retry(args))
-        else:
-            self._run_command(args)
+        failure_hook = bool(self.task_data.get('hooks', {}).get('failure'))
+        retry = bool(self.task_data.get('retry'))
 
-        self._run_hooks(args, 'post-run')
+        success = True
+
+        if retry:
+            success = asyncio.run(self._run_with_retry(args))
+        else:
+            try:
+                self._run_command(args, exit_on_error=not failure_hook)
+            except Exception:
+                success = False
+
+        if not success and failure_hook:
+            self._run_hooks(args, 'failure')
+        else:
+            self._run_hooks(args, 'post-run')

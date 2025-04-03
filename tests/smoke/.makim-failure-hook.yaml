@@ -1,0 +1,158 @@
+groups:
+  setup:
+    tasks:
+      post-hook:
+        help: Should run after task
+        log:
+          path: ./tests/smoke/logs/post_hook.txt
+        run: echo post
+
+      pre-hook:
+        help: Should run after task
+        log:
+          path: ./tests/smoke/logs/pre_hook.txt
+        run: echo pre
+
+      failure-hook:
+        help: Should run after task fails
+        log:
+          path: ./tests/smoke/logs/failure_hook.txt
+        run: echo fail
+
+      clean-failure-file:
+        help: This task removes failure log file
+        run: rm -f ./tests/smoke/logs/failure_hook.txt
+
+      clean-post-hook-file:
+        help: This task removes post hook log file
+        run: rm -f ./tests/smoke/logs/post_hook.txt
+
+      clean-pre-hook-file:
+        help: This task removes pre hook log file
+        run: rm -f ./tests/smoke/logs/pre_hook.txt
+
+  run:
+    tasks:
+      simple-failure:
+        help: This task will fail and run failure hook task
+        hooks:
+          failure:
+            - task: setup.failure-hook
+        run: |
+          assert 1 == 2
+
+      failure-pass:
+        help: This task will pass
+        hooks:
+          pre-run:
+            - task: setup.pre-hook
+          post-run:
+            - task: setup.post-hook
+          failure:
+            - task: setup.failure-hook
+        log:
+          path: ./tests/smoke/logs/failure_pass.txt
+        run: echo pass
+
+      failure-retry:
+        help: This task will fail and retry then run failure hook task
+        retry:
+          count: 2
+        hooks:
+          failure:
+            - task: setup.failure-hook
+        run: |
+          assert 1 == 2
+
+      failure-retry-once:
+        help: This task will only have one retry then will run failure hook task
+        retry:
+          count: 1
+        hooks:
+          failure:
+            - task: setup.failure-hook
+        run: |
+          assert 1 == 2
+
+      failure-retry-pass:
+        help: This task will have retry config but will pass
+        retry:
+          count: 3
+        hooks:
+          pre-run:
+            - task: setup.pre-hook
+          post-run:
+            - task: setup.post-hook
+          failure:
+            - task: setup.failure-hook
+        log:
+          path: ./tests/smoke/logs/failure_retry_pass.txt
+        run: echo "retry_pass"
+
+  tests:
+    tasks:
+      test-simple-failure:
+        help: This task will test simple failure task
+        hooks:
+          pre-run:
+            - task: setup.clean-failure-file
+            - task: run.simple-failure
+        run: |
+          import os
+          file_path = "./tests/smoke/logs/failure_hook.txt"
+          assert os.path.exists(file_path), f"Failure hook didn't run"
+
+      test-failure-pass:
+        help: This task will test failure pass
+        hooks:
+          pre-run:
+            - task: setup.clean-failure-file
+            - task: setup.clean-post-hook-file
+            - task: setup.clean-pre-hook-file
+            - task: run.failure-pass
+        run: |
+          import os
+          pre_file_path = "./tests/smoke/logs/post_hook.txt"
+          post_file_path = "./tests/smoke/logs/pre_hook.txt"
+          pass_file_path =  "./tests/smoke/logs/failure_pass.txt"
+
+          assert os.path.exists(pre_file_path), f"Pre run hook didn't run"
+          assert os.path.exists(post_file_path), f"Post run hook didn't run"
+          assert os.path.exists(pass_file_path), f"Failure pass didn't run"
+
+      test-failure-retry:
+        help: This task will test failure retry
+        hooks:
+          pre-run:
+            - task: run.failure-retry
+        run: |
+          import os
+          file_path = "./tests/smoke/logs/failure_hook.txt"
+          assert os.path.exists(file_path), f"Failure hook didn't run with retry"
+
+      test-failure-retry-once:
+        help: This task will test failure retry once
+        hooks:
+          pre-run:
+            - task: setup.clean-failure-file
+            - task: run.failure-retry-once
+        run: |
+          import os
+          file_path = "./tests/smoke/logs/failure_hook.txt"
+          assert os.path.exists(file_path), f"Failure hook didn't run with retry once"
+
+      test-retry-pass:
+        help: This task will test failure retry pass
+        hooks:
+          pre-run:
+            - task: setup.clean-failure-file
+            - task: run.failure-retry-pass
+        run: |
+          import os
+          pre_file_path = "./tests/smoke/logs/post_hook.txt"
+          post_file_path = "./tests/smoke/logs/pre_hook.txt"
+          pass_file_path =  "./tests/smoke/logs/failure_retry_pass.txt"
+
+          assert os.path.exists(pre_file_path), f"Pre run hook didn't run"
+          assert os.path.exists(post_file_path), f"Post run hook didn't run"
+          assert os.path.exists(pass_file_path), f"Failure retry pass didn't run"
