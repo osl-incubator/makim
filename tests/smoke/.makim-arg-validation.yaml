@@ -1,0 +1,27 @@
+groups:
+  tests:
+    tasks:
+      integer-validations:
+        help: Validate integers
+        args:
+          age:
+            help: user age
+            type: integer
+            validations:
+              minimum: 0
+              maximum: 150
+              multiple-of: 3
+            required: true
+        run: echo ${{ args.age }}
+
+      string-validations:
+        help: Validate string
+        args:
+          name:
+            help: user name
+            type: string
+            validations:
+              min-length: 2
+              max-length: 15
+            required: true
+        run: echo ${{ args.name }}

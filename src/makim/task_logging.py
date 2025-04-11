@@ -1,4 +1,4 @@
-"""Task Logging Module for Makimm."""
+"""Task logging module for Makim."""
 
 import datetime
 

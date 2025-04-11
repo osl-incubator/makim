@@ -8,7 +8,7 @@ groups:
           delay: 2
         run: echo success
 
-      eventually_success:
+      eventually-success:
         help: "Task that fails once, then succeeds"
         retry:
           count: 3

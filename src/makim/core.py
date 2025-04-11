@@ -30,6 +30,7 @@ from makim.console import get_terminal_size
 from makim.logs import MakimError, MakimLogs
 from makim.scheduler import MakimScheduler
 from makim.task_logging import FormattedLogStream, LogLevel, Tee
+from makim.utils import kebab_to_camel
 
 
 def command_exists(command: str) -> bool:
@@ -666,6 +667,7 @@ class Makim:
         return cast(Dict[str, Any], fix_dict_keys_recursively(variables))
 
     def _load_task_args(self) -> None:
+        """Load and validate task args."""
         if self.args is None:
             self.args = {}
         for name, value in self.task_data.get('args', {}).items():
@@ -677,6 +679,38 @@ class Makim:
                     default
                     if default is not None
                     else (False if is_bool else None)
+                )
+
+            if 'validations' not in value:
+                continue
+
+            arg_value = self.args[qualified_name]
+
+            if arg_value is None:
+                continue
+
+            arg_type = value.get('type', 'string')
+            if arg_type == 'integer' and not isinstance(arg_value, int):
+                try:
+                    arg_value = int(arg_value)
+                    self.args[qualified_name] = arg_value
+                except ValueError:
+                    MakimLogs.raise_error(
+                        f"Argument '{name}' must be an integer",
+                        MakimError.CONFIG_VALIDATION_ERROR,
+                    )
+
+            schema = {'type': arg_type}
+            for key, val in value['validations'].items():
+                schema[kebab_to_camel(key)] = val
+            try:
+                validate(instance=arg_value, schema=schema)
+            except ValidationError as ve:
+                error_message = (
+                    f"Validation error for argument '{name}': {ve.message}"
+                )
+                MakimLogs.raise_error(
+                    error_message, MakimError.CONFIG_VALIDATION_ERROR
                 )
 
     def _log_command_execution(

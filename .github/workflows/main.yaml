@@ -149,6 +149,9 @@ jobs:
       - name: Run smoke test for testing failure hook
         run: makim smoke-tests.failure-hook
 
+      - name: Run smoke test for testing args validation
+        run: makim smoke-tests.arg-validation
+
       - name: Semantic Release PR Title Check
         uses: osl-incubator/semantic-release-pr-title-check@v1.4.1
         if: success() || failure()
