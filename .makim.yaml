@@ -94,6 +94,7 @@ groups:
             - task: smoke-tests.retry
             - task: smoke-tests.validate-conditionals
             - task: smoke-tests.failure-hook
+            - task: smoke-tests.arg-validation
 
       ci:
         help: Run all tasks used on CI
@@ -527,7 +528,7 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE --help
           makim $VERBOSE_FLAG --file $MAKIM_FILE --version
           makim $VERBOSE_FLAG --file $MAKIM_FILE test.success
-          makim $VERBOSE_FLAG --file $MAKIM_FILE test.eventually_success
+          makim $VERBOSE_FLAG --file $MAKIM_FILE test.eventually-success
 
       validate-conditionals:
         help: Test makim tasks with conditionals
@@ -579,6 +580,23 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-failure-retry
           makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-failure-retry-once
           makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-retry-pass
+
+      arg-validation:
+        help: Test makim with arg validation
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-arg-validation.yaml
+        backend: bash
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.integer-validations --age=6
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.string-validations --name=makim
 
   error:
     help: This group helps tests failure tasks
