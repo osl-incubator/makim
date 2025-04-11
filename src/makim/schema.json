@@ -173,7 +173,7 @@
                             },
                             "validations": {
                               "type": "object",
-                              "description": "Additional JSON‐Schema constraints to apply to this argument’s value.",
+                              "description": "JSON schema validations for the argument",
                               "additionalProperties": true
                             }
                           },
