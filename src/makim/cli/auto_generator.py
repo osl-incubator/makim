@@ -8,6 +8,7 @@ import click
 import typer
 
 from fuzzywuzzy import process
+from rich.console import Console
 from typer import Typer
 
 from makim.core import Makim
@@ -295,7 +296,7 @@ def create_dynamic_command_pipeline(
     pipeline_config: Dict[str, Any],
 ) -> None:
     """
-    Create a dynamic command for a pipeline.
+    Create a dynamic command for a specific pipeline, placing it in the 'Available Pipelines' help panel.
 
     Parameters
     ----------
@@ -315,20 +316,23 @@ def create_dynamic_command_pipeline(
     @typer_app.command(
         pipeline_name,
         help=help_text,
+        rich_help_panel='Available Pipelines',  # <-- THIS IS THE KEY ADDITION HERE
     )
     def pipeline_cmd(
+        # These options allow overriding execution mode per-run
         parallel: bool = typer.Option(
             False,
             '--parallel',
-            help='Run steps in parallel where possible',
+            help='Run steps in parallel where possible (overrides default)',
             is_flag=True,
         ),
         sequential: bool = typer.Option(
             False,
             '--sequential',
-            help='Run steps sequentially',
+            help='Run steps sequentially (overrides default)',
             is_flag=True,
         ),
+        # These are general execution options
         verbose: bool = typer.Option(
             False,
             '--verbose',
@@ -349,40 +353,51 @@ def create_dynamic_command_pipeline(
             is_flag=True,
         ),
     ) -> None:
-        """Execute a specific pipeline."""
-        from rich.console import Console
-
+        """Execute this specific pipeline."""
+        # We need Console for potential error messages
         console = Console()
 
-        # Determine execution mode
-        execution_mode = None
-
+        # Determine execution mode based on flags or pipeline default
+        execution_mode = pipeline_config.get(
+            'default_execution_mode', 'sequential'
+        )  # Start with default
         if parallel and sequential:
             console.print(
-                '[bold red]Error:[/] Cannot specify both --parallel and'
-                ' --sequential'
+                '[bold red]Error:[/] Cannot specify both --parallel and --sequential'
             )
             raise typer.Exit(code=1)
         elif parallel:
             execution_mode = 'parallel'
         elif sequential:
             execution_mode = 'sequential'
+        # If neither flag is set, execution_mode remains the pipeline's default
 
-        # Use pipeline's default max_workers
-        max_workers = None
+        # Use pipeline's default max_workers (run_pipeline handles None)
+        max_workers = pipeline_config.get('max_workers')
 
         try:
-            success = makim_instance.pipeline.run_pipeline(
-                pipeline_name,
-                execution_mode=execution_mode,
-                max_workers=max_workers,
-                verbose=verbose,
-                dry_run=dry_run,
-                debug=debug,
-            )
-            if not success and not dry_run:
+            # Ensure the pipeline object exists before trying to run
+            if hasattr(makim_instance, 'pipeline') and makim_instance.pipeline:
+                success = makim_instance.pipeline.run_pipeline(
+                    pipeline_name,  # Use the specific pipeline name for this command
+                    execution_mode=execution_mode,  # Pass the determined mode
+                    max_workers=max_workers,  # Pass the default max_workers
+                    verbose=verbose,
+                    dry_run=dry_run,
+                    debug=debug,
+                )
+                # Exit with error code if the run failed (and wasn't a dry run)
+                if not success and not dry_run:
+                    raise typer.Exit(code=1)
+            else:
+                # Handle case where pipeline system might not be initialized
+                console.print(
+                    '[bold red]Error: Pipeline system not initialized correctly.[/]'
+                )
                 raise typer.Exit(code=1)
+
         except Exception as e:
+            # Catch any other errors during pipeline execution
             msg = f"Error running pipeline '{pipeline_name}': {e!s}"
             console.print(f'[bold red]{msg}[/]')
             raise typer.Exit(code=1)
