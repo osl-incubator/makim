@@ -928,96 +928,107 @@ class MakimPipeline:
         show_status: bool = False,
         run_id: Optional[str] = None,
     ) -> str:
-        """Visualize a pipeline as an ASCII graph or text representation.
+        """Visualize a pipeline as an ASCII graph by passing the NetworkX graph
+           directly to asciinet after relabeling nodes.
 
         Parameters
         ----------
         pipeline_name : str
             The name of the pipeline to visualize
         show_status : bool
-            Whether to show status information
+            Whether to show status information in node labels
         run_id : Optional[str]
             Optional run ID to get status from
 
         Returns
         -------
         str
-            ASCII representation of the pipeline
+            ASCII representation of the pipeline or fallback text.
         """
         try:
-            import asciinet
+            # Dynamically import asciinet to avoid hard dependency
+            from asciinet import graph_to_ascii
         except ImportError:
             return (
                 'To visualize pipelines, install the asciinet package: '
                 'pip install asciinet'
             )
 
-        G = self.build_dependency_graph(pipeline_name)
-        pipeline_config = self.get_pipeline_config(pipeline_name)
+        # Build the initial graph
+        try:
+            G = self.build_dependency_graph(pipeline_name)
+            pipeline_config = self.get_pipeline_config(pipeline_name)
+        except Exception as graph_err:
+             return f"[bold red]Error building dependency graph for '{pipeline_name}':[/] {graph_err!s}"
 
-        # Convert to a format asciinet can use
-        nodes = list(G.nodes())
-        edges = list(G.edges())
-
-        # Get status information if requested
+        # --- Status Handling (Fetch status if needed) ---
         status_info = {}
         if show_status and run_id:
-            query = """
-            SELECT name, status
-            FROM pipeline_steps
-            WHERE run_id = ?
-            """
+            query = "SELECT name, status FROM pipeline_steps WHERE run_id = ?"
             results = _execute_query(query, (run_id,), fetch=True)
-
             if results:
                 for name, status in results:
                     status_info[name] = status
 
-        # Create display function based on whether to show status
-        def make_node_display_with_status(node: str) -> str:
-            """Create a node display string with status information."""
-            return (
-                f'{node}: {G.nodes[node]["task"]} '
-                f'[{status_info.get(node, "unknown")}]'
-            )
+        # --- Create Node Label Mapping ---
+        # Create a dictionary mapping original node IDs to desired string labels
+        node_label_map: Dict[str, str] = {}
+        for node_id in G.nodes():
+            task_name = G.nodes[node_id].get("task", "Unknown Task")
+            label = f'{node_id}: {task_name}' # Base label: "step_name: task.name"
+            # Append status if requested and available
+            if show_status and node_id in status_info:
+                 status_str = status_info.get(node_id, "pending")
+                 label += f' [{status_str}]'
+            node_label_map[node_id] = label
 
-        def make_node_display(node: str) -> str:
-            """Create a simple node display string."""
-            return f'{node}: {G.nodes[node]["task"]}'
-
-        node_display = (
-            make_node_display_with_status
-            if show_status and status_info
-            else make_node_display
-        )
-
-        # Generate ASCII graph
+        # --- Relabel the Graph ---
+        # Create a new graph with nodes relabeled to the desired strings
+        # Use copy=True to avoid modifying the original graph G if needed elsewhere
         try:
-            ascii_graph = asciinet.graph_to_ascii(
-                nodes, edges, node_display=node_display
-            )
-        except Exception as e:
-            # Fallback to a simple text representation if asciinet fails
-            ascii_graph = 'Graph visualization failed: ' + str(e)
+            # Ensure mapping covers all nodes before relabeling
+            if set(node_label_map.keys()) != set(G.nodes()):
+                 raise ValueError("Node label map does not cover all nodes in the graph.")
+            relabeled_G = nx.relabel_nodes(G, node_label_map, copy=True)
+        except Exception as relabel_err:
+             return f"[bold red]Error relabeling graph nodes for visualization:[/]\n{relabel_err!s}"
 
-            # Create simple text representation
+
+        # --- Attempt asciinet visualization ---
+        try:
+            # Pass the relabeled NetworkX graph directly to asciinet
+            ascii_graph = graph_to_ascii(relabeled_G)
+
+        except Exception as e:
+            # Fallback mechanism (keep as before, using original graph G for info)
+            ascii_graph = f'Graph visualization failed ({type(e).__name__}). Using fallback list.'
+
             steps_text = []
-            for i, node in enumerate(sorted(G.nodes())):
-                task = G.nodes[node]['task']
+            try:
+                # Use topological sort on the original graph G for logical order
+                sorted_nodes = list(nx.topological_sort(G))
+            except nx.NetworkXUnfeasible: # Handle cycles in original graph
+                sorted_nodes = sorted(G.nodes())
+
+            for i, node in enumerate(sorted_nodes):
+                # Get info from the original graph G
+                task = G.nodes[node].get('task', 'Unknown Task')
                 depends = ', '.join(G.predecessors(node))
                 steps_text.append(
-                    f'{i + 1}. {node}: {task}'
+                    f'{i + 1}. {node}: {task}' # Use original node name here
                     + (f' (depends on: {depends})' if depends else '')
                 )
-
             ascii_graph = '\n'.join(steps_text)
+        # --- End asciinet attempt ---
 
+        # --- Construct final output string ---
         description = pipeline_config.get('help', 'No description')
-        return (
+        final_output = (
             f'Pipeline: {pipeline_name}\n'
             f'Description: {description}\n\n'
-            f'{ascii_graph}'
+            f'{ascii_graph}' # Contains either the graph or the fallback list
         )
+        return final_output
 
     def generate_rich_visualization(
         self, pipeline_name: str, run_id: Optional[str] = None
@@ -2664,3 +2675,4 @@ class MakimPipeline:
             console = Console()
             console.print(f'[bold red]Failed to retry pipeline:[/] {e!s}')
             return False
+
