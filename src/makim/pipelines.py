@@ -928,8 +928,9 @@ class MakimPipeline:
         show_status: bool = False,
         run_id: Optional[str] = None,
     ) -> str:
-        """Visualize a pipeline as an ASCII graph by passing the NetworkX graph
-           directly to asciinet after relabeling nodes.
+        """Visualize a pipeline as an ASCII graph.
+
+        pass the NetworkX graph directly to asciinet after relabeling nodes.
 
         Parameters
         ----------
@@ -959,12 +960,12 @@ class MakimPipeline:
             G = self.build_dependency_graph(pipeline_name)
             pipeline_config = self.get_pipeline_config(pipeline_name)
         except Exception as graph_err:
-             return f"[bold red]Error building dependency graph for '{pipeline_name}':[/] {graph_err!s}"
+            return f"[bold red]Error building dependency graph for '{pipeline_name}':[/] {graph_err!s}"
 
         # --- Status Handling (Fetch status if needed) ---
         status_info = {}
         if show_status and run_id:
-            query = "SELECT name, status FROM pipeline_steps WHERE run_id = ?"
+            query = 'SELECT name, status FROM pipeline_steps WHERE run_id = ?'
             results = _execute_query(query, (run_id,), fetch=True)
             if results:
                 for name, status in results:
@@ -974,12 +975,14 @@ class MakimPipeline:
         # Create a dictionary mapping original node IDs to desired string labels
         node_label_map: Dict[str, str] = {}
         for node_id in G.nodes():
-            task_name = G.nodes[node_id].get("task", "Unknown Task")
-            label = f'{node_id}: {task_name}' # Base label: "step_name: task.name"
+            task_name = G.nodes[node_id].get('task', 'Unknown Task')
+            label = (
+                f'{node_id}: {task_name}'  # Base label: "step_name: task.name"
+            )
             # Append status if requested and available
             if show_status and node_id in status_info:
-                 status_str = status_info.get(node_id, "pending")
-                 label += f' [{status_str}]'
+                status_str = status_info.get(node_id, 'pending')
+                label += f' [{status_str}]'
             node_label_map[node_id] = label
 
         # --- Relabel the Graph ---
@@ -988,11 +991,12 @@ class MakimPipeline:
         try:
             # Ensure mapping covers all nodes before relabeling
             if set(node_label_map.keys()) != set(G.nodes()):
-                 raise ValueError("Node label map does not cover all nodes in the graph.")
+                raise ValueError(
+                    'Node label map does not cover all nodes in the graph.'
+                )
             relabeled_G = nx.relabel_nodes(G, node_label_map, copy=True)
         except Exception as relabel_err:
-             return f"[bold red]Error relabeling graph nodes for visualization:[/]\n{relabel_err!s}"
-
+            return f'[bold red]Error relabeling graph nodes for visualization:[/]\n{relabel_err!s}'
 
         # --- Attempt asciinet visualization ---
         try:
@@ -1007,7 +1011,7 @@ class MakimPipeline:
             try:
                 # Use topological sort on the original graph G for logical order
                 sorted_nodes = list(nx.topological_sort(G))
-            except nx.NetworkXUnfeasible: # Handle cycles in original graph
+            except nx.NetworkXUnfeasible:  # Handle cycles in original graph
                 sorted_nodes = sorted(G.nodes())
 
             for i, node in enumerate(sorted_nodes):
@@ -1015,7 +1019,7 @@ class MakimPipeline:
                 task = G.nodes[node].get('task', 'Unknown Task')
                 depends = ', '.join(G.predecessors(node))
                 steps_text.append(
-                    f'{i + 1}. {node}: {task}' # Use original node name here
+                    f'{i + 1}. {node}: {task}'  # Use original node name here
                     + (f' (depends on: {depends})' if depends else '')
                 )
             ascii_graph = '\n'.join(steps_text)
@@ -1026,7 +1030,7 @@ class MakimPipeline:
         final_output = (
             f'Pipeline: {pipeline_name}\n'
             f'Description: {description}\n\n'
-            f'{ascii_graph}' # Contains either the graph or the fallback list
+            f'{ascii_graph}'  # Contains either the graph or the fallback list
         )
         return final_output
 
