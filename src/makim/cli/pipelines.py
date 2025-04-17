@@ -86,20 +86,20 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
         typer.Typer: The pipeline command group with all subcommands.
     """
     typer_pipeline = typer.Typer(
-        name="pipeline", # Explicitly name the command group
-        help='Manage and run Makim pipelines.', # More descriptive help
-        invoke_without_command=True, # Shows help if 'makim pipeline' is run alone
-        no_args_is_help=True, # Also show help if no args/subcommand given
+        name='pipeline',  # Explicitly name the command group
+        help='Manage and run Makim pipelines.',  # More descriptive help
+        invoke_without_command=True,  # Shows help if 'makim pipeline' is run alone
+        no_args_is_help=True,  # Also show help if no args/subcommand given
     )
 
     # Define the panel name for management commands for consistency
-    management_panel = "Pipeline Management Commands"
+    management_panel = 'Pipeline Management Commands'
 
     # Check if the pipeline system is loaded in the makim instance
     if hasattr(makim_instance, 'pipeline') and makim_instance.pipeline:
         # --- Create Dynamic Commands for Each Defined Pipeline ---
         pipelines = makim_instance.pipeline.get_all_pipelines()
-        if pipelines: # Only proceed if there are pipelines defined
+        if pipelines:  # Only proceed if there are pipelines defined
             for pipeline_name, pipeline_config in pipelines.items():
                 # This function now adds rich_help_panel="Available Pipelines" internally
                 create_dynamic_command_pipeline(
@@ -109,30 +109,64 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
                     pipeline_config,
                 )
         # else:
-            # Optionally print a message if no pipelines are found in the config
-            # print("No pipelines found in configuration.") # Or use Console
+        # Optionally print a message if no pipelines are found in the config
+        # print("No pipelines found in configuration.") # Or use Console
 
         # --- Define Fixed Management Commands ---
 
         @typer_pipeline.command(
-            "run", # Explicit command name
+            'run',  # Explicit command name
             help='Run a pipeline by its name',
-            rich_help_panel=management_panel # <-- Grouping
+            rich_help_panel=management_panel,  # <-- Grouping
         )
-        def run_cmd( # Renamed function slightly to avoid conflict with built-in 'run'
-            name: str = typer.Argument(..., help='Name of the pipeline to run'),
-            parallel: bool = typer.Option(False, '--parallel', help='Run steps in parallel where possible', is_flag=True),
-            sequential: bool = typer.Option(False, '--sequential', help='Run steps sequentially', is_flag=True),
-            max_workers: Optional[int] = typer.Option(None, '--max-workers', help='Maximum number of parallel workers (for parallel mode)'),
-            verbose: bool = typer.Option(False, '--verbose', '-v', help='Show verbose output during pipeline execution', is_flag=True),
-            dry_run: bool = typer.Option(False, '--dry-run', help='Show steps without executing them', is_flag=True),
-            debug: bool = typer.Option(False, '--debug', help='Show detailed debug information', is_flag=True),
+        def run_cmd(
+            name: str = typer.Argument(
+                ..., help='Name of the pipeline to run'
+            ),
+            parallel: bool = typer.Option(
+                False,
+                '--parallel',
+                help='Run steps in parallel where possible',
+                is_flag=True,
+            ),
+            sequential: bool = typer.Option(
+                False,
+                '--sequential',
+                help='Run steps sequentially',
+                is_flag=True,
+            ),
+            max_workers: Optional[int] = typer.Option(
+                None,
+                '--max-workers',
+                help='Maximum number of parallel workers (for parallel mode)',
+            ),
+            verbose: bool = typer.Option(
+                False,
+                '--verbose',
+                '-v',
+                help='Show verbose output during pipeline execution',
+                is_flag=True,
+            ),
+            dry_run: bool = typer.Option(
+                False,
+                '--dry-run',
+                help='Show steps without executing them',
+                is_flag=True,
+            ),
+            debug: bool = typer.Option(
+                False,
+                '--debug',
+                help='Show detailed debug information',
+                is_flag=True,
+            ),
         ) -> None:
-            """Internal handler for the 'run' command."""
+            """Handle the 'run' command."""
             execution_mode: Optional[str] = None
             if parallel and sequential:
                 console = Console()
-                console.print('[bold red]Error:[/] Cannot specify both --parallel and --sequential')
+                console.print(
+                    '[bold red]Error:[/] Cannot specify both --parallel and --sequential'
+                )
                 raise typer.Exit(code=1)
             elif parallel:
                 execution_mode = 'parallel'
@@ -140,133 +174,226 @@ def _handle_pipeline_commands(makim_instance: Makim) -> typer.Typer:
                 execution_mode = 'sequential'
             # If neither is specified, _handle_pipeline_run will use the pipeline's default
             _handle_pipeline_run(
-                makim_instance, name, execution_mode=execution_mode, max_workers=max_workers,
-                verbose=verbose, dry_run=dry_run, debug=debug
+                makim_instance,
+                name,
+                execution_mode=execution_mode,
+                max_workers=max_workers,
+                verbose=verbose,
+                dry_run=dry_run,
+                debug=debug,
             )
 
         @typer_pipeline.command(
-            "show", # Explicit command name
+            'show',
             help='Show pipeline structure (ASCII/Tree) or list all pipelines',
-            rich_help_panel=management_panel # <-- Grouping
+            rich_help_panel=management_panel,
         )
-        def show_cmd( # Renamed function
-            name: Optional[str] = typer.Argument(None, help='Name of the pipeline to show. If omitted, lists all pipelines.'),
-            run_id: Optional[str] = typer.Option(None, '--run-id', help='Run ID to show status information for (if available)'),
-            status: bool = typer.Option(False, '--status', help='Include status information in visualization (if available)', is_flag=True),
+        def show_cmd(
+            name: Optional[str] = typer.Argument(
+                None,
+                help='Name of the pipeline to show. If omitted, lists all pipelines.',
+            ),
+            run_id: Optional[str] = typer.Option(
+                None,
+                '--run-id',
+                help='Run ID to show status information for (if available)',
+            ),
+            status: bool = typer.Option(
+                False,
+                '--status',
+                help='Include status information in visualization (if available)',
+                is_flag=True,
+            ),
         ) -> None:
-            """Internal handler for the 'show' command."""
+            """Handle for the 'show' command."""
             _handle_pipeline_show(makim_instance, name, run_id, status)
 
         @typer_pipeline.command(
-            "list", # Explicit command name
+            'list',
             help='List all defined pipelines and their descriptions',
-            rich_help_panel=management_panel # <-- Grouping
+            rich_help_panel=management_panel,
         )
-        def list_cmd() -> None: # Renamed function
-            """Internal handler for the 'list' command."""
+        def list_cmd() -> None:
+            """Handle the 'list' command."""
             _handle_pipeline_list(makim_instance)
 
         @typer_pipeline.command(
-            "logs", # Explicit command name
+            'logs',  # Explicit command name
             help='View pipeline execution logs',
-            rich_help_panel=management_panel # <-- Grouping
+            rich_help_panel=management_panel,  # <-- Grouping
         )
-        def logs_cmd( # Renamed function
-            pipeline: Optional[str] = typer.Option(None, '--pipeline', help='Filter logs by pipeline name'),
-            run_id: Optional[str] = typer.Option(None, '--run-id', help='Filter logs by run ID'),
-            step: Optional[str] = typer.Option(None, '--step', help='Filter logs by step name'),
-            last: int = typer.Option(20, '--last', '-n', help='Number of most recent log entries to show'), # Added -n alias
-            type: Optional[str] = typer.Option(None, '--type', help='Filter by log type (stdout, stderr)'),
-            follow: bool = typer.Option(False, '--follow', '-f', help='Follow log output in real-time', is_flag=True),
-            clear: bool = typer.Option(False, '--clear', help='Clear all pipeline logs from the database', is_flag=True),
+        def logs_cmd(  # Renamed function
+            pipeline: Optional[str] = typer.Option(
+                None, '--pipeline', help='Filter logs by pipeline name'
+            ),
+            run_id: Optional[str] = typer.Option(
+                None, '--run-id', help='Filter logs by run ID'
+            ),
+            step: Optional[str] = typer.Option(
+                None, '--step', help='Filter logs by step name'
+            ),
+            last: int = typer.Option(
+                20,
+                '--last',
+                '-n',
+                help='Number of most recent log entries to show',
+            ),  # Added -n alias
+            type: Optional[str] = typer.Option(
+                None, '--type', help='Filter by log type (stdout, stderr)'
+            ),
+            follow: bool = typer.Option(
+                False,
+                '--follow',
+                '-f',
+                help='Follow log output in real-time',
+                is_flag=True,
+            ),
+            clear: bool = typer.Option(
+                False,
+                '--clear',
+                help='Clear all pipeline logs from the database',
+                is_flag=True,
+            ),
         ) -> None:
-            """Internal handler for the 'logs' command."""
+            """Handle for the 'logs' command."""
             _handle_pipeline_logs(
-                makim_instance, pipeline_name=pipeline, run_id=run_id, step_name=step,
-                limit=last, log_type=type, follow=follow, clear=clear
+                makim_instance,
+                pipeline_name=pipeline,
+                run_id=run_id,
+                step_name=step,
+                limit=last,
+                log_type=type,
+                follow=follow,
+                clear=clear,
             )
 
         @typer_pipeline.command(
-            "history", # Explicit command name
+            'history',  # Explicit command name
             help='View pipeline execution history',
-            rich_help_panel=management_panel # <-- Grouping
+            rich_help_panel=management_panel,  # <-- Grouping
         )
-        def history_cmd( # Renamed function
-            pipeline: Optional[str] = typer.Option(None, '--pipeline', help='Filter history by pipeline name'),
-            last: int = typer.Option(10, '--last', '-n', help='Number of most recent executions to show'), # Added -n alias
-            status: Optional[str] = typer.Option(None, '--status', help='Filter by status (running, completed, failed, cancelled)'),
-            details: bool = typer.Option(False, '--details', '-d', help='Show detailed step information for each run', is_flag=True),
+        def history_cmd(  # Renamed function
+            pipeline: Optional[str] = typer.Option(
+                None, '--pipeline', help='Filter history by pipeline name'
+            ),
+            last: int = typer.Option(
+                10,
+                '--last',
+                '-n',
+                help='Number of most recent executions to show',
+            ),  # Added -n alias
+            status: Optional[str] = typer.Option(
+                None,
+                '--status',
+                help='Filter by status (running, completed, failed, cancelled)',
+            ),
+            details: bool = typer.Option(
+                False,
+                '--details',
+                '-d',
+                help='Show detailed step information for each run',
+                is_flag=True,
+            ),
         ) -> None:
-            """Internal handler for the 'history' command."""
+            """Handle for the 'history' command."""
             _handle_pipeline_history(
-                makim_instance, pipeline_name=pipeline, limit=last, status=status, details=details
+                makim_instance,
+                pipeline_name=pipeline,
+                limit=last,
+                status=status,
+                details=details,
             )
 
         @typer_pipeline.command(
-            "schedule", # Explicit command name
+            'schedule',  # Explicit command name
             help='Schedule a pipeline to run automatically via cron or interval',
-            rich_help_panel=management_panel # <-- Grouping
+            rich_help_panel=management_panel,  # <-- Grouping
         )
-        def schedule_cmd( # Renamed function
-            pipeline: str = typer.Argument(..., help='Name of the pipeline to schedule'),
-            cron: Optional[str] = typer.Option(None, '--cron', help="Cron expression for scheduling (e.g., '0 9 * * *')"),
-            interval: Optional[int] = typer.Option(None, '--interval', help='Interval in seconds between executions'),
+        def schedule_cmd(  # Renamed function
+            pipeline: str = typer.Argument(
+                ..., help='Name of the pipeline to schedule'
+            ),
+            cron: Optional[str] = typer.Option(
+                None,
+                '--cron',
+                help="Cron expression for scheduling (e.g., '0 9 * * *')",
+            ),
+            interval: Optional[int] = typer.Option(
+                None,
+                '--interval',
+                help='Interval in seconds between executions',
+            ),
         ) -> None:
-            """Internal handler for the 'schedule' command."""
-            _handle_pipeline_schedule(makim_instance, pipeline, cron=cron, interval=interval)
+            """Handle for the 'schedule' command."""
+            _handle_pipeline_schedule(
+                makim_instance, pipeline, cron=cron, interval=interval
+            )
 
         @typer_pipeline.command(
-            "scheduled", # Explicit command name
+            'scheduled',  # Explicit command name
             help='List all currently scheduled pipelines',
-            rich_help_panel=management_panel # <-- Grouping
+            rich_help_panel=management_panel,  # <-- Grouping
         )
-        def scheduled_cmd() -> None: # Renamed function
-            """Internal handler for the 'scheduled' command."""
+        def scheduled_cmd() -> None:  # Renamed function
+            """Handle for the 'scheduled' command."""
             _handle_pipeline_scheduled(makim_instance)
 
         @typer_pipeline.command(
-            "unschedule", # Explicit command name
+            'unschedule',  # Explicit command name
             help='Remove a pipeline from the schedule',
-            rich_help_panel=management_panel # <-- Grouping
+            rich_help_panel=management_panel,  # <-- Grouping
         )
-        def unschedule_cmd( # Renamed function
-            pipeline: str = typer.Argument(..., help='Name or ID of the pipeline schedule to remove'),
+        def unschedule_cmd(  # Renamed function
+            pipeline: str = typer.Argument(
+                ..., help='Name or ID of the pipeline schedule to remove'
+            ),
         ) -> None:
-            """Internal handler for the 'unschedule' command."""
+            """Handle for the 'unschedule' command."""
             _handle_pipeline_unschedule(makim_instance, pipeline)
 
         @typer_pipeline.command(
-            "retry", # Explicit command name
+            'retry',  # Explicit command name
             help='Retry the last failed execution of a pipeline',
-            rich_help_panel=management_panel # <-- Grouping
+            rich_help_panel=management_panel,  # <-- Grouping
         )
-        def retry_cmd( # Renamed function
-            pipeline: str = typer.Argument(..., help='Name of the failed pipeline to retry'),
-            all: bool = typer.Option(False, '--all', help='Retry all steps, not just the failed ones', is_flag=True),
+        def retry_cmd(  # Renamed function
+            pipeline: str = typer.Argument(
+                ..., help='Name of the failed pipeline to retry'
+            ),
+            all: bool = typer.Option(
+                False,
+                '--all',
+                help='Retry all steps, not just the failed ones',
+                is_flag=True,
+            ),
         ) -> None:
-            """Internal handler for the 'retry' command."""
+            """Handle for the 'retry' command."""
             _handle_pipeline_retry(makim_instance, pipeline, all)
 
         @typer_pipeline.command(
-            "cancel", # Explicit command name
+            'cancel',  # Explicit command name
             help='Request cancellation of a currently running pipeline',
-            rich_help_panel=management_panel # <-- Grouping
+            rich_help_panel=management_panel,  # <-- Grouping
         )
-        def cancel_cmd( # Renamed function
-            pipeline: str = typer.Argument(..., help='Name or ID of the running pipeline to cancel'),
+        def cancel_cmd(  # Renamed function
+            pipeline: str = typer.Argument(
+                ..., help='Name or ID of the running pipeline to cancel'
+            ),
         ) -> None:
-            """Internal handler for the 'cancel' command."""
+            """Handle for the 'cancel' command."""
             _handle_pipeline_cancel(makim_instance, pipeline)
 
     else:
         # If the pipeline attribute doesn't exist or is None, provide a message
         # This callback runs if 'makim pipeline' is invoked without a subcommand
         @typer_pipeline.callback(invoke_without_command=True)
-        def pipeline_system_not_loaded(ctx: typer.Context):
-             # Only show the message if no subcommand was actually invoked
-             if ctx.invoked_subcommand is None:
-                  console = Console()
-                  console.print("[yellow]Pipeline system not available. Ensure 'pipelines' are defined in your .makim.yaml[/]")
+        def pipeline_system_not_loaded(ctx: typer.Context) -> None:
+            # Only show the message if no subcommand was actually invoked
+            if ctx.invoked_subcommand is None:
+                console = Console()
+                console.print(
+                    "[yellow]Pipeline system not available. Ensure 'pipelines' are defined in your .makim.yaml[/]"
+                )
 
     return typer_pipeline
 
@@ -351,14 +478,18 @@ def _handle_pipeline_show(
 
             # Check if asciinet was available (it returns a specific message if not)
             if 'pip install asciinet' in pipeline_viz:
-                console.print(f"[yellow]{pipeline_viz}[/]")
+                console.print(f'[yellow]{pipeline_viz}[/]')
                 # Fallback to rich tree visualization if asciinet is missing
-                console.print("[yellow]Falling back to tree visualization...[/]")
+                console.print(
+                    '[yellow]Falling back to tree visualization...[/]'
+                )
                 try:
                     tree = pipeline.generate_rich_visualization(name, run_id)
                     console.print(tree)
                 except Exception as tree_err:
-                    console.print(f"[bold red]Tree visualization also failed:[/]\n{tree_err!s}")
+                    console.print(
+                        f'[bold red]Tree visualization also failed:[/]\n{tree_err!s}'
+                    )
             else:
                 # Print the successful ASCII visualization
                 console.print(
@@ -369,17 +500,27 @@ def _handle_pipeline_show(
                     )
                 )
 
-        except ValueError as e: # Handle case where pipeline name doesn't exist
+        except (
+            ValueError
+        ) as e:  # Handle case where pipeline name doesn't exist
             console.print(f'[bold red]Error:[/] {e!s}')
             raise typer.Exit(code=1)
-        except Exception as viz_err: # Catch other potential errors during visualization
-            console.print(f"[bold red]Error during ASCII visualization:[/]\n{viz_err!s}")
-            console.print("[yellow]Attempting fallback tree visualization...[/]")
+        except (
+            Exception
+        ) as viz_err:  # Catch other potential errors during visualization
+            console.print(
+                f'[bold red]Error during ASCII visualization:[/]\n{viz_err!s}'
+            )
+            console.print(
+                '[yellow]Attempting fallback tree visualization...[/]'
+            )
             try:
                 tree = pipeline.generate_rich_visualization(name, run_id)
                 console.print(tree)
             except Exception as tree_err:
-                console.print(f"[bold red]Tree visualization also failed:[/]\n{tree_err!s}")
+                console.print(
+                    f'[bold red]Tree visualization also failed:[/]\n{tree_err!s}'
+                )
             raise typer.Exit(code=1)
     else:
         # List all pipelines with a brief overview if no name is provided
@@ -579,14 +720,15 @@ def _handle_pipeline_logs(
                 while True:
                     # Check if there are still running pipelines
                     running = False
-                    config = cast(Any, pipeline).PipelineConfig
+                    from makim.pipelines import PipelineConfig
+
                     if run_id:
-                        running = run_id in config.running_pipelines
+                        running = run_id in PipelineConfig.running_pipelines
                     else:
                         for (
                             current_run_id,
                             pipeline_info,
-                        ) in config.running_pipelines.items():
+                        ) in PipelineConfig.running_pipelines.items():
                             if pipeline_info['pipeline_name'] == pipeline_name:
                                 running = True
                                 break
