@@ -17,6 +17,8 @@ from apscheduler.triggers.cron import CronTrigger
 
 from makim.logs import MakimError, MakimLogs
 
+_EXPECTED_MIN_JOB_ARGS = 2
+
 
 class Config:
     """Global configuration state handler."""
@@ -477,3 +479,93 @@ class MakimScheduler:
                 'Failed to retrieve job list', MakimError.SCHEDULER_JOB_ERROR
             )
             return []
+
+    def trigger_job(self, name: str) -> None:
+        """
+        Manually trigger the execution of a scheduled job's task.
+
+        Parameters
+        ----------
+        name : str
+            The name of the job to trigger.
+        """
+        if self.scheduler is None:
+            MakimLogs.raise_error(
+                'Cannot trigger job: Scheduler system is not available',
+                MakimError.SCHEDULER_JOB_ERROR,
+            )
+            return
+        job = self.get_job(name)
+        if not job:
+            MakimLogs.raise_error(
+                f"Job '{name}' not found in scheduler.",
+                MakimError.SCHEDULER_JOB_NOT_FOUND,
+            )
+            return
+
+        if (
+            not job.args
+            or len(job.args) < _EXPECTED_MIN_JOB_ARGS
+            or not job.kwargs
+            or 'args' not in job.kwargs
+        ):
+            error_msg = (
+                f"Job '{name}' has an unexpected configuration and "
+                f'cannot be triggered manually.'
+            )
+            MakimLogs.raise_error(
+                error_msg,
+                MakimError.SCHEDULER_JOB_ERROR,
+            )
+            return
+
+        task: str = job.args[0]
+        scheduler_name: str = job.args[1]
+        task_args: Optional[Dict[str, Any]] = job.kwargs.get('args')
+
+        try:
+            MakimLogs.print_info(
+                f"Manually triggering job '{name}' (task: '{task}')..."
+            )
+            log_execution(name, 'manual_trigger', task=task)
+            run_makim_task(task, scheduler_name, task_args)
+            MakimLogs.print_info(f"Manual trigger of job '{name}' completed.")
+        except Exception as e:
+            log_execution(
+                name, 'manual_trigger_failed', error=str(e), task=task
+            )
+            MakimLogs.raise_error(
+                f"Failed to manually trigger job '{name}': {e}",
+                MakimError.SCHEDULER_JOB_ERROR,
+            )
+
+    def clear_job_history(self, name: Optional[str] = None) -> None:
+        """
+        Clear job execution history.
+
+        Parameters
+        ----------
+        name : Optional[str], optional
+            The name of the job whose history should be cleared.
+            If None, clears history for all jobs. By default None.
+        """
+        if not self.job_history_path.exists():
+            MakimLogs.print_info(
+                'No job history file found. Nothing to clear.'
+            )
+            return
+
+        # Reload history just in case it changed since init
+        self.job_history = self._load_history()
+
+        if name:
+            if name in self.job_history:
+                del self.job_history[name]
+                MakimLogs.print_info(f"Cleared history for job '{name}'.")
+            else:
+                MakimLogs.print_warning(f"No history found for job '{name}'.")
+        else:
+            self.job_history.clear()
+            MakimLogs.print_info('Cleared all job history.')
+
+        self._save_history()

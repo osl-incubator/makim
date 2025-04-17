@@ -50,6 +50,25 @@ def _handle_cron_commands(makim_instance: Makim) -> typer.Typer:
             """List tasks defined in .makim.yaml and their current status."""
             _handle_cron_list(makim_instance)
 
+        @typer_cron.command(help='Manually trigger a scheduled job')
+        def trigger(
+            name: str = typer.Argument(..., help='Name of the job to trigger'),
+        ) -> None:
+            """Manually trigger a scheduled job's task immediately."""
+            _handle_cron_trigger(makim_instance, name)
+
+        @typer_cron.command(help='Clear execution history for one or all jobs')
+        def clear_history(
+            name: Optional[str] = typer.Argument(
+                None,
+                help=(
+                    'Name of the job history to clear. Clears all if omitted.'
+                ),
+            ),
+        ) -> None:
+            """Clear the execution history log."""
+            _handle_cron_clear_history(makim_instance, name)
+
         @typer_cron.command(help='Start a scheduler by its name')
         def start(
             name: str = typer.Argument(
@@ -226,3 +245,32 @@ def _handle_cron_stop(
         typer.echo(f"Successfully stopped schedule '{name}'")
     except Exception as e:
         typer.echo(f"Failed to stop schedule '{name}': {e}", err=True)
+
+
+def _handle_cron_trigger(makim_instance: Makim, name: str) -> None:
+    """Handle the cron trigger command."""
+    if not makim_instance.scheduler:
+        typer.echo('Scheduler is not available or configured.', err=True)
+        raise typer.Exit(1)
+
+    try:
+        makim_instance.scheduler.trigger_job(name)
+        # Success message is printed within trigger_job
+    except Exception as e:
+        typer.echo(f"Error triggering job '{name}': {e}", err=True)
+        raise typer.Exit(1)
+
+
+def _handle_cron_clear_history(
+    makim_instance: Makim, name: Optional[str]
+) -> None:
+    """Handle the cron clear-history command."""
+    if not makim_instance.scheduler:
+        typer.echo('Scheduler is not available or configured.', err=True)
+        raise typer.Exit(1)
+
+    try:
+        makim_instance.scheduler.clear_job_history(name)
+    except Exception as e:
+        typer.echo(f'Error clearing job history: {e}', err=True)
+        raise typer.Exit(1)
