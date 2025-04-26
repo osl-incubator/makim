@@ -740,11 +740,11 @@ class Makim:
         return combinations
 
     # run commands
-    def _run_hooks(self, args: dict[str, Any], hook_type: str) -> None:
+    def _run_hooks(self, args: dict[str, Any], hook_type: str) -> bool:
         if self.skip_hooks:
-            return
+            return True
         if not self.task_data.get('hooks', {}).get(hook_type):
-            return
+            return True
         makim_hook = deepcopy(self)
         args_hook_original = {
             'help': args.get('help', False),
@@ -764,6 +764,8 @@ class Makim:
                 if isinstance(arg_value, str)
                 else arg_value
             )
+
+        all_hooks_succeeded = True
 
         for hook_data in self.task_data['hooks'][hook_type]:
             env, variables = makim_hook._load_scoped_data('task')
@@ -801,8 +803,17 @@ class Makim:
                             f'{hook_data.get("task")}'
                         )
                     continue
+            try:
+                # Execute the hook task and capture its return value
+                hook_success = makim_hook.run(deepcopy(args_hook))
+                if not hook_success:
+                    all_hooks_succeeded = False
+                    break
+            except Exception:
+                all_hooks_succeeded = False
+                break
 
-            makim_hook.run(deepcopy(args_hook))
+        return all_hooks_succeeded
 
     def _run_command(
         self, args: dict[str, Any], exit_on_error: bool = True
@@ -1025,7 +1036,7 @@ class Makim:
         self._verify_config()
         self.env = self._load_dotenv(self.global_data)
 
-    def run(self, args: dict[str, Any]) -> None:
+    def run(self, args: dict[str, Any]) -> bool:
         """Run makim task code."""
         self.args = args
 
@@ -1043,9 +1054,11 @@ class Makim:
                     f'{args["task"]} not executed.'
                     'Condition (if) not satisfied.'
                 )
-            return
+            return True
 
-        self._run_hooks(args, 'pre-run')
+        pre_run_success = self._run_hooks(args, 'pre-run')
+        if not pre_run_success:
+            return False
 
         failure_hook = bool(self.task_data.get('hooks', {}).get('failure'))
         retry = bool(self.task_data.get('retry'))
@@ -1062,5 +1075,7 @@ class Makim:
 
         if not success and failure_hook:
             self._run_hooks(args, 'failure')
+            return False
         else:
-            self._run_hooks(args, 'post-run')
+            post_run_success = self._run_hooks(args, 'post-run')
+            return success and post_run_success
