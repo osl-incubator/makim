@@ -325,6 +325,17 @@
                     "if": {
                       "type": "string",
                       "description": "Conditional expression to execute the task."
+                    },
+                    "options": {
+                      "type": "object",
+                      "description": "Additionals configuration options for task",
+                      "properties": {
+                        "ignore-errors": {
+                          "type": "boolean",
+                          "description": "Number of times to retry the task on failure.",
+                          "default": false
+                        }
+                      }
                     }
                   },
                   "additionalProperties": false
