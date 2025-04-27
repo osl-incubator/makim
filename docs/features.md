@@ -57,6 +57,30 @@ You can run:
 makim clean --cache
 ```
 
+### Arguments Validation
+
+Makim also allows extra validation following the
+[JSON schema validation](https://json-schema.org/draft/2020-12/json-schema-validation#name-validation-keywords-for-num),
+you can provide validation options similar to JSON schema validation options:
+
+```yaml
+{% raw %}
+tasks:
+  create-cluster:
+    help: Create a Kubernetes cluster with a specific number of nodes
+    args:
+      node-count:
+        help: number of nodes
+        type: integer
+        validations:
+          minimum: 1
+          maximum: 100
+        required: true
+    run: |
+      echo "Creating Kubernetes cluster with ${{ args.node-count }} nodes..."
+{% endraw %}
+```
+
 ### Benefit
 
 - Prevents hardcoded parameters in scripts.
@@ -174,8 +198,8 @@ Makim automatically expands this into multiple runs for each combination.
 
 ### What It Does
 
-Makim provides `pre-run` and `post-run` hooks to execute tasks before or after
-another task runs.
+Makim provides `pre-run`, `post-run` and `failure` hooks to execute tasks before
+or after another task runs or after task execution fails.
 
 ### Use Case
 
@@ -191,6 +215,8 @@ groups:
             - task: build.clean
           post-run:
             - task: build.notify
+          failure:
+            - task: build.failure-notify
         run: echo "Compiling source code..."
 
       clean:
@@ -200,6 +226,10 @@ groups:
       notify:
         help: Notify team about successful compilation
         run: echo "Build completed successfully!"
+
+      failure-notify:
+        help: Notify team about build failure
+        run: echo "Build failed! Alerting the team..."
 ```
 
 ### Skipping Hooks
