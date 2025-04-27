@@ -94,6 +94,7 @@ groups:
             - task: smoke-tests.retry
             - task: smoke-tests.validate-conditionals
             - task: smoke-tests.failure-hook
+            - task: smoke-tests.ignore-error-option
 
       ci:
         help: Run all tasks used on CI
@@ -579,6 +580,30 @@ groups:
           makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-failure-retry
           makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-failure-retry-once
           makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-retry-pass
+
+      ignore-error-option:
+        help: Test makim tasks with ignore error
+        args:
+          verbose-mode:
+            help: Run the all the tests in verbose mode
+            type: bool
+            action: store_true
+        env:
+          MAKIM_FILE: tests/smoke/.makim-skip-errors.yaml
+        backend: bash
+        hooks:
+          post-run:
+            - task: clean.tmp
+        run: |
+          export VERBOSE_FLAG='${{ "--verbose" if args.verbose_mode else "" }}'
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --help
+          makim $VERBOSE_FLAG --file $MAKIM_FILE --version
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-simple-ignore-error
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-retry-ignore-error
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-ignore-error-with-hook
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-retry-failure-ignore
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-pre-run-hooks
+          makim $VERBOSE_FLAG --file $MAKIM_FILE tests.test-post-run-hooks
 
   error:
     help: This group helps tests failure tasks

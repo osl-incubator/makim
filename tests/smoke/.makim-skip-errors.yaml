@@ -1,0 +1,220 @@
+groups:
+  setup:
+    tasks:
+      echo-task:
+        help: Prints echo
+        log:
+          path: ./tests/smoke/logs/echo_task.txt
+        run: echo "Test task"
+      post-hook:
+        help: Should run after task
+        log:
+          path: ./tests/smoke/logs/post_hook.txt
+        run: echo post
+
+      pre-hook:
+        help: Should run after task
+        log:
+          path: ./tests/smoke/logs/pre_hook.txt
+        run: echo pre
+
+      failure-hook:
+        help: Should run after task fails
+        log:
+          path: ./tests/smoke/logs/failure_hook.txt
+        run: echo fail
+
+      clean-logs:
+        help: This task removes all log files
+        run: |
+          rm -f ./tests/smoke/logs/failure_hook.txt
+          rm -f ./tests/smoke/logs/post_hook.txt
+          rm -f ./tests/smoke/logs/pre_hook.txt
+          rm -f ./tests/smoke/logs/ignore_error_task.txt
+          rm -f ./tests/smoke/logs/after_ignored_error.txt
+          rm -f ./tests/smoke/logs/retry_ignore_task.txt
+          rm -f ./tests/smoke/logs/ignore_with_failure_hook.txt
+          rm -f ./tests/smoke/logs/retry_failure_ignore.txt
+          rm -f ./tests/smoke/logs/pre_hook_ignore.txt
+          rm -f ./tests/smoke/logs/post_hook_ignore.txt
+          rm -f ./tests/smoke/logs/echo_task.txt
+
+  run:
+    tasks:
+      simple-ignore-error:
+        help: This task will fail but ignore error and execution continues
+        options:
+          ignore-errors: true
+        log:
+          path: ./tests/smoke/logs/ignore_error_task.txt
+        run: |
+          print("Task will fail but execution should continue")
+          assert 1 == 2
+
+      after-ignored-error:
+        help: This task runs after a failed task with ignore-errors
+        log:
+          path: ./tests/smoke/logs/after_ignored_error.txt
+        run: echo "This task should run after ignored error"
+
+      retry-ignore-error:
+        help: This task will retry and fail but ignore error
+        retry:
+          count: 2
+        options:
+          ignore-errors: true
+        log:
+          path: ./tests/smoke/logs/retry_ignore_task.txt
+        run: |
+          print("Task will retry, fail, but continue execution")
+          assert 1 == 2
+
+      ignore-error-with-hook:
+        help: This task will fail, trigger failure hook, but continue execution
+        options:
+          ignore-errors: true
+        hooks:
+          failure:
+            - task: setup.failure-hook
+        log:
+          path: ./tests/smoke/logs/ignore_with_failure_hook.txt
+        run: |
+          print("Task will fail, run failure hook, but continue execution")
+          assert 1 == 2
+
+      retry-failure-ignore:
+        help: This task will retry, fail, run failure hook, but continue execution
+        retry:
+          count: 2
+        options:
+          ignore-errors: true
+        hooks:
+          failure:
+            - task: setup.failure-hook
+        log:
+          path: ./tests/smoke/logs/retry_failure_ignore.txt
+        run: |
+          print("Task will retry, fail, run failure hook, but continue execution")
+          assert 1 == 2
+
+      pre-run-hook:
+        help: This task will run error task and correct task in pre hook
+        log:
+          path: ./tests/smoke/logs/pre_hook_ignore.txt
+        hooks:
+          pre-run:
+            - task: run.retry-failure-ignore
+            - task: setup.echo-task
+        run: echo pre-run-hook
+
+      post-run-hook:
+        help: This task will run error task and correct task in post hook
+        log:
+          path: ./tests/smoke/logs/post_hook_ignore.txt
+        hooks:
+          post-run:
+            - task: run.retry-failure-ignore
+            - task: setup.echo-task
+        run: echo post-run-hook
+
+  tests:
+    tasks:
+      test-simple-ignore-error:
+        help: Test that execution continues after task failure with ignore-errors
+        hooks:
+          pre-run:
+            - task: setup.clean-logs
+            - task: run.simple-ignore-error
+            - task: run.after-ignored-error
+        run: |
+          import os
+          failed_task_log = "./tests/smoke/logs/ignore_error_task.txt"
+          next_task_log = "./tests/smoke/logs/after_ignored_error.txt"
+
+          assert os.path.exists(failed_task_log), "Failed task with ignore-errors should have run"
+          assert os.path.exists(next_task_log), "Task after failed task with ignore-errors should have run"
+
+      test-retry-ignore-error:
+        help: Test that execution continues after task retry failure with ignore-errors
+        hooks:
+          pre-run:
+            - task: setup.clean-logs
+            - task: run.retry-ignore-error
+            - task: run.after-ignored-error
+        run: |
+          import os
+          retry_log = "./tests/smoke/logs/retry_ignore_task.txt"
+          next_task_log = "./tests/smoke/logs/after_ignored_error.txt"
+
+          assert os.path.exists(retry_log), "Failed task with retry and ignore-errors should have run"
+          assert os.path.exists(next_task_log), "Task after failed retry with ignore-errors should have run"
+
+      test-ignore-error-with-hook:
+        help: Test that execution continues after task failure with hooks and ignore-errors
+        hooks:
+          pre-run:
+            - task: setup.clean-logs
+            - task: run.ignore-error-with-hook
+            - task: run.after-ignored-error
+        run: |
+          import os
+          failed_task_log = "./tests/smoke/logs/ignore_with_failure_hook.txt"
+          failure_hook_log = "./tests/smoke/logs/failure_hook.txt"
+          next_task_log = "./tests/smoke/logs/after_ignored_error.txt"
+
+          assert os.path.exists(failed_task_log), "Failed task with hook and ignore-errors should have run"
+          assert os.path.exists(failure_hook_log), "Failure hook should have run"
+          assert os.path.exists(next_task_log), "Task after failed task with hook and ignore-errors should have run"
+
+      test-retry-failure-ignore:
+        help: Test that execution continues after task retry failure with hooks and ignore-errors
+        hooks:
+          pre-run:
+            - task: setup.clean-logs
+            - task: run.retry-failure-ignore
+            - task: run.after-ignored-error
+        run: |
+          import os
+          retry_log = "./tests/smoke/logs/retry_failure_ignore.txt"
+          failure_hook_log = "./tests/smoke/logs/failure_hook.txt"
+          next_task_log = "./tests/smoke/logs/after_ignored_error.txt"
+
+          assert os.path.exists(retry_log), "Failed task with retry, hook and ignore-errors should have run"
+          assert os.path.exists(failure_hook_log), "Failure hook should have run"
+          assert os.path.exists(next_task_log), "Task after failed retry with hook and ignore-errors should have run"
+
+      test-pre-run-hooks:
+        help: Test that execution continues through pre-run hooks
+        hooks:
+          pre-run:
+            - task: setup.clean-logs
+            - task: run.pre-run-hook
+        run: |
+          import os
+          retry_log = "./tests/smoke/logs/retry_failure_ignore.txt"
+          failure_hook_log = "./tests/smoke/logs/failure_hook.txt"
+          echo_log = "./tests/smoke/logs/echo_task.txt"
+          pre_hook_log = "./tests/smoke/logs/pre_hook_ignore.txt"
+
+          assert os.path.exists(retry_log), "Retry failure task should have run"
+          assert os.path.exists(failure_hook_log), "Failure hook should have run"
+          assert os.path.exists(echo_log), "Echo task should have run after failed task"
+          assert os.path.exists(pre_hook_log), "Pre-run hook task should have run"
+
+      test-post-run-hooks:
+        help: Test that execution continues through post-run hooks
+        hooks:
+          pre-run:
+            - task: setup.clean-logs
+            - task: run.post-run-hook
+        run: |
+          import os
+          retry_log = "./tests/smoke/logs/retry_failure_ignore.txt"
+          failure_hook_log = "./tests/smoke/logs/failure_hook.txt"
+          echo_log = "./tests/smoke/logs/echo_task.txt"
+          post_hook_log = "./tests/smoke/logs/post_hook_ignore.txt"
+
+          assert os.path.exists(retry_log), "Retry failure task should have run"
+          assert os.path.exists(failure_hook_log), "Failure hook should have run"
+          assert os.path.exists(echo_log), "Echo task should have run after failed task"
+          assert os.path.exists(post_hook_log), "Post-run hook task should have run"

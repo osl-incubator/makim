@@ -740,11 +740,11 @@ class Makim:
         return combinations
 
     # run commands
-    def _run_hooks(self, args: dict[str, Any], hook_type: str) -> None:
+    def _run_hooks(self, args: dict[str, Any], hook_type: str) -> bool:
         if self.skip_hooks:
-            return
+            return True
         if not self.task_data.get('hooks', {}).get(hook_type):
-            return
+            return True
         makim_hook = deepcopy(self)
         args_hook_original = {
             'help': args.get('help', False),
@@ -754,55 +754,127 @@ class Makim:
 
         makim_hook._change_group_data()
 
-        # clean double dash prefix in args
+        original_args_clean = self._prepare_clean_args(args)
+
+        return self._process_hooks(
+            makim_hook, args_hook_original, original_args_clean, hook_type
+        )
+
+    def _prepare_clean_args(self, args: dict[str, Any]) -> dict[str, Any]:
+        """Clean and prepare arguments."""
         original_args_clean = {}
         for arg_name, arg_value in args.items():
-            original_args_clean[
-                arg_name.replace('--', '', 1).replace('-', '_')
-            ] = (
-                arg_value.replace('--', '', 1)
-                if isinstance(arg_value, str)
-                else arg_value
-            )
+            clean_name = arg_name.replace('--', '', 1).replace('-', '_')
+            clean_value = arg_value
+            if isinstance(arg_value, str):
+                clean_value = arg_value.replace('--', '', 1)
+            original_args_clean[clean_name] = clean_value
+        return original_args_clean
+
+    def _process_hooks(
+        self,
+        makim_hook: Any,
+        args_hook_original: dict[str, Any],
+        original_args_clean: dict[str, Any],
+        hook_type: str,
+    ) -> bool:
+        """Process all hooks."""
+        all_hooks_succeeded = True
 
         for hook_data in self.task_data['hooks'][hook_type]:
             env, variables = makim_hook._load_scoped_data('task')
             for k, v in env.items():
                 os.environ[k] = v
-
             makim_hook.env_scoped = deepcopy(env)
-            args_hook = {}
 
-            # update the arguments
-            for arg_name, arg_value in hook_data.get('args', {}).items():
-                unescaped_value = str(arg_value)
+            if not self._should_run_hook(
+                hook_data, original_args_clean, variables
+            ):
+                continue
 
-                args_hook[f'--{arg_name}'] = yaml.safe_load(
-                    TEMPLATE.from_string(unescaped_value).render(
-                        args=original_args_clean, env=makim_hook.env_scoped
-                    )
+            args_hook = self._prepare_hook_args(
+                hook_data, makim_hook, original_args_clean, args_hook_original
+            )
+
+            hook_success = self._execute_hook(makim_hook, args_hook, hook_data)
+
+            if not hook_success:
+                hook_task_name = hook_data['task']
+                hook_task_copy = deepcopy(makim_hook)
+                hook_task_copy._change_task(hook_task_name)
+                hook_ignore_errors = hook_task_copy.task_data.get(
+                    'options', {}
+                ).get('ignore-errors', False)
+
+                if not hook_ignore_errors:
+                    all_hooks_succeeded = False
+                    break
+        return all_hooks_succeeded
+
+    def _should_run_hook(
+        self,
+        hook_data: dict[str, Any],
+        original_args_clean: dict[str, Any],
+        variables: dict[str, Any],
+    ) -> bool:
+        """Check if a hook should be run based on its conditional."""
+        if_stmt = hook_data.get('if')
+        if not if_stmt:
+            return True
+
+        result = TEMPLATE.from_string(str(if_stmt)).render(
+            args=original_args_clean,
+            env=self.env_scoped,
+            vars=variables,
+        )
+
+        if not yaml.safe_load(result):
+            return False
+        return True
+
+    def _prepare_hook_args(
+        self,
+        hook_data: dict[str, Any],
+        makim_hook: Any,
+        original_args_clean: dict[str, Any],
+        args_hook_original: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Prepare arguments for a hook task."""
+        args_hook = {}
+
+        for arg_name, arg_value in hook_data.get('args', {}).items():
+            unescaped_value = str(arg_value)
+            args_hook[f'--{arg_name}'] = yaml.safe_load(
+                TEMPLATE.from_string(unescaped_value).render(
+                    args=original_args_clean, env=makim_hook.env_scoped
                 )
+            )
 
-            args_hook['task'] = hook_data['task']
-            args_hook.update(args_hook_original)
+        args_hook['task'] = hook_data['task']
+        args_hook.update(args_hook_original)
+        return args_hook
 
-            # checking for the conditional statement
-            if_stmt = hook_data.get('if')
-            if if_stmt:
-                result = TEMPLATE.from_string(str(if_stmt)).render(
-                    args=original_args_clean,
-                    env=self.env_scoped,
-                    vars=variables,
-                )
-                if not yaml.safe_load(result):
-                    if self.verbose:
-                        MakimLogs.print_info(
-                            f'[II] Skipping {hook_type} hook: '
-                            f'{hook_data.get("task")}'
-                        )
-                    continue
+    def _execute_hook(
+        self,
+        makim_hook: Any,
+        args_hook: dict[str, Any],
+        hook_data: dict[str, Any],
+    ) -> bool:
+        """Execute a hook task and handle exceptions."""
+        hook_task_name = hook_data['task']
 
-            makim_hook.run(deepcopy(args_hook))
+        try:
+            return bool(makim_hook.run(deepcopy(args_hook)))
+        except Exception:
+            hook_task_copy = deepcopy(makim_hook)
+            hook_task_copy._change_task(hook_task_name)
+            hook_ignore_errors = hook_task_copy.task_data.get(
+                'options', {}
+            ).get('ignore-errors', False)
+
+            if not hook_ignore_errors:
+                return False
+            return True
 
     def _run_command(
         self, args: dict[str, Any], exit_on_error: bool = True
@@ -1025,7 +1097,7 @@ class Makim:
         self._verify_config()
         self.env = self._load_dotenv(self.global_data)
 
-    def run(self, args: dict[str, Any]) -> None:
+    def run(self, args: dict[str, Any]) -> bool:
         """Run makim task code."""
         self.args = args
 
@@ -1043,24 +1115,35 @@ class Makim:
                     f'{args["task"]} not executed.'
                     'Condition (if) not satisfied.'
                 )
-            return
+            return True
 
-        self._run_hooks(args, 'pre-run')
+        ignore_errors = self.task_data.get('options', {}).get(
+            'ignore-errors', False
+        )
+
+        pre_run_success = self._run_hooks(args, 'pre-run')
+        if not pre_run_success and not ignore_errors:
+            return False
 
         failure_hook = bool(self.task_data.get('hooks', {}).get('failure'))
         retry = bool(self.task_data.get('retry'))
 
         success = True
 
-        if retry:
-            success = asyncio.run(self._run_with_retry(args))
-        else:
-            try:
-                self._run_command(args, exit_on_error=not failure_hook)
-            except Exception:
-                success = False
+        try:
+            if retry:
+                success = asyncio.run(self._run_with_retry(args))
+            else:
+                self._run_command(
+                    args, exit_on_error=not (failure_hook or ignore_errors)
+                )
+        except Exception:
+            success = False
 
         if not success and failure_hook:
             self._run_hooks(args, 'failure')
-        else:
+
+        if success or ignore_errors:
             self._run_hooks(args, 'post-run')
+
+        return success or ignore_errors
